@@ -3,7 +3,7 @@
 extern void *heap_start, *heap_end, *heap_max, *heap_curr;
 extern int kheap_enabled;
 
-uint8_t *temp_mem;
+uint8_t* temp_mem;
 bool paging_enabled = false;
 
 page_directory_t* kernel_page_dir = {0};
@@ -200,7 +200,6 @@ void vmm_init(void) {
     switch_page_directory(kernel_page_dir, 0);
 
     allocate_region(kernel_page_dir, 0, 0x10000, 0, 1, 1);
-    allocate_region(kernel_page_dir, 0x0ffe0000, 0xffeffff, 1, 1, 1);
 
     enable_paging();
 

@@ -27,8 +27,8 @@ const char* welecome_banner = "\nWelecome to:\n         _                       
 void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_esp) {
     static uint32_t module_start, module_size;
     static struct mboot_tag_basic_meminfo* meminfo;
-    static rsdp_t* rsdp;
-    char* ramdisk = NULL;
+    static uint8_t* rsdp;
+    static uint8_t* ramdisk;
 
     #ifdef TEXTMODE
     vga_clear();
@@ -57,19 +57,19 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
                 case MBOOT_TAG_TYPE_MODULE:
                     module_start = ((struct mboot_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
                     module_size = (((struct mboot_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS) - module_start;
-                    ramdisk = (char*) 0x400000;
+                    ramdisk = (uint8_t*) 0x400000;
                     klog(LOG_OK, "Copying ramdisk to usable memory...\n");
-                    memcpy(ramdisk, (char*) module_start, module_size);
+                    memcpy(ramdisk, (uint8_t*) module_start, module_size);
                     break;
                 case MBOOT_TAG_TYPE_BASIC_MEMINFO:
                     meminfo = (struct mboot_tag_basic_meminfo*) tag;
                     break;
                 case MBOOT_TAG_TYPE_ACPI_OLD:
                     if(!rsdp)
-                        rsdp = (rsdp_t*) &((struct mboot_tag_old_acpi*) tag)->rsdp;
+                        rsdp = (uint8_t*) &((struct mboot_tag_old_acpi*) tag)->rsdp;
                     break;
                 case MBOOT_TAG_TYPE_ACPI_NEW: 
-                    rsdp = (rsdp_t*) &((struct mboot_tag_new_acpi*) tag)->rsdp;
+                    rsdp = (uint8_t*) &((struct mboot_tag_new_acpi*) tag)->rsdp;
                     break;
             }
         }
@@ -94,6 +94,9 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     timer_init(100); /* programmable interrupt timer */
     keyboard_init(); /* ps/2 keyboard controller */
     rtc_init();      /* real time clock */
+
+    if (ramdisk && !fs_root)
+        ext2_ramdisk_mount((uint32_t) ramdisk);
 
     /* initalize multitasking */
     tasking_init(); 

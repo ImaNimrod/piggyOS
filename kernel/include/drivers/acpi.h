@@ -9,14 +9,6 @@
 #include <string.h>
 
 typedef struct {
-    char signature[8];
-    uint8_t checksum;
-    char oem_id[6];
-    uint8_t revision;
-    uintptr_t rsdt_address;
-} __attribute__((packed)) rsdp_t;
-
-typedef struct {
     uint32_t signature;
     uint32_t length;
     uint8_t revision;
@@ -32,6 +24,11 @@ typedef struct {
     acpi_header_t header;
     uint32_t sdt_entries[];
 } rsdt_t;
+
+typedef struct {
+    acpi_header_t header;
+    uint64_t sdt_entries[];
+} xsdt_t;
 
 typedef struct  {
     acpi_header_t header;
@@ -51,7 +48,7 @@ typedef struct  {
 } fadt_t;
 
 /* function declarations */
-void acpi_init(rsdp_t* rsdp);
+void acpi_init(uint8_t* rsdp);
 void reboot(void);
 void shutdown(void);
 
