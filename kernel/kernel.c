@@ -14,8 +14,6 @@
 #include <memory.h>
 #include <string.h>
 
-extern uint32_t kernel_end;
-
 void kernel_main() {
     vga_clear();
     vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);

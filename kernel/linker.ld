@@ -1,38 +1,36 @@
-ENTRY(start)
 OUTPUT_FORMAT(elf32-i386)
+ENTRY(start)
 
 SECTIONS {
-   . = 0x00100000;
+	. = 1M; 
 
-   low_kernel_start = .;
+    KERNEL_VIRTUAL_BASE = 0xc0000000;
+    . += KERNEL_VIRTUAL_BASE;
 
-   .multiboot2_header :  { *(.multiboot2_header) }
+	kernel_start = .;
 
-   .low_text ALIGN (0x1000) : { *(.low_text) }
-   .low_data ALIGN (0x1000) : { *(.low_data) }
-   .low_bss ALIGN (0x1000) :
-   {
-       *(.low_bss)
-   }
+    .text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_VIRTUAL_BASE)
+	{
+		kernel_text_start = .;
+		*(.multiboot2_header)
+		*(.text .text.*)
+		kernel_text_end = .;
+	}
 
-   low_kernel_end = .;
+    .data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_VIRTUAL_BASE)
+	{
+		kernel_data_start = .;
+		*(.data .data.*)
+		*(.symbols)
+		kernel_data_end = .;
+	}
 
-   . += 0xC0000000;
+	.bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_VIRTUAL_BASE)
+	{
+		*(COMMON)
+		*(.bss .bss.*)
+		*(.stack)
+	}
 
-   kernel_start = .;
-
-   .text ALIGN (0x1000) : AT(ADDR(.text) - 0xC0000000) { *(.text) }
-   .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - 0xC0000000) { *(.rodata*) }
-   .data ALIGN (0x1000) : AT(ADDR(.data) - 0xC0000000) { *(.data) }
-   .bss ALIGN (0x1000) : AT(ADDR(.bss) - 0xC0000000)
-   {
-       *(COMMON)
-       *(.bss)
-   }
-
-   kernel_end = .;
-
-   kernel_size = kernel_end - kernel_start;
+    kernel_end = .;
 }
-
-ASSERT(kernel_size < 0x400000, "kernel exceeds the 4 MB limit. entry.asm must be updated to work with a >3MB kernel");

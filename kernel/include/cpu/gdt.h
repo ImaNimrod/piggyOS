@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define GDT_LEN 6
+#define GDT_LEN 5
 
 typedef struct gdt_descr {
 	uint16_t limit_low;

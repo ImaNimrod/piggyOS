@@ -1,21 +1,10 @@
-global start 
+bits 32 
 
-extern low_kernel_start
-extern low_kernel_end
-
-extern kernel_start
-extern kernel_end
-
-extern kernel_main
-
-KERNEL_BASE equ 0xC0000000
-PAGE_SIZE   equ 4096
-PAGE_SHIFT  equ 12 
-
-bits 32
+KERNEL_VIRTUAL_BASE equ 0xc0000000
+KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; PDE of kernel's 4MB PTE 
 
 section .multiboot2_header
-
+align 8
 header_start:
 	dd 0xe85250d6 
 	dd 0 
@@ -27,107 +16,58 @@ header_start:
 	dd 8
 header_end:
 
-section .low_text progbits
+section .data
+align 0x1000
+boot_page_dir:
+    dd 0x00000083
+    times (KERNEL_PAGE_NUMBER - 1) dd 0
+    dd 0x00000083
+    times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0
 
+section .text
+global start
 start:
-    ; save multiboot info for kernel
-    mov [multiboot_magic], eax
-    mov [multiboot_info],  ebx
-
-    ; identity map from 0x00000000 to end of low kernel mem
-    mov eax, lowmem_pt
-    mov [page_directory], eax
-    or dword [page_directory], 0x003 
-
-    xor eax, eax 
-.low_mem:
-    ; copy physical addr to PTE and mark it as present, writable
-    mov ecx, eax
-    shr ecx, PAGE_SHIFT     
-    and ecx, 0x3ff          
-    mov [lowmem_pt+ecx*4], eax 
-    or dword [lowmem_pt+ecx*4], 0x003 
-
-    ; check if we have finished identity mapping low mem
-    add eax, PAGE_SIZE      
-    cmp eax, low_kernel_end 
-    jl .low_mem
-
-    ; create kernel mappings in higher half
-    mov edx, KERNEL_BASE
-    shr edx, 22          
-
-    ; mark PT as present, writable
-    mov eax, kernel_pt
-    mov [page_directory+edx*4], eax
-    or dword [page_directory+edx*4], 0x03 
-
-    mov eax, kernel_start 
-.higher:
-    ; generate kernel pte
-    mov ecx, eax
-    shr ecx, PAGE_SHIFT
-    and ecx, 0x3ff 
-
-    ; convert virt addr to phys addr
-    mov ebx, eax 
-    sub ebx, KERNEL_BASE 
-    mov [kernel_pt+ecx*4], ebx
-    or dword [kernel_pt+ecx*4], 0x003 
-
-    ; check if we are done mapping the kernel
-    add eax, PAGE_SIZE 
-    cmp eax, kernel_end 
-    jl .higher
-
     ; load cr3 with our page directory
-    mov eax, page_directory
-    mov cr3, eax 
+    mov ecx, (boot_page_dir - KERNEL_VIRTUAL_BASE)
+    mov cr3, ecx
 
     ; enable 4MB pages
-    mov ecx, cr4;
-    or ecx, 0x002
+    mov ecx, cr4
+    or ecx, 0x00000010
     mov cr4, ecx
 
-    ; enable pagaing
-    mov eax, cr0
-    or eax, 0x80000000
-    mov cr0, eax 
+    ; enable paging
+    mov ecx, cr0
+    or ecx, 0x80000000
+    mov cr0, ecx
 
-    ; initialize stack ptr and pass multiboot info to kernel 
-    mov esp, stack_top 
+    ; jump to the absoulute address of our kernel in higher mem
+    lea ecx, [higher_half]
+    jmp ecx
 
-    push dword [multiboot_magic]        
-    push dword [multiboot_info] 
+extern kernel_main
+higher_half:
+    ; unmap the first identity-mapped 4MB; we dont need it anymore
+    mov dword [boot_page_dir], 0
+    invlpg [0]
 
-    ; run kernel
-    call kernel_main 
+    ; initialize stack
+    mov esp, stack_top
 
-    ; infinite loop for if kernel returns (it won't)
+    ; pass multiboot information to kernel
+    push eax
+    push ebx
+
+    ; load out kernel
+    call kernel_main
+
     cli
-.end:	
+.end:
     hlt
-	jmp .end
-
-section .low_bss nobits
-
-align 4096
-page_directory:
-  resd 1024       
-lowmem_pt:
-  resd 1024 
-kernel_pt:
-  resd 1024
-
-section .low_data
-
-multiboot_magic:
-  dd 0
-multiboot_info:
-  dd 0
+    jmp .end
 
 section .bss
-    align 4
-stack_bottom:
-    resb 16384 
+align 4
+kernel_stack:
+    resb 0x4000
 stack_top:

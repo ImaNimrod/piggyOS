@@ -30,7 +30,6 @@ void gdt_init(void) {
     gdt_set_descr(&gdt[2], 0, 0xFFFFFFFF,   0x92, 0xCF); // kernel data entry
     gdt_set_descr(&gdt[3], 0, 0xFFFFFFFF,   0xFA, 0xCF); // user code entry
     gdt_set_descr(&gdt[4], 0, 0xFFFFFFFF,   0xF2, 0xCF); // user data entry
-    gdt_set_descr(&gdt[5], 0, 0xFFFFFFFF,   0x89, 0x00); // tss entry
 
     gdt_ptr.limit = (sizeof(gdt_descr_t) * GDT_LEN) - 1;
     gdt_ptr.base  = (uintptr_t) &gdt;
