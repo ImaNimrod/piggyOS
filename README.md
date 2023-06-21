@@ -11,3 +11,5 @@ is in the early phases of development and many features/fixes will be coming in 
 - [ ] Switch to user mode
 - [x] Syscalls
 - [ ] Loading ELF User Mode programs into memory and run them
+- [ ] Redo / make better timer interface
+- [ ] Syncronization primatives (mutex, spinlock)
