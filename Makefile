@@ -17,7 +17,8 @@ run:
 	qemu-system-i386 -m 128M\
 					 -rtc base=localtime\
 					 -serial stdio\
-					 -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
+					 -cdrom piggyOS.iso
+					 # -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
 
 cdrom: 
 	@grub-file --is-x86-multiboot2 iso/boot/piggyOS-kernel.bin 

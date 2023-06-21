@@ -6,7 +6,7 @@ CC:=$(TARGET)-gcc
 LD:=$(TARGET)-ld
 AS:=nasm
 
-KERNEL_DIR:=~/piggyOS/kernel
-BUILD_DIR:=~/piggyOS/build
+KERNEL_DIR:=./kernel
+BUILD_DIR:=./build
 CDROM:=piggyOS.iso
 DISK:=piggyOS-disk.img
