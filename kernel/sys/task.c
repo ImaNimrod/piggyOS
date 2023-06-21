@@ -1,105 +1,75 @@
 #include <sys/task.h>
 
-static task_t ktask;
-task_t* current;
-static list_t* task_list;
-static pid_t next_pid = 1;
+task_t* current_task;
+list_t* task_list;
+static volatile pid_t next_pid = 1;
 
-int task_init(task_t* t, task_entry_t entry) {
-    char* ti;
-    uint32_t* sp;
+spinlock_t lock = 0;
+spinlock_t lock2 = 0;
 
+void kidle(void) {
+    kprintf("idle task started\n");
+    while (1)
+        __asm__ volatile("hlt");
+}
+
+void task_create(char* name, uintptr_t func) {
+    context_t* context;
+
+    task_t* t = (task_t*) kmalloc(sizeof(task_t));
+
+    t->kstack_mem = kmalloc(0x1000); 
+    if (!t->kstack_mem) {
+        kfree(t);
+        return;
+    }
+
+    strncpy(t->name, name, 16);
     t->pid = next_pid++;
 
-    if (t == &ktask) {
-        t->page_dir = kernel_page_dir;
-        t->context = NULL;
-    }
+	__asm__ volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(t->page_dir)::"%eax");
 
-    // t->page_dir = (page_directory_t*) kmalloc_a(sizeof(page_directory_t));
-    // if (!t->page_dir)
-    //     return -1;
-    // memset(t->page_dir, 0, sizeof(page_directory_t));
-    // copy_page_directory(t->page_dir, kernel_page_dir);
+    t->kstack = t->kstack_mem + 0x1000 - sizeof(context_t);
+    context = (context_t*) t->kstack;
 
-    ti = (char*) kmalloc(4096);
-    if (!ti)
-        return -1;
+    context->eip = func;
+    context->eflags = 0x202; 
 
-    sp = (uint32_t*) ALIGN_DOWN((uintptr_t) ti + 4096, sizeof(uint32_t));
+    t->self = list_insert_back(task_list, t);
 
-    // if (current->isr_frame) {
-    //     regs_t* isr_frame2 = ((regs_t*) sp) - 1;
-    //
-    //     sp = (uint32_t*) isr_frame2;
-    //
-    //     *isr_frame2 = *current->isr_frame;
-    //     isr_frame2->eax = 0;
-    // }
-
-    t->context = ((context_t*) sp) - 1;
-    t->context->ebp = (uint32_t) sp;
-    t->context->eip = (uint32_t) entry;
-    t->context->ebx = 0;
-    t->context->edi = 0;
-    t->context->esi = 0;
-
-    return 0;
-}
-
-task_t* task_create(task_entry_t entry) {
-    task_t* t = (task_t*) kcalloc(sizeof(task_t), 1);
-    if (task_init(t, entry) < 0) {
-        kfree(t);
-        klog(LOG_ERR, "Failed to create task...\n");
-        return NULL;
-    }
-
-    t->self = list_insert_front(task_list, t);
     schedule();
-    
-    return t;
-}
-
-void task_delete(task_t* t) {
-    kfree((void*) ALIGN_DOWN((uint32_t) t->context, 4096));
-    kfree(t);
 }
 
 void schedule(void) {
-    if(!list_size(task_list))
+    if (!task_list && !current_task)
         return;
 
-    task_t* last;
-    task_t* next;
-
-    last = current;
-    list_node_t* nextnode = (current->self)->next;
-
-    if (current->state == TASK_ZOMBIE)
-        list_remove_node(task_list, current->self);
-
-    if (!nextnode)
-        next = list_peek_front(task_list);
-    else
-        next = nextnode->value;
-
-    if (next == current) {
-        ktask.state = TASK_RUNNING;
-        next = &ktask;
+    /* this only happens for the first task */
+    if (!current_task) {
+        task_t* next = list_peek_front(task_list);
+        context_switch(next);
     }
 
-    current = next;
+    list_node_t* next_node = (current_task->self)->next;
+    task_t* next;
 
-    // perform context switch 
-    kprintf("scheduler chose to run task: %d\n", next->pid);
-    tss.esp0 = ALIGN_UP((uint32_t) next->context, 4096);
-    // switch_page_directory((page_directory_t*) next->page_dir, 1);
+    if (!next_node)
+        next = list_peek_front(task_list); // we have reached the end of the list
+    else
+        next = next_node->value; // get the next task in the list
 
-    context_switch(&last->context, next->context);
+    if (!current_task) {
+        kpanic("no tasks left. this is really bad\n");
+    }
+   
+    context_switch(next);
 }
 
-void tasking_init(void) {
+void multitasking_init(char* name, uintptr_t func) {
     klog(LOG_OK, "Initializing multitasking\n");
+
     task_list = list_create();
+    
+    /* initial kernel idle task */
+    task_create(name, func);
 }

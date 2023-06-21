@@ -6,7 +6,7 @@ static void timer_irq_handler(regs_t* r) {
     (void) r;
 
     timer_ticks++;
-    // schedule();
+    schedule();
 }
 
 __attribute__((optimize("O0"))) void sleep(uint64_t ticks) {

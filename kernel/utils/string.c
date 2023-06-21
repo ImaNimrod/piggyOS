@@ -50,6 +50,12 @@ char* strcpy(char* str1, const char* str2) {
 	return str1;
 }
 
+char* strncpy(char* dst, const char* src, size_t n) {
+    size_t i = 0;
+    while(i++ != n && (*dst++ = *src++));
+    return dst;
+}
+
 size_t strlen(const char *str) {
 	size_t i = 0;
 	while(str[i] != 0) i++;

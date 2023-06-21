@@ -1,18 +1,13 @@
 #include <sys/syscall.h>
 
-static int sys_hello(void) {
-    kprintf("hello\n");
-    return 0;
-}
+extern task_t* current_task;
 
-static int sys_goodbye(void) {
-    kprintf("goodbye\n");
-    return 0;
+static int sys_getpid(void) {
+    return current_task->pid;
 }
 
 static uintptr_t syscall_table[] = {
-    [SYS_HELLO]   = (uintptr_t) &sys_hello,
-    [SYS_GOODBYE] = (uintptr_t) &sys_goodbye,
+    [SYS_GETPID]  = (uintptr_t) &sys_getpid,
 };
 
 static void syscall_dispatcher(regs_t* r) {

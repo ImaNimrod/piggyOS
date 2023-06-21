@@ -24,7 +24,14 @@
 #include <system.h>
 
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n\t\t\t\tBy: James Steffes\n";
-extern void switch_to_user(void);
+
+void stage2(void) {
+    vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
+    kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
+
+    while (1)
+        __asm__ volatile("hlt");
+}
 
 void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2, uint32_t inital_esp) {
     static uint32_t module_start, module_end;
@@ -102,20 +109,9 @@ void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2, uint32_t inita
     /* initalize tarfs */
     tarfs_init(module_start, module_end);
 
-    /* initialize multiasking */ 
-    tasking_init();
-
     /* initialize syscall handler */
     syscalls_init();
 
-    vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
-    kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
-
-    fs_node_t* initrd = finddir_fs(get_fs_root(), "initrd"); 
-    if (initrd) {
-        fs_node_t* elf = finddir_fs(initrd, "initrd/test"); 
-        elf_run(elf);
-    }
-
-    for(;;);
+    /* initialize multiasking */ 
+    multitasking_init("kidle", (uintptr_t) &stage2);
 }

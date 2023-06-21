@@ -11,7 +11,7 @@ is in the early phases of development and many features/fixes will be coming in 
 - Should be free of any major bugs
 
 ## coming features
-- [ ] Multitasking (not fully featured as of 8/27/22)
+- [X] Multitasking (not fully featured but we're getting there)
 - [X] VFS and devFS working
 - [X] USTAR ramdisk support
 - [x] Improved memory management system
@@ -21,4 +21,4 @@ is in the early phases of development and many features/fixes will be coming in 
 - [ ] Redo / make better timer interface
 - [X] Syncronization primatives (just spinlock right now)
 - [ ] User mode shell with number of commands
-- [X] ACPI parsing
+- [ ] ACPI parsing

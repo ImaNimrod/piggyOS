@@ -5,9 +5,9 @@
 #include <display.h>
 #include <stdint.h>
 #include <system.h>
+#include <sys/task.h>
 
-#define SYS_HELLO 1
-#define SYS_GOODBYE 2
+#define SYS_GETPID 1
 
 /* function declarations */
 void syscalls_init(void);
