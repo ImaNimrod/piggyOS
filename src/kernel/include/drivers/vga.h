@@ -1,7 +1,6 @@
 #ifndef _KERNEL_VGA_H
 #define _KERNEL_VGA_H
 
-#include <stddef.h>
 #include <stdint.h>
 
 enum vga_color {
@@ -23,7 +22,7 @@ enum vga_color {
     VGA_COLOR_WHITE       = 15,
 };
 
-/* function definitions */
+/* function declarations */
 
 void vga_clear(void);
 void vga_puts(const char* string);
