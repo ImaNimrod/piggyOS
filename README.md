@@ -4,7 +4,11 @@ piggyOS is a homemade operating system for i686 processors. This is a toy OS cre
 to learn the concepts of OS development and how to put them into practice. Right now, it 
 is in the early phases of development and many features/fixes will be coming in the coming months.
 
-The goal right now is to have a fleshed out and functioning 1.0 release by the end of November 2022.
+## plan for version 1.0
+- The goal right now is to have v1.0 finished by late November 2022.
+- It will have no permanent storage and run off of an ext2 ramdisk.
+- It will have some basic commands and a shell (all loaded/run in usermode)
+- Should be bug free
 
 ## coming features
 - [x] Multitasking (not fully featured as of 8/27/22)
