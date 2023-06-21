@@ -3,9 +3,9 @@
 
 #include <display.h>
 #include <memory.h>
-#include <list.h>
-#include <tree.h>
-#include <hashmap.h>
+#include <dsa/list.h>
+#include <dsa/tree.h>
+#include <dsa/hashmap.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

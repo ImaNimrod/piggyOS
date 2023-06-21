@@ -1,5 +1,5 @@
 #include <string.h>
-#include <list.h>
+#include <dsa/list.h>
 
 void list_destroy(list_t * list) {
 	/* kfree all of the contents of a list */

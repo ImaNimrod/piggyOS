@@ -15,7 +15,7 @@
 #include <memory.h>
 #include <string.h>
 
-extern uintptr_t kernel_end;
+extern uint32_t kernel_end;
 
 void kernel_main() {
     vga_clear();
@@ -35,20 +35,21 @@ void kernel_main() {
     fdc_init();
     ata_init();
 
-    // mbr_t mbr;
-    // uint32_t start_sector;
-    // uint32_t max_sector;
-    // read_parttbl(0, &mbr);
-    //
-    // for (int i = 0; i < 4; i++) {
-    //     if ((mbr.primary_part[i].bootable & 0x80) && mbr.primary_part[i].type == 0x83) {
-    //         kprintf("ext2 partition detected\n");
-    //         max_sector = mbr.primary_part[i].sector_count;
-    //         start_sector = mbr.primary_part[i].lba_first_sector;
-    //         break;
-    //     }
-    // }
-    
+    mbr_t mbr;
+    uint32_t start_sector;
+    uint32_t max_sector;
+    read_parttbl(0, &mbr);
+
+    for (int i = 0; i < 4; i++) {
+        if ((mbr.primary_part[i].bootable & 0x80) && mbr.primary_part[i].type == 0x83) {
+            kprintf("ext2 partition detected\n");
+            max_sector = mbr.primary_part[i].sector_count;
+            start_sector = mbr.primary_part[i].lba_first_sector;
+            ext2_disk_mount(start_sector, max_sector);
+            break;
+        }
+    }
+
     vfs_install();
     devfs_install("/dev");
 

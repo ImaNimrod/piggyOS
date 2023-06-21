@@ -8,7 +8,7 @@ static uint32_t pheap_end = 0;
 static uint8_t *pheap_desc = 0;
 static uint32_t memory_used = 0;
 
-void mmu_init(uintptr_t* kernel_end) {
+void mmu_init(uint32_t* kernel_end) {
 	last_alloc = kernel_end + 0x1000;
 	heap_begin = last_alloc;
 	pheap_end = 0x400000;
@@ -75,7 +75,7 @@ void mmu_print_state(void) {
 //        return (char *)((uint32_t)alloc + sizeof(alloc_t));
 // }
 
-char* kmalloc(size_t size) {
+void* kmalloc(size_t size) {
 	if(!size) return NULL;
 
 	uint8_t *mem = (uint8_t *) heap_begin;
@@ -95,7 +95,7 @@ char* kmalloc(size_t size) {
 
 			memset(mem + sizeof(alloc_t), 0, size);
 			memory_used += size + sizeof(alloc_t);
-			return (char *)(mem + sizeof(alloc_t));
+			return (void *) (mem + sizeof(alloc_t));
 		}
 		mem += a->size;
 		mem += sizeof(alloc_t);
@@ -114,8 +114,8 @@ char* kmalloc(size_t size) {
 	last_alloc += sizeof(alloc_t);
 	last_alloc += 4;
 	memory_used += size + 4 + sizeof(alloc_t);
-	memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
-	return (char *)((uint32_t)alloc + sizeof(alloc_t));
+	memset((void *) ((uint32_t) alloc + sizeof(alloc_t)), 0, size);
+	return (void *) ((uint32_t) alloc + sizeof(alloc_t));
 }
 
 void kfree(void *mem) {
@@ -123,24 +123,3 @@ void kfree(void *mem) {
 	memory_used -= alloc->size + sizeof(alloc_t);
 	alloc->status = 0;
 }
-
-char* kpmalloc(void) {
-    for(int i = 0; i < MAX_PAGE_ALIGNED_ALLOCS; i++) {
-        if(pheap_desc[i]) continue;
-        pheap_desc[i] = 1;
-        kprintf("Pallocated from 0x%x to 0x%x\n", pheap_begin + i*4096, pheap_begin + (i+1)*4096);
-        return (char *)(pheap_begin + i*4096);
-    }
-    kprintf("kpmalloc: FATAL: failure!\n");
-    return 0;
-}
-
-void kpfree(void *mem) {
-	if ((mem < pheap_begin) || (mem > pheap_end)) return;
-	uint32_t ad = (uint32_t)mem;
-	ad -= pheap_begin;
-	ad /= 4096;
-	pheap_desc[ad] = 0;
-	return;
-}
-

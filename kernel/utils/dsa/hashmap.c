@@ -1,5 +1,5 @@
 #include <string.h>
-#include <hashmap.h>
+#include <dsa/hashmap.h>
 
 unsigned int hashmap_string_hash(const void * _key) {
 	unsigned int hash = 0;

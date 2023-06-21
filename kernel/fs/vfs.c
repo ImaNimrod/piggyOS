@@ -133,7 +133,7 @@ static char *canonicalize_path(const char *cwd, const char *input) {
     return output;
 }
 
-static struct dirent *readdir_mapper(fs_node_t *node, unsigned long index) {
+static struct dirent *readdir_mapper(fs_node_t *node, uint32_t index) {
 	tree_node_t *d = (tree_node_t *) node->device;
 
 	if (!d) return NULL;
@@ -151,7 +151,7 @@ static struct dirent *readdir_mapper(fs_node_t *node, unsigned long index) {
 	}
 
 	index -= 2;
-	unsigned long i = 0;
+	uint32_t i = 0;
 	foreach(child, d->children) {
 		if (i == index) {
 			tree_node_t *tchild = (tree_node_t *) child->value;
@@ -389,7 +389,7 @@ fs_node_t *kopen_recur(const char *filename, uint32_t flags, uint32_t symlink_de
 	path[path_len] = '\0';
 	path_offset = path + 1;
 
-	unsigned int depth = 0;
+	uint32_t depth = 0;
 
 	fs_node_t *node_ptr = get_mount_point(path, path_depth, &path_offset, &depth);
 

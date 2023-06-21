@@ -1,29 +1,5 @@
 #include <string.h>
-#include "../../kernel/include/memory.h"
-
-void *memchr(const void *s, uint32_t c, size_t n) {
-    const uint8_t uc = c; 
-    const uint8_t *su;
-
-    for (su = s; 0 < n; su++, n--) { 
-        if (*su == uc) {
-            return ((void *) su); 
-        }
-    }
-
-    return NULL;
-}
-
-uint32_t memcmp(const void *s1, const void *s2, size_t n) {
-    const uint8_t *su1, *su2; 
-
-    for (su1 = s1, su2 = s2; 0 < n; su1++, su2++, n--) {
-        if (*su1 != *su2) {
-            return ((*su1 < *su2) ? -1 : +1);
-        }
-    }
-    return 0;
-}
+#include <memory.h>
 
 void *memcpy (void *s1, const void *s2, size_t n) {
     int8_t *su1; 
@@ -32,25 +8,6 @@ void *memcpy (void *s1, const void *s2, size_t n) {
     for (su1 = s1, su2 = s2; 0 < n; su1++, su2++, n--) {
         *su1 = *su2;
     }
-    return s1;
-}
-
-void *memmove (void *s1, const void *s2, size_t n) {
-    char *sc1;
-    const char *sc2; 
-
-    sc1 = s1; 
-    sc2 = s2; 
-
-    if (sc2 < sc1 && sc1 < sc2 + n) {
-        for (sc1 += n, sc2 += n; 0 < n; n--) {
-            *sc1-- = *sc2--; 
-        }
-    } else {
-        for (; 0 < n; n--)
-            *sc1++ = *sc2++;
-    }
-
     return s1;
 }
 
@@ -93,7 +50,7 @@ size_t strlen(const char *str) {
 	return i;
 }
 
-char *strpbrk(const char *str, const char *accept) {
+static char *strpbrk(const char *str, const char *accept) {
 	const char *acc = accept;
 
 	if (!*str) {
@@ -117,7 +74,7 @@ char *strpbrk(const char *str, const char *accept) {
 	return (char *)str;
 }
 
-size_t strspn(const char *str, const char *accept) {
+static size_t strspn(const char *str, const char *accept) {
 	const char *ptr = str;
 	const char *acc;
 
@@ -165,4 +122,3 @@ char *strtok_r(char *str, const char *delim, char **saveptr) {
 	}
 	return token;
 }
-

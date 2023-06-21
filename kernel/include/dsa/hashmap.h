@@ -2,7 +2,8 @@
 
 #include <stddef.h>
 #include <string.h>
-#include <list.h>
+#include <dsa/list.h>
+#include <memory.h>
 
 typedef unsigned int (*hashmap_hash_t) (const void * key);
 typedef int (*hashmap_comp_t) (const void * a, const void * b);

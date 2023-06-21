@@ -15,14 +15,11 @@ typedef struct {
 } alloc_t;
 
 /* function declarations */
-void mmu_init(uintptr_t* kernel_end);
+void mmu_init(uint32_t* kernel_end);
 void mmu_print_state(void);
 
-char* kmalloc(size_t size);
+void* kmalloc(size_t size);
 void kfree(void *mem);
-
-char* kpmalloc(void);
-void kpfree(void *mem);
 
 void paging_init(void);
 

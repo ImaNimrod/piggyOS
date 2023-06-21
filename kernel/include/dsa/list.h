@@ -1,8 +1,8 @@
 #pragma once
 
+#include <memory.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "../../kernel/include/memory.h"
 
 typedef struct node {
 	struct node * next;

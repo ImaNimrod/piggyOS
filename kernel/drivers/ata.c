@@ -1,6 +1,6 @@
 #include <drivers/ata.h>
 
-uint8_t *ide_buf = 0;
+uint16_t *ide_buf = 0;
 
 static void ata_primary_irq(regs_t *r) {
     irq_ack(ATA_PRIMARY_IRQ);

@@ -1,6 +1,4 @@
-#include <stdint.h>
-#include <string.h>
-#include <tree.h>
+#include <dsa/tree.h>
 
 tree_t * tree_create(void) {
 	tree_t * out = kmalloc(sizeof(tree_t));
