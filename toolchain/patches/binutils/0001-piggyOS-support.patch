@@ -116,6 +116,17 @@ index 741b246f67e..612fa5440d4 100644
  i[3-7]86-*-cygwin*)	targ_emul=i386pe ;
  			targ_extra_ofiles="deffilep.o pe-dll.o" ;
  			test "$targ" != "$host" && LIB_PATH='${tooldir}/lib/w32api'
+@@ -1099,6 +1099,10 @@ hppa*64*-*-hpux11*)
+   NATIVE_LIB_DIRS=/usr/lib/pa20_64
+   ;;
+
++*-*-piggyOS*)
++  NATIVE_LIB_DIRS='/initrd/lib'
++  ;;
++
+ i[3-7]86-*-sysv4*)
+   NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
+   ;;
 diff --git a/ld/emulparams/elf_i386_piggyOS.sh b/ld/emulparams/elf_i386_piggyOS.sh
 new file mode 100644
 index 0000000000..1369b90731

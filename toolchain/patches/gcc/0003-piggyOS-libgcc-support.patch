@@ -1,0 +1,15 @@
+diff --git a/libgcc/config.host b/libgcc/config.host
+index eb23abe89f5..53bda23b26b 100644
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -729,6 +729,10 @@ i[34567]86-*-linux*)
+ 	tm_file="${tm_file} i386/elf-lib.h"
+ 	md_unwind_header=i386/linux-unwind.h
+ 	;;
++i[34567]86-*-piggyOS*)
++	extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
+ i[34567]86-*-kfreebsd*-gnu | i[34567]86-*-kopensolaris*-gnu)
+ 	extra_parts="$extra_parts crtprec32.o crtprec64.o crtprec80.o crtfastmath.o"
+ 	tmake_file="${tmake_file} i386/t-crtpc t-crtfm i386/t-crtstuff t-dfprules"

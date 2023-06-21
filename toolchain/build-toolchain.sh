@@ -4,9 +4,6 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export PREFIX="${DIR}/build"
-export TARGET=i686-piggyOS
-
 export CFLAGS="-g0 -O2 -mtune=native"
 export CXXFLAGS="-g0 -O2 -mtune=native"
 
@@ -21,6 +18,9 @@ GCC_MD5SUM="d7644b494246450468464ffc2c2b19c3"
 GCC_NAME="gcc-$GCC_VERSION"
 GCC_PKG="${GCC_NAME}.tar.gz"
 GCC_BASE_URL="https://ftp.gnu.org/gnu/gcc"
+
+PREFIX="${DIR}/build"
+TARGET="i686-piggyOS"
 
 mkdir -p "$DIR/tarballs"
 
@@ -94,9 +94,7 @@ pushd "$DIR/tarballs"
         pushd build_binutils
             "$DIR"/tarballs/$BINUTILS_NAME/configure --prefix="$PREFIX" \
                                             --target="$TARGET" \
-                                            --with-sysroot \
-                                            --disable-nls \
-                                            --disable-werror
+                                            --disable-nls
             make -j "$(nproc)"
             make install
         popd
@@ -110,7 +108,6 @@ pushd "$DIR/tarballs"
             "$DIR"/tarballs/$GCC_NAME/configure --prefix="$PREFIX" \
                                        --target="$TARGET" \
                                        --disable-nls \
-                                       --enable-shared \
                                        --enable-languages=c \
                                        --without-headers \
                                        --enable-default-pie

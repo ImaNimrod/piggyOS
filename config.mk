@@ -1,16 +1,16 @@
 # target platform 
-TARGET:=i686-elf
+PREFIX:=$(PWD)/toolchain/build/bin
+TARGET:=i686-piggyOS
 
 # toolchain 
-CC:=$(TARGET)-gcc
-LD:=$(TARGET)-ld
+CC:=$(PREFIX)/$(TARGET)-gcc
+LD:=$(PREFIX)/$(TARGET)-ld
 AS:=nasm
 EMU:=qemu-system-i386
 
-KERNEL_DIR:=./kernel
-BUILD_DIR:=./build
-CDROM:=piggyOS.iso
-DISK:=piggyOS-disk.img
+KERNEL_DIR:=$(PWD)/kernel
+BUILD_DIR:=$(PWD)/build
+ISO_DIR:=$(PWD)/iso
 
 # kernel config options
 CONFIG_TEXTMODE=Y
