@@ -2,7 +2,7 @@ ENTRY (start)
 
 SECTIONS
 {
-    . = 0x00100000;
+    . = 1M;
 
 	kernel_start = .;
 
@@ -10,8 +10,8 @@ SECTIONS
         *(.multiboot_header)
     }
 
-    .multiboot.text : {
-        *(.multiboot.text)
+    .page_setup : {
+        *(.page_setup)
     }
 
 	. += 0xC0000000;

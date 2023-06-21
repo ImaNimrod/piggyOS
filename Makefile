@@ -1,5 +1,5 @@
 CC=i686-elf-gcc
-CFLAGS=-c -m32 -std=c99 -ffreestanding -O2 -Wall -Wextra
+CFLAGS=-c -m32 -std=c11 -ffreestanding -O2 -Wall -Wextra -fstack-protector -fstack-shuffle
 LDFLAGS= -ffreestanding -O2 -nostdlib -T linker.ld -lgcc
 SRCDIR=src
 ISODIR=iso

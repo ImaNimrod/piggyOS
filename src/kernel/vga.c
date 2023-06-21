@@ -13,7 +13,7 @@ size_t col = 0;
 size_t row = 0;
 uint8_t color = VGA_COLOR_WHITE | VGA_COLOR_BLACK << 4;
 
-void clear_row(size_t row) {
+static inline void clear_row(size_t row) {
     struct Char empty = (struct Char) {
         character: ' ',
         color: color,
@@ -30,7 +30,7 @@ void clear() {
     }
 }
 
-void print_newline() { col = 0;
+static inline void print_newline() { col = 0;
 
     if (row < NUM_ROWS - 1) {
         row++;
