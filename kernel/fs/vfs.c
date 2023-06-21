@@ -1,10 +1,29 @@
 #include <fs/fs.h>
 
-// tree_t *fs_tree = NULL;
+tree_t *fs_tree = NULL;
 fs_node_t *fs_root = NULL;
 // hashmap_t *fs_types = NULL;
 
 /* 6 basic functions god bless */
+void open_fs(fs_node_t* node, uint32_t flags) {
+    if (!node) return;
+
+    if (node->open) {
+        node->open(node, flags);
+    }
+}
+
+void close_fs(fs_node_t* node) {
+    if (!node) return;
+    if (node == fs_root) return;
+
+    if (node->close) {
+        node->close(node);
+    }
+
+    kfree(node);
+}
+
 uint32_t read_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
 	if (!node) return 0;
 	if (node->read) {
@@ -21,25 +40,6 @@ uint32_t write_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
 	} else {
 		return 0;
 	}
-}
-
-void open_fs(fs_node_t* node, uint32_t flags) {
-	if (!node) return;
-
-	if (node->open) {
-		node->open(node, flags);
-	}
-}
-
-void close_fs(fs_node_t* node) {
-	if (!node) return;
-    if (node == fs_root) return;
-
-    if (node->close) {
-        node->close(node);
-    }
-
-    kfree(node);
 }
 
 struct dirent* readdir_fs(fs_node_t* node, uint32_t index) {
@@ -61,7 +61,7 @@ fs_node_t* finddir_fs(fs_node_t* node, char* name) {
 		return NULL;
 	}
 }
-//
+
 // static char *canonicalize_path(const char *cwd, const char *input) {
 //     list_t *out = list_create("vfs canonicalize_path working memory", input);
 //
@@ -634,18 +634,16 @@ fs_node_t* finddir_fs(fs_node_t* node, char* name) {
 // 		f->device = entry;
 // 	}
 // }
-//
-// void init_vfs(void) {
-// 	fs_tree = tree_create();
-//
-// 	struct vfs_entry* root = kmalloc(sizeof(struct vfs_entry));
-//
-// 	root->name = strdup("[root]");
-// 	root->file = NULL; 
-// 	root->fs_type = NULL;
-// 	root->device = NULL;
-//
-// 	tree_set_root(fs_tree, root);
-//
-// 	fs_types = hashmap_create(5);
-// }
+
+void init_vfs(void) {
+	fs_tree = tree_create();
+
+	struct vfs_entry* root = kmalloc(sizeof(struct vfs_entry));
+
+	root->name = strdup("[root]");
+	root->file = NULL; 
+	root->fs_type = NULL;
+	root->device = NULL;
+
+	tree_set_root(fs_tree, root);
+}

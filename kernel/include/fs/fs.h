@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <tree.h>
 
 #define min(l,r) ((l) < (r) ? (l) : (r))
 
@@ -28,50 +29,50 @@
 
 struct fs_node;
 
-typedef uint32_t (*read_type_t) (struct fs_node *, uint32_t, uint32_t, uint8_t *);
-typedef uint32_t (*write_type_t) (struct fs_node *, uint32_t, uint32_t, uint8_t *);
-typedef void (*open_type_t) (struct fs_node *, uint32_t flags);
-typedef void (*close_type_t) (struct fs_node *);
-typedef struct dirent *(*readdir_type_t) (struct fs_node *, uint32_t);
-typedef struct fs_node *(*finddir_type_t) (struct fs_node *, char *name);
-typedef int (*create_type_t) (struct fs_node *, char *name);
-typedef int (*mkdir_type_t) (struct fs_node *, char *name);
-typedef int (*symlink_type_t) (struct fs_node *, char *name, char *value);
-typedef int (*unlink_type_t) (struct fs_node *, char *name);
-typedef int (*readlink_type_t) (struct fs_node *, char *buf, size_t size);
+typedef void (*open_type_t) (struct fs_node*, uint32_t flags);
+typedef void (*close_type_t) (struct fs_node*);
+typedef uint32_t (*read_type_t) (struct fs_node*, uint32_t, uint32_t, uint8_t*);
+typedef uint32_t (*write_type_t) (struct fs_node*, uint32_t, uint32_t, uint8_t*);
+typedef struct dirent *(*readdir_type_t) (struct fs_node*, uint32_t);
+typedef struct fs_node *(*finddir_type_t) (struct fs_node*, char* name);
+typedef int (*create_type_t) (struct fs_node*, char* name);
+typedef int (*mkdir_type_t) (struct fs_node*, char* name);
+typedef int (*symlink_type_t) (struct fs_node*, char* name, char* value);
+typedef int (*unlink_type_t) (struct fs_node*, char* name);
+typedef int (*readlink_type_t) (struct fs_node*, char* buf, size_t size);
 
 typedef struct fs_node {
-    char name[64]; 
-    void *device; 
+    char name[128]; 
+    void* device; 
     uint32_t flags, inode, len, impl;
 
     /* these are func ptrs that outline the operations we can do on files */
-    read_type_t read;   
-    write_type_t write;
     open_type_t open;
     close_type_t close;
+    read_type_t read;   
+    write_type_t write;
     readdir_type_t readdir; 
     finddir_type_t finddir; 
-    struct fs_node *ptr;
-
-	create_type_t create;
-	mkdir_type_t mkdir;
+    create_type_t create;
+    mkdir_type_t mkdir;
     unlink_type_t unlink;
-	symlink_type_t symlink;
-	readlink_type_t readlink;
+    symlink_type_t symlink;
+    readlink_type_t readlink;
+
+    struct fs_node *ptr;
 } fs_node_t;
 
-typedef fs_node_t *(*vfs_mount_callback) (const char *arg, const char *mount_point);
+typedef fs_node_t *(*vfs_mount_callback) (const char* arg, const char* mount_point);
 
 struct vfs_entry {
-	char *name;
-	fs_node_t * file;
-	char *device;
-	char *fs_type;
+	char* name;
+	fs_node_t* file;
+	char* device;
+	char* fs_type;
 };
 
 struct dirent {
-    char name[64];
+    char name[128];
     uint32_t inode;
 };
 

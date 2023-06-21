@@ -316,11 +316,11 @@ int do_amd(void) {
         switch(model) {
             case 1: break;
             case 2: break;
-            case 4:
-                kprintf("Athlon Model %d", model);
-                break;
             case 3:
                 kprintf("Duron Model 3");
+                break;
+            case 4:
+                kprintf("Athlon Model %d", model);
                 break;
             case 6:
                 kprintf("Athlon MP/Mobile Athlon Model 6");

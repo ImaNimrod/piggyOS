@@ -63,7 +63,7 @@ void task_schedule(void) {
         switch_context(NULL, &current_task->regs);
     }
 
-    listnode_t* nextnode = (current_task->self)->next;
+    list_node_t* nextnode = (current_task->self)->next;
     if(current_task->state == TASK_STATE_ZOMBIE) {
         list_remove_node(task_list, current_task->self);
         prev_task = NULL;
@@ -75,7 +75,7 @@ void task_schedule(void) {
     if(!nextnode)
         next = list_peek_front(task_list);
     else
-        next = nextnode->val;
+        next = nextnode->value;
 
     current_task = next;
     if(current_task == NULL)

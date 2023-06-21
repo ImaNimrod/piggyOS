@@ -34,7 +34,7 @@ typedef struct {
     context_t regs;
     uint32_t state;
     page_directory_t* page_dir;
-    listnode_t* self;
+    list_node_t* self;
 } task_t;
 
 /* defined in vmm.h */

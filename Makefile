@@ -16,9 +16,9 @@ kernel:
 run:
 	qemu-system-i386 -m 4G\
 					 -rtc base=localtime\
-					 -cdrom piggyOS.iso\
-					 -cpu pentium3\
 					 -serial stdio\
+					 -machine type=pc-i440fx-3.1\
+					 -cdrom piggyOS.iso\
 					 # -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
 
 cdrom: 
