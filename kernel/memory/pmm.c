@@ -3,28 +3,29 @@
 static uint32_t max_blocks;
 static uint32_t used_blocks;
 static uint32_t mem_size;
-uint8_t* pmm_bitmap = (uint8_t*) &kernel_end; 
+uint32_t* pmm_bitmap;
 uint32_t pmm_bitmap_size;
 
 static void pmm_bitmap_set(uint32_t bit) {
-    pmm_bitmap[bit / 8] |= (1 << (bit % 8));
+    pmm_bitmap[bit / 32] |= (1 << (bit % 32));
     used_blocks++;
 }
+
 static void pmm_bitmap_unset(uint32_t bit) {
-    pmm_bitmap[bit / 8] &= ~(1 << (bit % 8));
+    pmm_bitmap[bit / 32] &= ~(1 << (bit % 32));
     used_blocks--;
 }
 
 static int pmm_bitmap_test(uint32_t bit) {
-    return pmm_bitmap[bit / 8] & (1 << (bit % 8));
+    return pmm_bitmap[bit / 32] & (1 << (bit % 32));
 }
 
 static uint32_t first_free_block(void) {
-    for (uint32_t i = 0; i < max_blocks / 8; i++) {
-        if (pmm_bitmap[i] != 0xff) {
-            for (uint32_t j = 0; j < 8; j++) {
+    for (uint32_t i = 0; i < max_blocks / 32; i++) {
+        if (pmm_bitmap[i] != 0xffffffff) {
+            for (uint32_t j = 0; j < 32; j++) {
                 if (!(pmm_bitmap[i] & (1 << j)))
-                    return i * 8 + j;
+                    return i * 32 + j;
             }
         }
     }
@@ -79,10 +80,8 @@ void pmm_init(struct mboot2_begin* mb2) {
     max_blocks = mem_size / PMM_BLOCK_SIZE;
 
     /* place pmm_bitmap after kernel and its modules */
-    pmm_bitmap = (uint8_t*) bitmap_addr;
-    pmm_bitmap_size = max_blocks / 8;
-    if (pmm_bitmap_size * 8 < max_blocks)
-        pmm_bitmap_size++;
+    pmm_bitmap = (uint32_t*) bitmap_addr;
+    pmm_bitmap_size = max_blocks / 32;
 
     memset(pmm_bitmap, 0, pmm_bitmap_size);
 

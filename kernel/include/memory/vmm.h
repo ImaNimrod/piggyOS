@@ -64,7 +64,7 @@ extern page_directory_t* boot_page_dir;
 extern page_directory_t* kernel_page_dir;
 
 // pmm_bitmap defined in pmm.c
-extern uint8_t* pmm_bitmap;
+extern uint32_t* pmm_bitmap;
 extern uint32_t pmm_bitmap_size;
 
 /* function declarations */

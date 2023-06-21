@@ -64,7 +64,7 @@ void allocate_page(page_directory_t* dir, uint32_t virtual_addr, uint32_t frame,
         dir->ref_tables[page_dir_idx] = table;
     }
 
-    if(!table->pages[page_tbl_idx].present) {
+    if (!table->pages[page_tbl_idx].present) {
         uint32_t t;
         if (frame)
             t = frame;
@@ -183,7 +183,7 @@ static void enable_paging(void) {
 }
 
 void vmm_init(void) {
-    temp_mem = pmm_bitmap + pmm_bitmap_size;
+    temp_mem = (uint8_t*) pmm_bitmap + pmm_bitmap_size;
 
     kernel_page_dir = dumb_kmalloc(sizeof(page_directory_t), 1);
     memset(kernel_page_dir, 0, sizeof(page_directory_t));
