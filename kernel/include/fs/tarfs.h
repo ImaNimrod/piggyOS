@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <types.h>
 
 #define NUM_TARFILES 64
 

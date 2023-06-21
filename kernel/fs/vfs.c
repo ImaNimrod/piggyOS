@@ -1,6 +1,7 @@
 #include <fs/fs.h>
 
 fs_node_t* fs_root = NULL;
+tree_t* fs_tree = NULL;
 
 /* file operations */
 void open_fs(fs_node_t* node, uint32_t flags) {
@@ -20,20 +21,20 @@ void close_fs(fs_node_t* node) {
     kfree(node);
 }
 
-size_t read_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
+ssize_t read_fs(fs_node_t* node, off_t offset, size_t size, uint8_t* buffer) {
 	if (!node) return 0;
 
 	if (node->read) 
-		return node->read(node, offset, size, buf);
+		return node->read(node, offset, size, buffer);
 
     return 0;
 }
 
-size_t write_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
+ssize_t write_fs(fs_node_t* node, off_t offset, size_t size, uint8_t* buffer) {
 	if (!node) return 0;
 
 	if (node->write)
-		return node->write(node, offset, size, buf);
+		return node->write(node, offset, size, buffer);
 
     return 0;
 }

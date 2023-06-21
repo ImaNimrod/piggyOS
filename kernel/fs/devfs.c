@@ -61,10 +61,10 @@ void devfs_register(fs_node_t* device) {
 
 void devfs_init(void) {
     klog(LOG_OK, "Initializing devFS\n");
-    fs_node_t* devfs = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
+    fs_node_t* devfs = (fs_node_t*) kmalloc(sizeof(fs_node_t));
 
     strcpy(devfs->name, "dev");
-    devfs->flags = FS_DIRECTORY;
+    devfs->flags = FS_DIRECTORY | FS_MOUNTPOINT;
     devfs->inode = 0;
 
     devfs->atime = get_seconds();
@@ -84,4 +84,5 @@ void devfs_init(void) {
 
     null_device_create();
     port_device_create();
+    random_device_create();
 }

@@ -71,14 +71,15 @@ fs_node_t* rootfs_init(void) {
     fs_node_t* rootfs = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
 
     strcpy(rootfs->name, "/");
-    rootfs->flags = FS_DIRECTORY;
+    rootfs->flags = FS_DIRECTORY | FS_MOUNTPOINT;
 
-    rootfs->read = 0;
-    rootfs->write = 0;
-    rootfs->open = 0;
-    rootfs->close = 0;
+    rootfs->open = NULL;
+    rootfs->close = NULL;
+    rootfs->read = NULL;
+    rootfs->write = NULL;
     rootfs->readdir = &rootfs_readdir;
     rootfs->finddir = &rootfs_finddir;
+    rootfs->ioctl = NULL;
 
     root_nodes = list_create();
 

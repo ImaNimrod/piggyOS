@@ -2,7 +2,7 @@
 
 cpuid_info_t cpuid_features;
 
-const char *Intel[] = {
+const char* Intel[] = {
     "Brand ID Not Supported.", 
     "Intel(R) Celeron(R) processor", 
     "Intel(R) Pentium(R) III processor", 
@@ -29,7 +29,7 @@ const char *Intel[] = {
     "Mobile Intel(R) Celeron(R) processor"
 };
 
-const char *Intel_Other[] = {
+const char* Intel_Other[] = {
     "Reserved", 
     "Reserved", 
     "Reserved", 

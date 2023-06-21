@@ -7,7 +7,6 @@
 
 /* function declarations */
 void* memcpy(void* restrict dest, const void* restrict src, size_t n);
-void* memmove(void* restrict dest, const void* restrict src, size_t count);
 void* memset (void*, uint32_t, size_t);
 int memcmp(void* s1, void* s2, int len);
 

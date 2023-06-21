@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/spinlock.h>
+#include <types.h>
 
 #define FS_FILE        0x01
 #define FS_DIRECTORY   0x02
@@ -15,16 +16,16 @@
 #define FS_BLOCKDEVICE 0x04
 #define FS_PIPE        0x05
 #define FS_SYMLINK     0x06
-#define FS_FIFO        0x07
+#define FS_MOUNTPOINT  0x08
 
 struct fs_node;
 
 typedef void (*open_type_t) (struct fs_node*, uint32_t flags);
 typedef void (*close_type_t) (struct fs_node*);
-typedef size_t (*read_type_t) (struct fs_node*, uint32_t, uint32_t, uint8_t*);
-typedef size_t (*write_type_t) (struct fs_node*, uint32_t, uint32_t, uint8_t*);
-typedef struct dirent *(*readdir_type_t) (struct fs_node*, uint32_t);
-typedef struct fs_node *(*finddir_type_t) (struct fs_node*, char* name);
+typedef ssize_t (*read_type_t) (struct fs_node*, off_t, size_t, uint8_t*);
+typedef ssize_t (*write_type_t) (struct fs_node*, off_t, size_t, uint8_t*);
+typedef struct dirent* (*readdir_type_t) (struct fs_node*, uint32_t);
+typedef struct fs_node* (*finddir_type_t) (struct fs_node*, char* name);
 typedef int (*ioctl_type_t) (struct fs_node*, uint32_t request, void* argp);
 
 typedef struct fs_node {
@@ -55,24 +56,17 @@ struct dirent {
     uint32_t offset;
 };
 
-struct vfs_entry {
-	char* name;
-	fs_node_t* file;
-};
-
-extern fs_node_t *fs_root;
+extern fs_node_t* fs_root;
 
 /* function declarations */
-void open_fs(fs_node_t *node, uint32_t flags);
-void close_fs(fs_node_t *node);
-size_t read_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf);
-size_t write_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf);
+void open_fs(fs_node_t* node, uint32_t flags);
+void close_fs(fs_node_t* node);
+ssize_t read_fs(fs_node_t* node, off_t offset, size_t size, uint8_t* buffer);
+ssize_t write_fs(fs_node_t* node, off_t offset, size_t size, uint8_t* buffer);
 struct dirent* readdir_fs(fs_node_t* node, uint32_t index);
 fs_node_t* finddir_fs(fs_node_t* node, char* name);
 int ioctl_fs(fs_node_t* node, uint32_t request, void* argp);
 fs_node_t* clone_fs(fs_node_t* node);
-
-char* split_path(char* path);
 
 void vfs_init(void);
 fs_node_t* get_fs_root(void);

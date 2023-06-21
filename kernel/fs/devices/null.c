@@ -1,6 +1,6 @@
 #include <fs/devfs.h>
 
-static size_t read_null(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
+static ssize_t read_null(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {
     (void) node;
     (void) offset;
     (void) size;
@@ -8,7 +8,7 @@ static size_t read_null(fs_node_t* node, uint32_t offset, size_t size, uint8_t* 
 	return 0;
 }
 
-static size_t write_null(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
+static ssize_t write_null(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {
     (void) node;
     (void) offset;
     (void) buf;

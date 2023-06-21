@@ -18,7 +18,7 @@ static uint32_t tar_getsize(const char* in) {
 static void tar_parse(uint32_t address, uint32_t end) {
         for (tarfs_files = 0; ; tarfs_files++) {
 
-        struct tar_header *header = (struct tar_header*) address;
+        struct tar_header* header = (struct tar_header*) address;
 
         if (header->name[0] == '\0')
             break;
@@ -36,10 +36,10 @@ static void tar_parse(uint32_t address, uint32_t end) {
     }
 }
 
-static size_t tarfs_read(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buffer) {
+static ssize_t tarfs_read(fs_node_t* node, off_t offset, size_t size, uint8_t* buffer) {
     uint32_t file_sz = node->length;
 
-    if (offset > file_sz)
+    if ((size_t) offset > file_sz)
         return 0;
 
     if (offset + size > file_sz)
@@ -101,6 +101,9 @@ void tarfs_init(uint32_t start, uint32_t end) {
     strcpy(tarfs_root->name, "initrd");
     tarfs_root->flags = FS_DIRECTORY;
     tarfs_root->inode = (uint32_t) list_create();
+
+    tarfs_root->atime = get_seconds();
+    tarfs_root->ctime = tarfs_root->atime;
 
     tarfs_root->open = NULL;
     tarfs_root->close = NULL;

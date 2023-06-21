@@ -8,9 +8,9 @@ header_start:
 	dd header_end - header_start
 	dd 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start))
 
-	dw 0
-	dw 0
-	dd 8
+    dw 0 
+    dw 0 
+    dd 8 
 header_end:
 
 section .bss
@@ -29,14 +29,9 @@ boot_page_dir:
     dd 0x00000083
     dd 0x00400083 
     dd 0x00800083 
-    dd 0x00c00083 
-    times (KERNEL_PAGE_NUMBER - 4) dd 0
+    times (KERNEL_PAGE_NUMBER - 3) dd 0
     dd 0x00000083
-    %assign i 0xc0400083
-    %rep 0x7f 
-        dd i 
-        %assign i i+0x400000
-    %endrep
+    times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0
 
 section .text
 global start

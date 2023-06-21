@@ -17,26 +17,28 @@ static void* dumb_kmalloc(uint32_t size, int align) {
     return ret;
 }
 
-void *virt2phys(page_directory_t* dir, void* virtual_addr) {
-    if(!paging_enabled) {
+void* virt2phys(page_directory_t* dir, void* virtual_addr) {
+    if(!paging_enabled)
         return (void*) ((char*) virtual_addr - LOAD_MEMORY_ADDRESS);
-    }
+
     uint32_t page_dir_idx = PAGEDIR_INDEX(virtual_addr), page_tbl_idx = PAGETBL_INDEX(virtual_addr), page_frame_offset = PAGEFRAME_INDEX(virtual_addr);
     if(!dir->ref_tables[page_dir_idx]) {
         kprintf("%s: page dir entry does not exist\n", __func__);
         return NULL;
     }
+
     page_table_t* table = dir->ref_tables[page_dir_idx];
     if(!table->pages[page_tbl_idx].present) {
         kprintf("%s: page table entry does not exist\n", __func__);
         return NULL;
     }
+
     uint32_t t = table->pages[page_tbl_idx].frame;
     t = (t << 12) + page_frame_offset;
     return (void*) t;
 }
 
-static void allocate_page(page_directory_t* dir, uint32_t virtual_addr, uint32_t frame, int is_kernel, int is_writable) {
+void allocate_page(page_directory_t* dir, uint32_t virtual_addr, uint32_t frame, int is_kernel, int is_writable) {
     page_table_t* table = NULL;
     if(!dir) {
         kprintf("%s: page directory is empty\n", __func__);
@@ -88,7 +90,7 @@ void allocate_region(page_directory_t* dir, uint32_t start_va, uint32_t end_va, 
     }
 }
 
-static void free_page(page_directory_t* dir, uint32_t virtual_addr, int free) {
+void free_page(page_directory_t* dir, uint32_t virtual_addr, int free) {
     if(dir == boot_page_dir) return;
     uint32_t page_dir_idx = PAGEDIR_INDEX(virtual_addr), page_tbl_idx = PAGETBL_INDEX(virtual_addr);
     if(!dir->ref_tables[page_dir_idx]) {

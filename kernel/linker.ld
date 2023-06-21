@@ -12,24 +12,20 @@ SECTIONS {
 
     .text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_VIRTUAL_BASE)
 	{
-		kernel_text_start = .;
 		*(.multiboot2_header)
-		*(.text .text.*)
-		kernel_text_end = .;
+		*(.text)
+        *(.rodata*)
 	}
 
     .data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_VIRTUAL_BASE)
 	{
-		kernel_data_start = .;
-		*(.data .data.*)
-		kernel_data_end = .;
+		*(.data)
 	}
 
 	.bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_VIRTUAL_BASE)
 	{
 		*(COMMON)
-		*(.bss .bss.*)
-		*(.stack)
+		*(.bss)
 	}
 
     kernel_end = .;

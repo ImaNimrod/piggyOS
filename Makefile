@@ -13,11 +13,11 @@ kernel:
 	$(MAKE) -C $(KERNEL_DIR) -f Makefile piggyOS-kernel.bin
 
 run:
-	$(EMU) -m 1G\
-		   -cdrom piggyOS.iso\
-		   -rtc base=localtime\
+	$(EMU) -m 64M\
+		   -cdrom piggyOS.iso \
+		   -rtc base=localtime \
 		   -cpu pentium2\
-		   -serial mon:stdio
+		   -serial stdio
 
 initrd:
 	@mkdir -p ./iso/modules

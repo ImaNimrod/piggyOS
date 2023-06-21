@@ -8,8 +8,7 @@ static void tss_flush(uint16_t index) {
 }
 
 void tss_init(uint32_t index, uint32_t kss, uint32_t kesp) {
-    uint32_t base = (uint32_t) &tss;
-    gdt_set_descr(index, base, base + sizeof(tss_entry_t), 0xE9, 0);
+    gdt_set_descr(index, (uint32_t) &tss, (uint32_t) &tss + sizeof(tss_entry_t), 0xe9, 0);
 
     memset(&tss, 0, sizeof(tss_entry_t));
 

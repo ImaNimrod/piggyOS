@@ -22,50 +22,49 @@ typedef struct {
 	uint8_t abi;
 	uint8_t abiversion;
 	uint8_t unused[7];
-	uint16_t filetype; //This contains 0, 1 or 2 - 0 is none, 1 is relocatable file, 2 is executable file.
+	uint16_t filetype;
 	uint16_t machine;
-	uint32_t version; //ELF file version.
-	uint32_t entry; //ELF file entry point.
-	uint32_t phoff; //Program header table offset in file.
-	uint32_t shoff; //Section header table offset in the file.
-	uint32_t flags; //ELF file flags.
-	uint16_t hsize; //File header size.
-	uint16_t ph_ent_size; //Program header entry size.
-	uint16_t ph_ent_cnt; //Program header entry count.
-	uint16_t sh_ent_size; //Section header entry size.
-	uint16_t sh_ent_cnt; //Section header entry count.
-	uint16_t sh_name_index; //Index in section header table with section names
+	uint32_t version;
+	uint32_t entry;
+	uint32_t phoff;
+	uint32_t shoff;
+	uint32_t flags;
+	uint16_t hsize;
+	uint16_t ph_ent_size;
+	uint16_t ph_ent_cnt;
+	uint16_t sh_ent_size;
+	uint16_t sh_ent_cnt;
+	uint16_t sh_name_index;
 } __attribute__((packed)) elf_header_t;
 
 typedef struct {
-	uint32_t s_name;
-	uint32_t s_type;
-	uint32_t s_flags;
-	uint32_t s_addr;
-	uint32_t s_offset;
-	uint32_t s_size;
-	uint32_t s_link;
-	uint32_t s_info;
-	uint32_t s_addralign;
-	uint32_t s_entsize;
+	uint32_t	name; //Offset in section name table.
+	uint32_t	type; //Section type.
+	uint32_t	flags; //Section flags.
+	uint32_t	addr;
+	uint32_t	offset; //Actual section data offset in the file.
+	uint32_t	size;
+	uint32_t	link;
+	uint32_t	info;
+	uint32_t	addralign;
+	uint32_t	entsize;
 } __attribute__((packed)) elf_section_header_t;
 
 typedef struct {
-    uint32_t p_type;
-    uint32_t p_offset;
-    uint32_t p_vaddr;
-    uint32_t p_paddr;
-    uint32_t p_filesz;
-    uint32_t p_memsz;
-    uint32_t p_flags;
-    uint32_t p_align;
-    uint32_t p_entrysize;
+	uint32_t type; //Segment type: 0 - null, 1 - load to load_to address, 2 - requires dynamic linking, 3 - use interpreter, 4 - note.
+	uint32_t data_offset; //Segment data offset in the file.
+	uint32_t load_to; //Address in (virtual) memory on which segment data should be loaded to.
+	uint32_t undefined; //Undefined when using System V ABI.
+	uint32_t size_in_file; //Segment size in file.
+	uint32_t size_in_mem; //Segment size in memory.
+	uint32_t flags; //Flags: 1 - executable, 2 - writable, 4 - readable.
+	uint32_t align; //Alignment, must be power of 2.
 } __attribute__((packed)) elf_program_header_t;
 
 /* function declarations */
 uint8_t elf_check_header(elf_header_t* hdr);
 elf_header_t* elf_open(fs_node_t* node);
-elf_section_header_t* elf_get_section_header(elf_header_t* elf_file, uint32_t num);
-elf_program_header_t* elf_get_program_header(elf_header_t* elf_file, uint32_t num);
+void elf_hdr_info(elf_header_t* hdr);
+int run_elf_file(elf_header_t* hdr, int argc, char** argv);
 
 #endif

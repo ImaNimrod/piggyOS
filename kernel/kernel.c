@@ -22,6 +22,8 @@
 #include <sys/syscall.h>
 #include <system.h>
 
+extern void enter_usermode(void);
+
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n\t\t\t\tBy: James Steffes\n";
 
 void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_esp) {
@@ -57,7 +59,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
                 case MBOOT_TAG_TYPE_MODULE:
                     module_start = ((struct mboot_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
                     module_size = (((struct mboot_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS) - module_start;
-                    ramdisk = (uint8_t*) 0xc00000;
+                    ramdisk = (uint8_t*) 0x800000;
                     klog(LOG_OK, "Copying ramdisk to usable memory...\n");
                     memcpy(ramdisk, (uint8_t*) module_start, module_size);
                     break;
@@ -104,6 +106,22 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     if (ramdisk) {
         allocate_region(kernel_page_dir, (uint32_t) ramdisk, (uint32_t) ramdisk + module_size, 1, 1, 0);
         tarfs_init((uint32_t) ramdisk, (uint32_t) ramdisk + module_size);
+    }
+
+    /* initialize syscall handler */
+    syscalls_init();
+
+    fs_node_t* dev = finddir_fs(get_fs_root(), "dev");
+    if (dev) {
+        fs_node_t* rand = finddir_fs(dev, "rand");
+        if (rand) {
+            uint8_t* buffer = kmalloc(80);
+            read_fs(rand, 0, 80, buffer);
+            for (int i = 0; i < 80; i++)
+                kprintf("%c", buffer[i]);
+            kfree(buffer);
+            kprintf("\n");
+        }
     }
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);

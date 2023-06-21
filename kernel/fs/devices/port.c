@@ -1,7 +1,7 @@
 #include <drivers/io_port.h>
 #include <fs/devfs.h>
 
-static size_t read_port(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
+static ssize_t read_port(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {
 	switch (size) {
 		case 1:
 			buf[0] = inb(offset);
@@ -21,7 +21,7 @@ static size_t read_port(fs_node_t* node, uint32_t offset, size_t size, uint8_t* 
 	return size;
 }
 
-static size_t write_port(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf) {
+static ssize_t write_port(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {
 	switch (size) {
 		case 1:
 			outb(offset, buf[0]);
