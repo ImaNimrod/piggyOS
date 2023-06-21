@@ -13,3 +13,4 @@ is in the early phases of development and many features/fixes will be coming in 
 - [ ] Loading ELF User Mode programs into memory and run them
 - [ ] Redo / make better timer interface
 - [ ] Syncronization primatives (mutex, spinlock)
+- [ ] User mode shell with number of commands
