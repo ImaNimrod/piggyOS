@@ -12,11 +12,11 @@ typedef struct {
     uint8_t checksum;
     char oem_id[6];
     uint8_t revision;
-    uint32_t rsdt_address;
+    uintptr_t rsdt_address;
 } __attribute__((packed)) rsdp_t;
 
 typedef struct {
-    char signature[4];
+    uint32_t signature;
     uint32_t length;
     uint8_t revision;
     uint8_t checksum;
@@ -25,7 +25,12 @@ typedef struct {
     uint32_t oem_revision;
     uint32_t creator_id;
     uint32_t creator_revision;
-} __attribute__((packed)) acpi_header_t;
+} acpi_header_t;
+
+typedef struct {
+    acpi_header_t header;
+    uint32_t sdt_entries[];
+} rsdt_t;
 
 typedef struct  {
     acpi_header_t header;
@@ -37,7 +42,7 @@ typedef struct  {
     uint32_t smi_cmd;
     uint8_t acpi_enable;
     uint8_t acpi_disable;
-} __attribute__((packed)) fadt_t;
+} fadt_t;
 
 /* function declarations */
 void acpi_init(rsdp_t* rsdp);

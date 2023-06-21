@@ -200,7 +200,7 @@ void vmm_init(void) {
     switch_page_directory(kernel_page_dir, 0);
 
     allocate_region(kernel_page_dir, 0, 0x10000, 0, 1, 1);
-    allocate_region(kernel_page_dir, 0xffe0000, 0xffeffff, 1, 1, 0);
+    allocate_region(kernel_page_dir, 0xffe0000, 0xffeffff, 0, 1, 1);
 
     enable_paging();
 
