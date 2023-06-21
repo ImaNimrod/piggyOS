@@ -13,7 +13,7 @@ is in the early phases of development and many features/fixes will be coming in 
 ## coming features
 - [ ] Multitasking (not fully featured as of 8/27/22)
 - [X] VFS and devFS working
-- [X] EXT2 ramdisk support
+- [X] USTAR ramdisk support
 - [x] Improved memory management system
 - [ ] Switch to user mode
 - [X] Syscalls
