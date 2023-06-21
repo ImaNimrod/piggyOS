@@ -49,14 +49,13 @@ static void keyboard_irq_handler(regs_t *r) {
     } else {
         kprintf("%c", lower_map[scancode]);
     }
-    irq_ack(KEYBOARD_IRQ);
 
     (void) r;
 }
 
 void keyboard_init(void) {
     /* installs keyboard_handler to IRQ1 */ 
-    irq_install_handler(KEYBOARD_IRQ, keyboard_irq_handler);
+    int_install_handler(32 + KEYBOARD_IRQ, keyboard_irq_handler);
     klog(LOG_OK, "PS/2 Keyboard device initialized\n");
 }
 

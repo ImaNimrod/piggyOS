@@ -1,7 +1,7 @@
 #ifndef _KERNEL_VMM_H
 #define _KERNEL_VMM_H
 
-#include <cpu/exception.h>
+#include <cpu/isr.h>
 #include <display.h>
 #include <memory/kheap.h>
 #include <memory/pmm.h>

@@ -1,7 +1,7 @@
 #ifndef _KERNEL_KEYBOARD_H
 #define _KERNEL_KEYBOARD_H
 
-#include <cpu/irq.h>
+#include <cpu/isr.h>
 #include <display.h>
 #include <drivers/io_port.h>
 #include <stdbool.h>

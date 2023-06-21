@@ -1,7 +1,5 @@
 #include <cpu/cpuid.h>
 #include <cpu/desc_tbls.h>
-#include <cpu/exception.h>
-#include <cpu/irq.h>
 #include <display.h>
 #include <drivers/ata.h>
 #include <drivers/keyboard.h>
@@ -23,12 +21,6 @@
 
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n";
 
-void user_process() {
-    while(1) 
-        for(int i = 0; i < 10000; i++) 
-            for(int j= 0; j < 2000; j++)
-}
-
 void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t inital_esp) {
     #ifdef TEXTMODE
     vga_clear();
@@ -47,8 +39,6 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     gdt_init();
     idt_init();
     tss_init(5, 0x10, 0);
-    exception_init();
-    irq_init();
 
     /* initialize physical memory manager */
     pmm_init(1096 * M);
@@ -65,16 +55,15 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     rtc_init();
     ata_init();
 
-    /* initialize multitasking scheduler */
+    /* initalize multitasking */
     tasking_init();
 
     /* initialize syscalls */
     syscalls_init();
 
-    tss_set_stack(0x10, inital_esp);
-
-    create_task("user_process", &user_process);
-    create_task("user_process2", &user_process2);
+    // uint32_t a, num;
+    // num = 0;
+    // __asm__ volatile("int $0x7f" : "=a" (a) : "0" (num));
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s", welecome_banner);

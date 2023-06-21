@@ -1,7 +1,7 @@
 #ifndef _KERNEL_RTC_H
 #define _KERNEL_RTC_H
 
-#include <cpu/irq.h>
+#include <cpu/isr.h>
 #include <display.h>
 #include <drivers/io_port.h>
 #include <stdint.h>

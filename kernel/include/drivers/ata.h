@@ -1,7 +1,7 @@
 #ifndef _KERNEL_ATA_H
 #define _KERNEL_ATA_H
 
-#include <cpu/irq.h>
+#include <cpu/isr.h>
 #include <drivers/io_port.h>
 #include <display.h>
 #include <memory/kheap.h>

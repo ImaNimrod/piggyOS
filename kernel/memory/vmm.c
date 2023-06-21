@@ -202,7 +202,7 @@ void vmm_init(void) {
 
     enable_paging();
 
-	isrs_install_handler(14, &page_fault);
+	int_install_handler(0xe, &page_fault);
 
     klog(LOG_OK, "Virtual Memory Manager initialized\n");
 }

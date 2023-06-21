@@ -3,42 +3,45 @@
 uint32_t num_syscalls;
 
 static int sys_gettid(void) {
-    return (int) get_tid;
+    kprintf("hello");
+    return 0;
 }
 
 static uintptr_t syscall_table[] = {
-   (uintptr_t) &sys_gettid,
+    (uintptr_t) &sys_gettid,
+    0,
 };
 
 static void syscall_dispatcher(regs_t* r) {
-    if (r->eax >= num_syscalls && syscall_table[r->eax]) {
-        uintptr_t ptr = syscall_table[r->eax];
+    if(r->eax >= num_syscalls) {
+        klog(LOG_ERR, "Invalid syscall number: %d\n", r->eax);
+        return;
+    }
 
-        memcpy(&saved_context, r, sizeof(regs_t));
+    uintptr_t location = syscall_table[r->eax];
 
-        uint32_t ret;
-        __asm__ volatile (
-            "push %1\n"
-            "push %2\n"
-            "push %3\n"
-            "push %4\n"
-            "push %5\n"
-            "call *%6\n"
-            "pop %%ebx\n"
-            "pop %%ebx\n"
-            "pop %%ebx\n"
-            "pop %%ebx\n"
-            "pop %%ebx\n"
-            : "=a" (ret) : "r" (r->edi), "r" (r->esi), "r" (r->edx), "r" (r->ecx), "r" (r->ebx), "r" (ptr)
-        );
 
-        r->eax = ret;
-    } 
-    klog(LOG_ERR, "Invalid syscall number: %d\n", r->eax);
+    int32_t ret;
+    __asm__ volatile (" \
+            push %1; \
+            push %2; \
+            push %3; \
+            push %4; \
+            push %5; \
+            call *%6; \
+            pop %%ebx; \
+            pop %%ebx; \
+            pop %%ebx; \
+            pop %%ebx; \
+            pop %%ebx; \
+            " : "=a" (ret) : "r" (r->edi), "r" (r->esi), "r" (r->edx), "r" (r->ecx), "r" (r->ebx), "r" (location)
+    );
+
+    r->eax = ret;
 }
 
 void syscalls_init(void) {
     klog(LOG_OK, "Initializing syscall handler\n");
-    for(num_syscalls = 0; syscall_table[num_syscalls] != 0; num_syscalls++);
-    isrs_install_handler(0x7f, syscall_dispatcher);
+    for(num_syscalls = 0; syscall_table[num_syscalls]; num_syscalls++);
+    int_install_handler(0x7f, syscall_dispatcher);
 }

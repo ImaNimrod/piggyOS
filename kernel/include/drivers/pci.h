@@ -1,11 +1,11 @@
 #ifndef _KERNEL_PCI_H
 #define _KERNEL_PCI_H
 
+#include <display.h>
+#include <drivers/io_port.h>
+#include <memory/kheap.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <display.h>
-#include <memory/kheap.h>
-#include <drivers/io_port.h>
 
 #define PCI_CONFIG_ADDRESS 0xCF8
 #define PCI_CONFIG_DATA    0xCFC

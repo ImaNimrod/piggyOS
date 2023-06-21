@@ -1,22 +1,19 @@
 #ifndef _KERNEL_TASKING_H
 #define _KERNEL_TASKING_H
 
-#include <cpu/desc_tbls.h>
 #include <display.h>
-#include <dsa/list.h>
 #include <memory/kheap.h>
 #include <memory/vmm.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <system.h>
+#include <stddef.h>
 
-#define TASK_STATE_ALIVE 0
-#define TASK_STATE_ZOMBIE 1
-#define TASK_STATE_DEAD 2
+#define TASK_STATUS_ALIVE 0
+#define TASK_STATUS_ZOMBIE 1
+#define TASK_STATUS_DEAD 2
 
-typedef uint16_t tid_t;
+typedef uint32_t tid_t;
 
-typedef struct {
+typedef struct context {
     uint32_t eax; // 0
     uint32_t ecx; // 4
     uint32_t edx; // 8
@@ -30,26 +27,16 @@ typedef struct {
     uint32_t eip; //40
 } context_t;
 
-typedef struct task {
-	char name[128];
-	tid_t tid;
-    context_t regs;
-    node_t* self;
-    void* stack;
+typedef struct task  {
+    char name[128];    
+    tid_t tid;  
+    context_t* regs;
     page_directory_t* page_dir;
-    uint32_t state;
+    struct task *prev, *next;
 } task_t;
 
-extern page_directory_t* kernel_page_dir;
-extern tss_entry_t tss;
-
-/* defined in usermode.asm */
-extern void user_regs_switch(context_t* regs2);
-extern void kernel_regs_switch(context_t* regs2);
-
+/* function declarations */
 void tasking_init(void);
-void create_task(const char* name, void *loc);
-tid_t get_tid(void);
+task_t* task_create(const char* name, uintptr_t location);
 
 #endif
-
