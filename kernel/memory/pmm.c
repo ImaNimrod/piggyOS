@@ -72,7 +72,7 @@ void pmm_init(struct mboot2_begin* mb2) {
         bitmap_addr = (uintptr_t) &kernel_end_phys;
 
     /* check to see if kernel and its modules are too large */
-    if (bitmap_addr > LOAD_MEMORY_ADDRESS + 0x00400000)
+    if (bitmap_addr > KERN_BASE + 0x00400000)
        kpanic("kernel is too large for initial 4mb idenity mapping\n");
 
     struct mboot2_tag_basic_meminfo* meminfo = (struct mboot2_tag_basic_meminfo*) mboot2_find_tag(mb2, MBOOT2_TAG_BASIC_MEMINFO);
@@ -83,7 +83,7 @@ void pmm_init(struct mboot2_begin* mb2) {
     max_blocks = mem_size / PMM_BLOCK_SIZE;
 
     /* place pmm_bitmap after kernel and its modules */
-    pmm_bitmap = (uint32_t*) align_to(bitmap_addr + LOAD_MEMORY_ADDRESS, 4);
+    pmm_bitmap = (uint32_t*) align_to(bitmap_addr + KERN_BASE, 4);
     pmm_bitmap_size = max_blocks / 8;
 
     memset(pmm_bitmap, 0, pmm_bitmap_size);

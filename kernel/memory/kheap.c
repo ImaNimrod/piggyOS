@@ -9,9 +9,10 @@ void* heap_end;
 void* heap_curr;
 void* heap_max;
 
-bool kheap_enabled = false;
+uint8_t kheap_enabled = 0;
 
 extern page_directory_t* kernel_page_dir;
+
 uint32_t placement_address = (uint32_t) &kernel_end_virt;
 
 void* kmalloc_cont(uint32_t sz, int align, uint32_t *phys) {
@@ -92,7 +93,7 @@ void kheap_init(void* start, void* end, void* max) {
     heap_end = end;
     heap_max = max;
     heap_curr = start;
-    kheap_enabled = true;
+    kheap_enabled = 1;
     klog(LOG_OK, "Kernel Heap initialized\n");
 }
 

@@ -7,9 +7,10 @@ extern void *heap_start, *heap_end, *heap_max, *heap_curr;
 extern int kheap_enabled;
 
 uint8_t* temp_mem;
-bool paging_enabled = false;
+uint8_t paging_enabled = 0;
 
 page_directory_t* kernel_page_dir = {0};
+page_directory_t* current_page_dir = {0};
 
 static void* dumb_kmalloc(uint32_t size, int align) {
     void* ret = temp_mem;
@@ -21,7 +22,7 @@ static void* dumb_kmalloc(uint32_t size, int align) {
 
 void* virt2phys(page_directory_t* dir, void* virtual_addr) {
     if(!paging_enabled)
-        return (void*) ((uint8_t*) virtual_addr - LOAD_MEMORY_ADDRESS);
+        return (void*) ((uint8_t*) virtual_addr - KERN_BASE);
 
     uint32_t page_dir_idx = PAGEDIR_INDEX(virtual_addr), page_tbl_idx = PAGETBL_INDEX(virtual_addr), page_frame_offset = PAGEFRAME_INDEX(virtual_addr);
     if(!dir->ref_tables[page_dir_idx]) {
@@ -123,13 +124,10 @@ void free_region(page_directory_t* dir, uint32_t start_va, uint32_t end_va, int 
     }
 }
 
-void switch_page_directory(page_directory_t* page_dir, uint32_t phys) {
-    uint32_t t;
-    if(!phys)
-        t = (uint32_t) virt2phys(boot_page_dir, page_dir);
-    else
-        t = (uint32_t) page_dir;
+void switch_page_directory(page_directory_t* page_dir) {
+    uint32_t t = (uint32_t) virt2phys(current_page_dir, (void*) page_dir->tables);
     __asm__ volatile("mov %0, %%cr3" :: "r"(t));
+    current_page_dir = page_dir;
 }
 
 page_table_t* copy_page_table(page_directory_t* src_page_dir, page_directory_t* dst_page_dir, uint32_t page_dir_idx, page_table_t* src) {
@@ -157,7 +155,7 @@ page_table_t* copy_page_table(page_directory_t* src_page_dir, page_directory_t* 
 
 void copy_page_directory(page_directory_t* dst, page_directory_t* src) {
     for(uint32_t i = 0; i < 1024; i++) {
-        if(kernel_page_dir->ref_tables[i] == src->ref_tables[i]) {
+        if (kernel_page_dir->ref_tables[i] == src->ref_tables[i]) {
             dst->tables[i] = src->tables[i];
             dst->ref_tables[i] = src->ref_tables[i];
         } else {
@@ -182,7 +180,7 @@ static void enable_paging(void) {
     SET_PGBIT(cr0);
     __asm__ volatile("mov %0, %%cr0" :: "r"(cr0));
 
-    paging_enabled = true;
+    paging_enabled = 1;
 }
 
 void vmm_init(void) {
@@ -191,22 +189,22 @@ void vmm_init(void) {
     kernel_page_dir = dumb_kmalloc(sizeof(page_directory_t), 1);
     memset(kernel_page_dir, 0, sizeof(page_directory_t));
 
-    uint32_t i = LOAD_MEMORY_ADDRESS;
-    while(i < LOAD_MEMORY_ADDRESS + 4 * M) { /* map kernel 4Mb */
+    uint32_t i = KERN_BASE;
+    while(i < KERN_BASE + 4 * M) { /* map kernel 4Mb */
         allocate_page(kernel_page_dir, i, 0, 1, 0);
         i = i + PAGE_SIZE;
     }
 
-    i = LOAD_MEMORY_ADDRESS + 4 * M;
-    while(i < LOAD_MEMORY_ADDRESS + 4 * M + KHEAP_INITIAL_SIZE) {
+    i = KERN_BASE + 4 * M;
+    while(i < KERN_BASE + 4 * M + KHEAP_INITIAL_SIZE) {
         allocate_page(kernel_page_dir, i, 0, 1, 1);
         i = i + PAGE_SIZE;
     }
 
-    switch_page_directory(kernel_page_dir, 0);
-    enable_paging();
-
     allocate_region(kernel_page_dir, 0, 0x10000, 1, 1, 0);
+
+    switch_page_directory(kernel_page_dir);
+    enable_paging();
 
 	int_install_handler(14, &page_fault);
 

@@ -3,8 +3,10 @@
 
 #include <cpu/isr.h>
 #include <display.h>
+#include <memory/vmm.h>
 #include <stdint.h>
 #include <system.h>
+#include <sys/elf.h>
 #include <sys/task.h>
 
 #define SYS_GETTID      1
@@ -14,7 +16,7 @@
 
 extern int sys_gettid(void);
 extern int sys_yield(void);
-extern int sys_exit(void);
+extern int sys_exit(int code);
 
 /* function declarations */
 void syscalls_init(void);

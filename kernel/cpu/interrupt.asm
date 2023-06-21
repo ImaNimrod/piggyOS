@@ -1,5 +1,7 @@
 bits 32
 
+global fork_ret
+
 %macro ISR_ERROR_CODE 1
   global isr%1
   isr%1:
@@ -84,7 +86,7 @@ handle_isr_common:
     push fs
     push gs
 
-    mov ax, 0x10 ; load the kernel data segment descriptor
+    mov ax, 0x10 ; load kernel data segment
     mov ds, ax
     mov es, ax
     mov fs, ax
@@ -101,8 +103,8 @@ handle_isr_common:
     pop es
     pop ds
     popa
-    add esp, 8     ; deallocate the error code and the interrupt number
-    iret           ; pops CS, EIP, EFLAGS and also SS, and ESP if privilege change occurs
+    add esp, 8     ; skip error code and the interrupt number
+    iret           ; cs, eip, eflags and also ss, and esp if privilege change occurs
 
 extern irq_handler
 
@@ -113,7 +115,7 @@ handle_irq_common:
     push fs
     push gs
 
-    mov ax, 0x10 ; load the kernel data segment descriptor
+    mov ax, 0x10 ; load kernel data segment 
     mov ds, ax
     mov es, ax
     mov fs, ax
@@ -130,5 +132,5 @@ handle_irq_common:
     pop es
     pop ds
     popa
-    add esp, 8     ; deallocate the error code and the interrupt number
-    iret           ; pops CS, EIP, EFLAGS and also SS, and ESP if privilege change occurs
+    add esp, 8     ; skip error code and the interrupt number
+    iret           ; cs, eip, eflags and also ss, and esp if privilege change occurs

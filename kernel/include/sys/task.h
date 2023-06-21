@@ -34,24 +34,25 @@ typedef struct {
     void* kstack;
 	void* kstack_mem;
     page_directory_t* page_dir;
+    regs_t* ifr;
 
     __attribute__((aligned(16))) uint8_t* fpu_state; // space for fpu/sse/mmx registers 
     uint8_t fpu_used;   // have we used the fpu yet
 
     list_node_t* self;
 
-    char name[16];
     tid_t tid;
     enum task_state state;
-
+    int exit_code;
     uint32_t usage;
 } task_t;
 
 /* function declarations */
-void task_create(char* name, uintptr_t func);
-void task_exit(void);
+task_t* task_create(uintptr_t func);
+void task_destroy(task_t* t);
+void task_exit(int code);
 void schedule(void);
-void multitasking_init(char* name, uintptr_t func);
+void multitasking_init(uintptr_t func);
 
 extern void context_switch(task_t* next);
 

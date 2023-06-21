@@ -16,7 +16,7 @@ header_end:
 section .bss
 align 4
 stack_bottom:
-    resb 0x4000
+    resb 0x1000
 stack_top:
 
 KERNEL_VIRTUAL_BASE equ 0xc0000000

@@ -3,14 +3,13 @@
 
 #include <display.h>
 #include <memory/vmm.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <system.h>
 
-#define KHEAP_START         (uint8_t*) LOAD_MEMORY_ADDRESS + 0x00400000 
+#define KHEAP_START         (uint8_t*) KERN_BASE + 0x00400000 
 #define KHEAP_INITIAL_SIZE  8 * M
-#define KHEAP_MAX_ADDRESS   (uint8_t*) LOAD_MEMORY_ADDRESS + 0x0FFFFFFF
+#define KHEAP_MAX_ADDRESS   (uint8_t*) KERN_BASE + 0x0FFFFFFF
 #define KHEAP_MIN_SIZE      4 * M
 
 #define OVERHEAD (sizeof(struct Block) + sizeof(size_t))

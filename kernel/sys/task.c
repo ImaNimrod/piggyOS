@@ -4,27 +4,39 @@ task_t* current_task;
 list_t* task_list;
 
 static volatile tid_t next_tid = 0;
-static uint32_t prev_ticks;
-extern page_directory_t* kernel_page_dir;
 
-void task_create(char* name, uintptr_t func) {
+static uint32_t prev_ticks;
+static uint32_t curr_ticks;
+
+extern page_directory_t* current_page_dir;
+
+task_t* task_create(uintptr_t func) {
     task_t* t = (task_t*) kcalloc(sizeof(task_t), 1);
 
-    strncpy(t->name, name, 16);
     t->tid = next_tid++;
     t->state = TASK_READY;
+    t->exit_code = 0;
 
-    /* kernel task can just use the existing kernel_page_dir */
-    if (t->tid == 0) 
-        t->page_dir = kernel_page_dir;
+    t->ifr = NULL;
+
+    t->page_dir = (page_directory_t*) kmalloc_a(sizeof(page_directory_t));
+    copy_page_directory(t->page_dir, current_page_dir);
 
     t->kstack_mem = kmalloc(KSTACK_SIZE);
     if (!t->kstack_mem) {
         kfree(t->kstack_mem);
-        return;
+        return NULL;
     }
     
     t->kstack = (uint8_t*) t->kstack_mem + KSTACK_SIZE - sizeof(struct context);
+
+    if (current_task->ifr) {
+        regs_t* ifr2 = ((regs_t*) t->kstack) - 1; 
+
+        t->kstack = (uint32_t*) ifr2;
+        *ifr2 = *current_task->ifr;
+        ifr2->eax = 0;
+    }
 
     struct context* ctx = (struct context*) t->kstack;
 
@@ -35,18 +47,29 @@ void task_create(char* name, uintptr_t func) {
     t->self = list_insert_front(task_list, t);
 
     schedule();
+
+    return t;
 }
 
-void task_exit(void) {
+void task_destroy(task_t* t) {
+    list_remove_node(task_list, t->self);
+
+    kfree(t->kstack_mem);
+    kfree(t->page_dir);
+    kfree(t);
+}
+
+void task_exit(int code) {
     task_t* t = current_task;
 
+    t->exit_code = code;
     t->state = TASK_ZOMBIE;
 
     schedule();
 }
 
 void schedule(void) {
-    if (!task_list && !current_task)
+    if (!task_list)
         return;
 
     /* this only happens for the first task */
@@ -67,11 +90,7 @@ _pick_next:
     
     /* if we picked a dead task, destroy it and try again */
     if (next->state == TASK_ZOMBIE) {
-        list_remove_node(task_list, next->self);
-
-        kfree(next->kstack_mem);
-        kfree(next);
-
+        task_destroy(next);
         goto _pick_next;
     }
 
@@ -80,18 +99,20 @@ _pick_next:
     }
 
     /* update time used by current_task */
-    current_task->usage += (get_ticks() - prev_ticks);
-    prev_ticks = get_ticks();
+    curr_ticks = get_ticks();
+    current_task->usage += curr_ticks - prev_ticks;
+    prev_ticks = curr_ticks;
 
     tss_set_stack(0x10, (uint32_t) next->kstack);
+    switch_page_directory(next->page_dir);
     context_switch(next);
 }
 
-void multitasking_init(char* name, uintptr_t func) {
+void multitasking_init(uintptr_t func) {
     klog(LOG_OK, "Initializing multitasking\n");
 
     task_list = list_create();
     
     /* initial kernel idle task */
-    task_create(name, func);
+    task_create(func);
 }

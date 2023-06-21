@@ -1,11 +1,14 @@
 #include <drivers/timer.h>
 
+extern task_t* current_task;
+
 uint32_t timer_ticks = 0;
 
 static void timer_irq_handler(regs_t* r) {
     (void) r;
 
     timer_ticks++;
+
     schedule();
 }
 

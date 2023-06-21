@@ -1,6 +1,6 @@
 #include <sys/syscall.h>
 
-// syscalls dealing with multitasking
+/* syscalls dealing with multitasking */
 
 extern task_t* current_task;
 
@@ -13,7 +13,8 @@ int sys_yield(void) {
     return 0;
 }
 
-int sys_exit(void) {
-    task_exit();
+int sys_exit(int code) {
+    task_exit(code);
+    while(1);
     return 0; // we never reach this
 }

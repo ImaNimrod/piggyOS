@@ -25,17 +25,14 @@
 
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n\t\t\t\tBy: James Steffes\n";
 
-extern void switch_to_user(uint32_t esp, uint32_t eip);
-
-void test(void) {
-    for(;;);
-}
+extern void init(void);
 
 void stage2(void) {
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
 
-    task_create("test", (uintptr_t) &test);
+    // if (!task_create((uintptr_t) &init))
+    //     kpanic("unable to start init system\n");
 
     /* idle forever */
     while (1) {
@@ -66,8 +63,8 @@ void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2) {
         do {
             switch(tag->type) {
                 case MBOOT2_TAG_MODULE:
-                    module_start = ((struct mboot2_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
-                    module_end = ((struct mboot2_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS;
+                    module_start = ((struct mboot2_tag_module*) tag)->mod_start + KERN_BASE;
+                    module_end = ((struct mboot2_tag_module*) tag)->mod_end + KERN_BASE;
                     break;
                 default: break;
             }
@@ -116,5 +113,5 @@ void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2) {
     syscalls_init();
 
     /* initialize multiasking */ 
-    multitasking_init("kidle", (uintptr_t) &stage2);
+    multitasking_init((uintptr_t) &stage2);
 }

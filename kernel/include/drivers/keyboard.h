@@ -4,7 +4,6 @@
 #include <cpu/isr.h>
 #include <display.h>
 #include <drivers/io_port.h>
-#include <stdbool.h>
 #include <stdint.h>
 
 #define PS2_DATA 0x60

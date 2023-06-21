@@ -98,6 +98,6 @@ typedef struct {
 
 /* function declarations */
 uint8_t elf_check_header(elf_header_t* hdr);
-int elf_run(fs_node_t* node);
+int elf_load(fs_node_t* node);
 
 #endif

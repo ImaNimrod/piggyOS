@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <system.h>
 
-typedef void (*isr_function)(regs_t*);
+typedef void (*isr_function) (regs_t*);
 
 void int_install_handler(uint8_t num, isr_function handler);
 void int_uninstall_handler(uint8_t num);

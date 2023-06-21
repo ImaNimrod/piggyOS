@@ -1,3 +1,3 @@
 #include <sys/syscall.h>
 
-// syscalls dealing with file system operations
+/* syscalls dealing with file system operations */

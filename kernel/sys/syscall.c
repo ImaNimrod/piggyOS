@@ -1,5 +1,7 @@
 #include <sys/syscall.h>
 
+extern task_t* current_task;
+
 static int sys_rpl3test(void) {
     kprintf("hello from usermode (rpl=3)\n");
     return 0;
@@ -13,14 +15,20 @@ static uintptr_t syscall_table[] = {
 };
 
 static void syscall_dispatcher(regs_t* r) {
-    if (r->eax <= 0 || r->eax > (NUM_ELEMENTS(syscall_table) - 1)) {
-        klog(LOG_ERR, "Invalid syscall number: %d\n", r->eax);
+    (void) r;
+
+    regs_t* ifr = current_task->ifr;
+
+    if (ifr->eax <= 0 || ifr->eax > (NUM_ELEMENTS(syscall_table) - 1)) {
+        klog(LOG_ERR, "Invalid syscall number: %d\n", ifr->eax);
+        ifr->eax = -1;
         return;
     }
 
-    uintptr_t location = syscall_table[r->eax];
+    uintptr_t location = syscall_table[ifr->eax];
     if (!location) {
-        klog(LOG_ERR, "Invalid syscall number: %d\n", r->eax);
+        klog(LOG_ERR, "Invalid syscall number: %d\n", ifr->eax);
+        ifr->eax = -1;
         return;
     }
 
@@ -37,10 +45,10 @@ static void syscall_dispatcher(regs_t* r) {
             pop %%ebx; \
             pop %%ebx; \
             pop %%ebx; \
-            " : "=a" (ret) : "r" (r->edi), "r" (r->esi), "r" (r->edx), "r" (r->ecx), "r" (r->ebx), "r" (location)
+            " : "=a" (ret) : "r" (ifr->edi), "r" (ifr->esi), "r" (ifr->edx), "r" (ifr->ecx), "r" (ifr->ebx), "r" (location)
     );
 
-    r->eax = ret;
+    ifr->eax = ret;
 }
 
 void syscalls_init(void) {
