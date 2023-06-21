@@ -24,7 +24,7 @@ static void gdt_set(gdt_ptr_t* gdt_ptr) {
     (void) gdt_ptr;
 }  
 
-void init_gdt(void) {
+void gdt_init(void) {
     gdt_set_descr(&gdt[0], 0, 0, 0, 0);                // null entry 
     gdt_set_descr(&gdt[1], 0, 0xFFFFFFFF,   0x9A, 0xCF); // kernel code entry
     gdt_set_descr(&gdt[2], 0, 0xFFFFFFFF,   0x92, 0xCF); // kernel data entry

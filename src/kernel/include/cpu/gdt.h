@@ -20,6 +20,6 @@ typedef struct gdt_ptr {
 } __attribute__((packed)) gdt_ptr_t;
 
 /* function declarations */
-void init_gdt(void);
+void gdt_init(void);
 
 #endif

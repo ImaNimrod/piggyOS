@@ -10,6 +10,6 @@
 #define KEYBOARD_IRQ 1
 
 /*function declarations */
-void init_keyboard(void);
+void keyboard_init(void);
 
 #endif 

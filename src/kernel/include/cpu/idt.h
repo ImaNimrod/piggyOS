@@ -28,7 +28,7 @@ typedef struct regs {
 } regs_t;
 
 /* function declarations */
-void init_idt(void);
+void idt_init(void);
 void idt_set_descr(uint8_t num, uint32_t base, uint8_t flags);
 
 #endif

@@ -39,7 +39,7 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
-void init_isr(void);
+void isr_init(void);
 void fault_handler(regs_t *r);
 
 #endif

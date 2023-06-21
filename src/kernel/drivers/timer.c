@@ -23,7 +23,7 @@ void timer_wait(uint32_t ticks) {
     while(timer_ticks < eticks);
 }
 
-void init_timer(void) {
+void timer_init(void) {
     /* installs 'timer_handler' to IRQ0 */
     vga_puts("initializing PIT...\n");
     irq_install_handler(TIMER_IRQ, timer_handler);

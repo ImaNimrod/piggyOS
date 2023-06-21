@@ -44,4 +44,6 @@ clean:
 	rm -rf piggyOS.iso
 
 run:
-	qemu-system-i386 -cdrom piggyOS.iso -m 4G
+	qemu-system-i386 -cdrom piggyOS.iso\
+					 -m 16M\
+					 -rtc base=localtime

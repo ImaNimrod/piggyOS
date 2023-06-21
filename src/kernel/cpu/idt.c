@@ -15,7 +15,7 @@ static void idt_set(void) {
     __asm__ volatile("lidtl (idt_ptr)"); 
 }
 
-void init_idt(void) {
+void idt_init(void) {
     idt_ptr.limit = sizeof(idt_descr_t) * IDT_LEN - 1;
     idt_ptr.base = (uintptr_t) &idt;
 

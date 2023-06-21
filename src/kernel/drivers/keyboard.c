@@ -54,7 +54,7 @@ static void keyboard_handler(regs_t *r) {
     (void) r;
 }
 
-void init_keyboard(void) {
+void keyboard_init(void) {
     /* installs keyboard_handler to IRQ1 */ 
     vga_puts("initializing PS/2 keyboard...\n");
     irq_install_handler(KEYBOARD_IRQ, keyboard_handler);

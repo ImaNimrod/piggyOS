@@ -18,7 +18,7 @@ static void irq_remap(void) {
     outb(PIC2_DATA, 0x0);
 }
 
-void init_irq(void) {
+void irq_init(void) {
     irq_remap();
 
     idt_set_descr(32, (unsigned)irq0,  0x8E);

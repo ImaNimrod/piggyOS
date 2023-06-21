@@ -30,7 +30,7 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
-void init_irq(void);
+void irq_init(void);
 void irq_install_handler(uint8_t irq, void (*handler)(regs_t *r));
 void irq_uninstall_handler(uint8_t irq);
 void irq_ack(uint8_t irq);

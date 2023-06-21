@@ -1,6 +1,6 @@
 #include <cpu/isr.h>
 
-void init_isr(void) {
+void isr_init(void) {
 	idt_set_descr(0,  (unsigned)isr0,  0x8E);
 	idt_set_descr(1,  (unsigned)isr1,  0x8E);
 	idt_set_descr(2,  (unsigned)isr2,  0x8E);
@@ -80,6 +80,7 @@ void fault_handler(regs_t *r) {
         vga_set_color(VGA_COLOR_RED, VGA_COLOR_LIGHT_GRAY);
         vga_puts("recieved interrupt: ");
 		vga_puts(exception_messages[r->int_no]);
+        vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
     }
     
     __asm__ volatile("sti");

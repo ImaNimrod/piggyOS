@@ -15,7 +15,7 @@
 #define TIMER_IRQ 0
 
 /* function declatations */
-void init_timer(void);
+void timer_init(void);
 void timer_wait(uint32_t ticks);
 
 #endif

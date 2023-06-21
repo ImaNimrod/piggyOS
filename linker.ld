@@ -4,8 +4,6 @@ SECTIONS
 {
     . = 1M;
 
-	kernel_start = .;
-
     .multiboot_header : {
         *(.multiboot_header)
     }
@@ -28,6 +26,5 @@ SECTIONS
 		*(.bss)
 	}
 
-	kernel_end = .;
+    kernel_end = .;
 }
-
