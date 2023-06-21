@@ -21,6 +21,5 @@
 void pmm_init(size_t mem_size);
 uint32_t allocate_block();
 void free_block(size_t blk_num);
-uint32_t first_free_block();
 
 #endif

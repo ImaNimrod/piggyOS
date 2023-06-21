@@ -21,7 +21,6 @@ SECTIONS {
 	{
 		kernel_data_start = .;
 		*(.data .data.*)
-		*(.symbols)
 		kernel_data_end = .;
 	}
 
@@ -33,4 +32,12 @@ SECTIONS {
 	}
 
     kernel_end = .;
+
+    /DISCARD/ :
+	{
+		*(.comment)
+        *(.eh_frame)
+		*(.note.gnu.build-id)
+	}
+
 }

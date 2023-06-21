@@ -20,6 +20,15 @@ void pmm_init(size_t mem_size) {
     klog(LOG_OK, "Physical Memory Manager initialized\n");
 }
 
+static uint32_t first_free_block(void) {
+    for(size_t i = 0; i < total_blocks; i++) {
+        if(!ISSET(i))
+            return i;
+    }
+    klog(LOG_WARN, "%s: running out of free blocks\n", __func__);
+    return (uint32_t) -1;
+}
+
 uint32_t allocate_block(void) {
     uint32_t free_block = first_free_block();
     SETBIT(free_block);
@@ -30,11 +39,3 @@ void free_block(size_t blk_num) {
     CLEARBIT(blk_num);
 }
 
-uint32_t first_free_block(void) {
-    for(size_t i = 0; i < total_blocks; i++) {
-        if(!ISSET(i))
-            return i;
-    }
-    klog(LOG_WARN, "%s: running out of free blocks\n", __func__);
-    return (uint32_t) -1;
-}

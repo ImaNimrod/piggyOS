@@ -269,4 +269,3 @@ void page_fault(regs_t *r) {
 
     kprintf("0x%x)\n", faulting_address);
 }
-

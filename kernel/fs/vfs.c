@@ -638,7 +638,7 @@ void map_vfs_directory(const char *c) {
 void vfs_install(void) {
 	fs_tree = tree_create();
 
-	struct vfs_entry * root = kmalloc(sizeof(struct vfs_entry));
+	struct vfs_entry* root = kmalloc(sizeof(struct vfs_entry));
 
 	root->name = strdup("[root]");
 	root->file = NULL; 

@@ -18,11 +18,14 @@
 #include <string.h>
 #include <system.h>
 
-void kernel_main() {
+void kernel_main(uintptr_t inital_esp) {
+    uint32_t inital_stack = inital_esp;
+
     #ifdef TEXTMODE
     vga_clear();
     vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
     #endif 
+
 
     serial_init();
 
@@ -47,6 +50,9 @@ void kernel_main() {
     rtc_init();
     ata_init();
     pci_init();
+
+    vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
+    kprintf("\nWelecome to piggyOS!\n");
 
     for(;;) {
         __asm__("hlt");

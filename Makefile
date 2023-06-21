@@ -2,7 +2,7 @@ include config.mk
 
 .PHONY: clean kernel disk cdrom run 
 
-all: clean kernel
+piggyOS: clean kernel 
 
 clean:
 	$(RM) -r $(BUILD_DIR)
