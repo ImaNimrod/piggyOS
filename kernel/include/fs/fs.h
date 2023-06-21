@@ -34,6 +34,10 @@ typedef struct fs_node {
     uint32_t inode;
     uint32_t length;
 
+    /* time of access and time of creation */
+    uint32_t atime;
+    uint32_t ctime;
+
     /* these are func ptrs that outline the operations we can do on files */
     open_type_t open;
     close_type_t close;

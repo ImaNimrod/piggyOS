@@ -4,6 +4,7 @@
 #include <display.h>
 #include <drivers/io_port.h>
 #include <drivers/timer.h>
+#include <memory/vmm.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

@@ -17,8 +17,8 @@
 #include <memory/vmm.h>
 #include <multiboot2.h>
 #include <string.h>
+#include <sys/process.h>
 #include <sys/syscall.h>
-#include <sys/tasking.h>
 #include <system.h>
 
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n\t\t\t\tBy: James Steffes\n";
@@ -105,31 +105,6 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
         ext2_ramdisk_mount((uint32_t) ramdisk);
     }
 
-    fs_node_t* initrd = finddir_fs(get_fs_root(), "initrd");
-    if (initrd) {
-        kprintf("%s\n", initrd->name);
-        fs_node_t* test = finddir_fs(initrd, "dir");
-        if (test) {
-            kprintf("0x%x\n", test);
-            kprintf("%s\n", test->name);
-            kprintf("%d\n", test->flags);
-            fs_node_t* motd = finddir_fs(test, "motd.txt");
-            if (motd) {
-                kprintf("0x%x\n", motd);
-                kprintf("%s\n", motd->name);
-                kprintf("%d\n", motd->flags);
-                kprintf("%d\n", motd->length);
-                uint8_t* buffer = kmalloc(motd->length / sizeof(uint8_t));
-                read_fs(motd, 0, motd->length, buffer);
-                for (uint32_t i = 0; i < motd->length; i++) {
-                    kprintf("%c", buffer[i]);
-                }
-                kprintf("\n");
-                kfree(buffer);
-            }
-        }
-    }
-    
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
 

@@ -42,10 +42,14 @@ static size_t write_port(fs_node_t* node, uint32_t offset, size_t size, uint8_t*
 }
 
 void port_device_create(void) {
-    fs_node_t* port = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
+    fs_node_t* port = (fs_node_t*) kmalloc(sizeof(fs_node_t));
 
 	strcpy(port->name, "port");
 	port->flags = FS_CHARDEVICE;
+    port->inode = 0;
+
+    port->atime = get_seconds();
+    port->ctime = port->atime;
 
     port->open = NULL;
     port->close = NULL;

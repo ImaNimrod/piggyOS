@@ -2,6 +2,7 @@
 #define _KERNEL_DEVFS_H
 
 #include <display.h>
+#include <drivers/rtc.h>
 #include <dsa/list.h>
 #include <fs/fs.h>
 #include <memory/kheap.h>

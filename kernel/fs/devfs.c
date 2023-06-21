@@ -2,7 +2,7 @@
 
 static list_t* devlist;
 static struct dirent* devfs_dirent;
-static spinlock_t devfs_lock = 1;
+static spinlock_t devfs_lock;
 
 static struct dirent* devfs_readdir(fs_node_t* node, uint32_t index) {
     struct dirent* result = NULL;
@@ -66,6 +66,9 @@ void devfs_init(void) {
     strcpy(devfs->name, "dev");
     devfs->flags = FS_DIRECTORY;
     devfs->inode = 0;
+
+    devfs->atime = get_seconds();
+    devfs->ctime = devfs->atime;
 
     devfs->open = NULL;
     devfs->close = NULL;

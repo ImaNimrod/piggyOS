@@ -16,10 +16,14 @@ static size_t write_null(fs_node_t* node, uint32_t offset, size_t size, uint8_t*
 }
 
 void null_device_create(void) {
-    fs_node_t* null = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
+    fs_node_t* null = (fs_node_t*) kmalloc(sizeof(fs_node_t));
     
 	strcpy(null->name, "null");
 	null->flags = FS_CHARDEVICE;
+    null->inode = 0;
+
+    null->atime = get_seconds();
+    null->ctime = null->atime;
 
     null->open = NULL;
     null->close = NULL;

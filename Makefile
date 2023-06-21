@@ -21,7 +21,7 @@ run:
 
 initrd:
 	@mkdir -p ./iso/modules
-	@genext2fs -d ./initrd -q -b 8192 ./iso/modules/piggyOS-initrd
+	genext2fs -d ./initrd -b 8192 ./iso/modules/piggyOS-initrd.img
 
 
 cdrom: initrd 

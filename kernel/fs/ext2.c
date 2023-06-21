@@ -50,18 +50,18 @@ static inline uint32_t ext2_time(void) {
 	return now++;
 }
 
-static void ramdisk_read_sector(uint16_t bus, uint8_t slave, uint32_t lba, uint8_t* buffer) {
+static void ramdisk_read_sector(uint32_t lba, uint8_t* buffer) {
 	char* src = (char*) (lba * SECTORSIZE + _ramdisk_offset);
 	memcpy(buffer, src, SECTORSIZE);
 }
 
-static void ramdisk_write_sector(uint16_t bus, uint8_t slave, uint32_t lba, uint8_t* buffer) {
+static void ramdisk_write_sector(uint32_t lba, uint8_t* buffer) {
 	return;
 }
 
 static void ext2_flush_dirty(uint32_t ent_no) {
 	for (uint32_t i = 0; i < BLOCKSIZE / SECTORSIZE; ++i)
-		ramdisk_write_sector(0, 0, btos(DC[ent_no].block_no) + i, (uint8_t*) ((uint32_t) &DC[ent_no].block + SECTORSIZE * i));
+		ramdisk_write_sector(btos(DC[ent_no].block_no) + i, (uint8_t*) ((uint32_t) &DC[ent_no].block + SECTORSIZE * i));
 
 	DC[ent_no].dirty = 0;
 }
@@ -85,7 +85,7 @@ void ext2_ramdisk_read_block(uint32_t block_no, uint8_t* buf) {
 	}
 
 	for (uint32_t i = 0; i < BLOCKSIZE / SECTORSIZE; ++i) 
-		ramdisk_read_sector(0, 0, btos(block_no) + i, (uint8_t*) ((uint32_t) &(DC[oldest].block) + SECTORSIZE * i));
+		ramdisk_read_sector(btos(block_no) + i, (uint8_t*) ((uint32_t) &(DC[oldest].block) + SECTORSIZE * i));
 
 	if (DC[oldest].dirty)
 		ext2_flush_dirty(oldest);
@@ -453,7 +453,7 @@ void ext2_ramdisk_write_inode(ext2_inodetable_t* inode, uint32_t index) {
 	kfree(inodet);
 }
 
-uint32_t write_ext2_ramdisk(fs_node_t* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
+size_t write_ext2_ramdisk(fs_node_t* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
 	ext2_inodetable_t* inode = ext2_ramdisk_inode(node->inode);
 
 	uint32_t end = offset + size;
@@ -473,7 +473,7 @@ uint32_t write_ext2_ramdisk(fs_node_t* node, uint32_t offset, uint32_t size, uin
 	}
 	
 	if (start_block == end_block) {
-		void* buf = kmalloc(BLOCKSIZE);
+		uint8_t* buf = kmalloc(BLOCKSIZE);
 		ext2_ramdisk_inode_read_block(inode, node->inode, start_block, buf);
 		memcpy((uint8_t*) ((uintptr_t) buf + (offset % BLOCKSIZE)), buffer, size_to_write);
 
@@ -515,7 +515,7 @@ uint32_t write_ext2_ramdisk(fs_node_t* node, uint32_t offset, uint32_t size, uin
 	return size_to_write;
 }
 
-uint32_t read_ext2_ramdisk(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buffer) {
+size_t read_ext2_ramdisk(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buffer) {
 	ext2_inodetable_t* inode = ext2_ramdisk_inode(node->inode);
 
 	uint32_t end;
@@ -533,7 +533,7 @@ uint32_t read_ext2_ramdisk(fs_node_t* node, uint32_t offset, size_t size, uint8_
 		end_block--;
 
 	if (start_block == end_block) {
-		void* buf = kmalloc(BLOCKSIZE);
+		uint8_t* buf = kcalloc(BLOCKSIZE, 1);
 		ext2_ramdisk_inode_read_block(inode, node->inode, start_block, buf);
 		memcpy(buffer, (uint8_t*) (((uint32_t) buf) + (offset % BLOCKSIZE)), size_to_read);
 
@@ -546,22 +546,21 @@ uint32_t read_ext2_ramdisk(fs_node_t* node, uint32_t offset, size_t size, uint8_
 
 		for (block_offset = start_block; block_offset < end_block; block_offset++, blocks_read++) {
 			if (block_offset == start_block) {
-				void* buf = kmalloc(BLOCKSIZE);
+				uint8_t* buf = kmalloc(BLOCKSIZE);
 				ext2_ramdisk_inode_read_block(inode, node->inode, block_offset, buf);
-
 				memcpy(buffer, (uint8_t*) (((uint32_t) buf) + (offset % BLOCKSIZE)), BLOCKSIZE - (offset % BLOCKSIZE));
 				kfree(buf);
 			} else {
-				void* buf = kmalloc(BLOCKSIZE);
+				uint8_t* buf = kmalloc(BLOCKSIZE);
 				ext2_ramdisk_inode_read_block(inode, node->inode, block_offset, buf);
 				memcpy(buffer + BLOCKSIZE * blocks_read - (offset % BLOCKSIZE), buf, BLOCKSIZE);
 				kfree(buf);
 			}
 		}
-		void* buf = kmalloc(BLOCKSIZE);
+
+	    uint8_t* buf = kmalloc(BLOCKSIZE);
 		ext2_ramdisk_inode_read_block(inode, node->inode, end_block, buf);
 		memcpy(buffer + BLOCKSIZE * blocks_read - (offset % BLOCKSIZE), buf, end_size);
-		kfree(buf);
 	}
 
 	kfree(inode);
@@ -833,7 +832,7 @@ void ext2_ramdisk_mount(uint32_t offset) {
     }
 
     fs_register(RN);
-	klog(LOG_OK, "Mounted EXT2 ramdisk, root VFS node is 0x%x\n", offset);
+	klog(LOG_OK, "Mounted EXT2 ramdisk\n");
 }
 
 void ext2_ramdisk_forget_superblock(void) {

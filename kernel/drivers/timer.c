@@ -4,8 +4,6 @@ uint32_t timer_ticks = 0;
 
 static void timer_irq_handler(regs_t *r) {
     timer_ticks++;
-    memcpy(&saved_context, r, sizeof(regs_t));
-    task_schedule();
 
     (void) r;
 }

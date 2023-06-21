@@ -59,6 +59,9 @@ typedef struct {
 // boot page directory defined in entry.asm
 extern page_directory_t* boot_page_dir;
 
+// boot page directory defined in memory/vmm.c 
+extern page_directory_t* kernel_page_dir;
+
 // phys_mem_bitmap defined in pmm.c
 extern uint8_t* phys_mem_bitmap;
 extern uint32_t phys_mem_bitmap_size;

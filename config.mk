@@ -11,3 +11,6 @@ KERNEL_DIR:=./kernel
 BUILD_DIR:=./build
 CDROM:=piggyOS.iso
 DISK:=piggyOS-disk.img
+
+# kernel config options
+CONFIG_TEXTMODE=Y

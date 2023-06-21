@@ -35,6 +35,7 @@ typedef struct{
 uint8_t read_cmos(cmos_reg reg);
 void write_cmos(cmos_reg, uint8_t value);
 void get_time(time_t *time);
+uint32_t get_seconds(void);
 void rtc_init(void);
 
 #endif

@@ -1,7 +1,7 @@
 #include <fs/fs.h>
 
 static list_t* root_nodes;
-static spinlock_t rootfs_lock = 1;
+static spinlock_t rootfs_lock;
 static uint32_t root_files;
 
 static struct dirent* rootfs_readdir(fs_node_t* node, uint32_t index) {
