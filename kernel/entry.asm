@@ -59,8 +59,9 @@ higher_half:
     push esp
 
     ; pass multiboot information to kernel
-    push eax
+    add ebx, KERNEL_VIRTUAL_BASE
     push ebx
+    push eax
 
     ; load out kernel
     call kernel_main

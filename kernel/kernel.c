@@ -14,19 +14,24 @@
 #include <memory/kheap.h>
 #include <memory/pmm.h>
 #include <memory/vmm.h>
+#include <multiboot.h>
 #include <string.h>
 #include <system.h>
 
-void kernel_main(uintptr_t inital_esp) {
-    uint32_t inital_stack = inital_esp;
-    uint32_t lock = 0;
+const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n";
 
+void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uintptr_t inital_esp) {
     #ifdef TEXTMODE
     vga_clear();
     vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
     #endif 
 
     serial_init();
+
+    if(mboot2_magic != MBOOT2_MAGIC) {
+        kpanic("multiboot bootloader not detected");
+        return;
+    }
 
     /* load descriptor tables and interrupt information */
     gdt_init();
@@ -52,7 +57,7 @@ void kernel_main(uintptr_t inital_esp) {
     pci_init();
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
-    kprintf("\nWelecome to piggyOS!\n");
+    kprintf("%s", welecome_banner);
 
     for(;;) {
         __asm__("hlt");

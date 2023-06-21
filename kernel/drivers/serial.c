@@ -43,7 +43,9 @@ void serial_puts(uint16_t port, const char* str) {
 }
 
 void serial_init(void) {
-    if (!port_enable(PORT_COM1))
+    if (!port_enable(PORT_COM1)) {
         klog(LOG_ERR, "COM1 initialization failed\n");
+        return;
+    }
     klog(LOG_OK, "Serial Ports initialized\n");
 }
