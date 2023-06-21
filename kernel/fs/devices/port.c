@@ -2,6 +2,8 @@
 #include <fs/devfs.h>
 
 static ssize_t read_port(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {
+    (void) node;
+
 	switch (size) {
 		case 1:
 			buf[0] = inb(offset);
@@ -22,6 +24,8 @@ static ssize_t read_port(fs_node_t* node, off_t offset, size_t size, uint8_t* bu
 }
 
 static ssize_t write_port(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {
+    (void) node;
+
 	switch (size) {
 		case 1:
 			outb(offset, buf[0]);

@@ -39,6 +39,8 @@ static ssize_t write_random(fs_node_t* node, off_t offset, size_t size, uint8_t*
 }
 
 static ssize_t read_random(fs_node_t* node, off_t offset, size_t size, uint8_t* buffer) {
+    (void) node;
+
     uint32_t s = 0;
 
 	while (s < size) {

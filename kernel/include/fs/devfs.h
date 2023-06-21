@@ -16,6 +16,7 @@
 void devfs_init(void);
 void devfs_register(fs_node_t* device);
 
+extern void com_device_create(int device);
 extern void null_device_create(void);
 extern void port_device_create(void);
 extern void random_device_create(void);

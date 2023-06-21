@@ -82,6 +82,7 @@ void devfs_init(void) {
 
     devlist = list_create();
 
+    com_device_create(PORT_COM1);
     null_device_create();
     port_device_create();
     random_device_create();

@@ -18,13 +18,13 @@
 #include <multiboot2.h>
 #include <string.h>
 #include <sys/elf.h>
-#include <sys/process.h>
+#include <sys/spinlock.h>
 #include <sys/syscall.h>
+#include <sys/task.h>
 #include <system.h>
 
-extern void enter_usermode(void);
-
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n\t\t\t\tBy: James Steffes\n";
+extern void switch_to_user(void);
 
 void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_esp) {
     static uint32_t module_start, module_size;
@@ -37,7 +37,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
     #endif 
 
-    /* initialize serial port(s) for debug output */
+    /* initialize serial port(s) */
     serial_init();
 
     /* load descriptor tables and interrupt information */
@@ -80,6 +80,9 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
         return;
     }
 
+    print_cpu_vendor();
+    print_cpu_features();
+
     /* initialize memory manager systems */
     pmm_init(meminfo);                                                              /* physical memory manager */
     vmm_init();                                                                     /* virtual memory manager */
@@ -88,7 +91,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     /* initalize floating-point unit */
     fpu_init();
 
-    // /* parse acpi tables */
+    /* parse acpi tables */
     // acpi_init(rsdp);
 
     /* initialize devices */
@@ -108,21 +111,11 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
         tarfs_init((uint32_t) ramdisk, (uint32_t) ramdisk + module_size);
     }
 
+    /* initialize multiasking */ 
+    // tasking_init();
+
     /* initialize syscall handler */
     syscalls_init();
-
-    fs_node_t* dev = finddir_fs(get_fs_root(), "dev");
-    if (dev) {
-        fs_node_t* rand = finddir_fs(dev, "rand");
-        if (rand) {
-            uint8_t* buffer = kmalloc(80);
-            read_fs(rand, 0, 80, buffer);
-            for (int i = 0; i < 80; i++)
-                kprintf("%c", buffer[i]);
-            kfree(buffer);
-            kprintf("\n");
-        }
-    }
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
