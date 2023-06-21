@@ -5,6 +5,7 @@ TARGET:=i686-elf
 CC:=$(TARGET)-gcc
 LD:=$(TARGET)-ld
 AS:=nasm
+EMU:=qemu-system-i386
 
 KERNEL_DIR:=./kernel
 BUILD_DIR:=./build

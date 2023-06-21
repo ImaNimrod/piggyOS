@@ -78,6 +78,7 @@ static void allocate_page(page_directory_t *dir, uint32_t virtual_addr, uint32_t
 void allocate_region(page_directory_t *dir, uint32_t start_va, uint32_t end_va, int iden_map, int is_kernel, int is_writable) {
     uint32_t start = start_va & 0xfffff000;
     uint32_t end = end_va & 0xfffff000;
+
     while(start <= end) {
         if(iden_map)
             allocate_page(dir, start, start / PAGE_SIZE, is_kernel, is_writable);
@@ -186,7 +187,7 @@ void vmm_init(void) {
     memset(kernel_page_dir, 0, sizeof(page_directory_t));
 
     uint32_t i = LOAD_MEMORY_ADDRESS;
-    while(i < LOAD_MEMORY_ADDRESS + 4 * M) {
+    while(i < LOAD_MEMORY_ADDRESS + 4 * M) { /* map kernel 4Mb */
         allocate_page(kernel_page_dir, i, 0, 1, 1);
         i = i + PAGE_SIZE;
     }
@@ -202,7 +203,7 @@ void vmm_init(void) {
 
     enable_paging();
 
-	int_install_handler(0xe, &page_fault);
+	int_install_handler(14, &page_fault);
 
     klog(LOG_OK, "Virtual Memory Manager initialized\n");
 }
@@ -238,8 +239,8 @@ restart_sbrk:
         }
     } else if(size < 0){
         new_boundary = (void*) ((uint32_t) heap_curr - size);
-        if((char*) new_boundary < (char*) heap_start + HEAP_MIN_SIZE) {
-            new_boundary = (char*) heap_start + HEAP_MIN_SIZE;
+        if((char*) new_boundary < (char*) heap_start + KHEAP_MIN_SIZE) {
+            new_boundary = (char*) heap_start + KHEAP_MIN_SIZE;
         }
 
         runner = (char*) heap_end - PAGE_SIZE;

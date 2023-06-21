@@ -44,7 +44,7 @@ typedef struct fs_node {
     /* basic file information */
     char name[128]; 
     void* device; 
-    uint32_t flags, inode, len, impl;
+    uint32_t flags, inode, length, impl;
 
     /* these are func ptrs that outline the operations we can do on files */
     open_type_t open;
@@ -88,7 +88,6 @@ fs_node_t *kopen(const char *filename, uint32_t flags);
 
 void vfs_init(void);
 
-fs_node_t* vfs_get_root(void);
 void *vfs_mount(const char *path, fs_node_t *local_root);
 fs_node_t *get_mount_point(char *path, uint32_t path_depth, char **outpath, uint32_t *outdepth);
 int vfs_mount_type(const char *type, const char *arg, const char *mountpoint);

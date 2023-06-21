@@ -4,12 +4,6 @@ static list_t* devlist;
 static spinlock_t devlist_lock;
 static struct dirent* devfs_dirent;
 
-static void open_devfs(fs_node_t* node, uint32_t flags) {
-    (void) node;
-    (void) flags;
-	return;
-}
-
 static struct dirent* devfs_readdir(fs_node_t* node, uint32_t index) {
     struct dirent* result = NULL;
     uint32_t counter = 0;
@@ -54,7 +48,7 @@ void devfs_init(void) {
 
     devfs->flags = FS_DIRECTORY;
 
-    devfs->open = open_devfs;
+    devfs->open = NULL;
     devfs->close = NULL;
     devfs->finddir = devfs_finddir;
     devfs->readdir = devfs_readdir;

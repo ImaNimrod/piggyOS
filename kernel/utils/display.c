@@ -153,3 +153,11 @@ int klog(enum status status, const char* str, ...) {
     __kprintf_va_list((char *) str, ap);
     return 1;
 }
+
+
+void assert_failed(const char *file, uint32_t line, const char *desc) {
+	kprintf("Kernel Assertion Failed: %s\n", desc);
+	kprintf("File: %s\n", file);
+	kprintf("Line: %d\n", line);
+    kpanic("");
+}

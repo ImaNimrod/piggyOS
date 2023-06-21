@@ -5,35 +5,74 @@
 
 #define MBOOT2_MAGIC 0x36d76289
 
-typedef struct {
-    uint32_t tabsize;
-    uint32_t strsize;
-    uint32_t addr;
-    uint32_t reserved;
-} aout_symbol_table_t;
+#define MBOOT_TAG_ALIGN                  8
+#define MBOOT_TAG_TYPE_END               0
+#define MBOOT_TAG_TYPE_CMDLINE           1
+#define MBOOT_TAG_TYPE_BOOT_LOADER_NAME  2
+#define MBOOT_TAG_TYPE_MODULE            3
+#define MBOOT_TAG_TYPE_BASIC_MEMINFO     4
+#define MBOOT_TAG_TYPE_BOOTDEV           5
+#define MBOOT_TAG_TYPE_MMAP              6
+#define MBOOT_TAG_TYPE_VBE               7
+#define MBOOT_TAG_TYPE_FRAMEBUFFER       8
+#define MBOOT_TAG_TYPE_ELF_SECTIONS      9
+#define MBOOT_TAG_TYPE_APM               10
+#define MBOOT_TAG_TYPE_EFI32             11
+#define MBOOT_TAG_TYPE_EFI64             12
+#define MBOOT_TAG_TYPE_SMBIOS            13
+#define MBOOT_TAG_TYPE_ACPI_OLD          14
+#define MBOOT_TAG_TYPE_ACPI_NEW          15
+#define MBOOT_TAG_TYPE_NETWORK           16
+#define MBOOT_TAG_TYPE_EFI_MMAP          17
+#define MBOOT_TAG_TYPE_EFI_BS            18
+#define MBOOT_TAG_TYPE_EFI32_IH          19
+#define MBOOT_TAG_TYPE_EFI64_IH          20
+#define MBOOT_TAG_TYPE_LOAD_BASE_ADDR    21
 
 typedef struct {
-    uint32_t num;
+   uint32_t flags;
+   uint32_t mem_lower;
+   uint32_t mem_upper;
+   uint32_t boot_device;
+   uint32_t cmdline;
+   uint32_t mods_count;
+   uint32_t mods_addr;
+   uint32_t num;
+   uint32_t size;
+   uint32_t addr;
+   uint32_t shndx;
+   uint32_t mmap_length;
+   uint32_t mmap_addr;
+   uint32_t drives_length;
+   uint32_t drives_addr;
+   uint32_t config_table;
+   uint32_t boot_loader_name;
+   uint32_t apm_table;
+   uint32_t vbe_control_info;
+   uint32_t vbe_mode_info;
+   uint32_t vbe_mode;
+   uint32_t vbe_interface_seg;
+   uint32_t vbe_interface_off;
+   uint32_t vbe_interface_len;
+} __attribute__((packed)) mboot_info_t; 
+
+typedef struct {
+    uint32_t type;
     uint32_t size;
-    uint32_t addr;
-    uint32_t shndx;
-} elf_section_header_table_t;
+} mboot_tag_t;
 
 typedef struct {
-    uint32_t flags;
+    mboot_tag_t tag;
     uint32_t mem_lower;
     uint32_t mem_upper;
-    uint32_t boot_device;
-    uint32_t cmdline;
-    uint32_t mods_count;
-    uint32_t mods_addr;
-    union {
-        aout_symbol_table_t aout_sym;
-        elf_section_header_table_t elf_sec;
-    } u;
-    uint32_t mmap_length;
-    uint32_t mmap_addr;
-} mboot_info_t;
+} mboot_tag_basic_meminfo_t;
+
+typedef struct {
+    mboot_tag_t tag;
+    uint32_t mod_start;
+    uint32_t mod_end;
+    char cmdline;
+} mboot_tag_module_t;
 
 typedef struct {
     uint32_t base_addr_low;

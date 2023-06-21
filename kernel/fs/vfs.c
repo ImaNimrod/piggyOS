@@ -54,7 +54,7 @@ fs_node_t* finddir_fs(fs_node_t* node, char* name) {
 	if ((node->flags & FS_DIRECTORY) && node->finddir)
 		return node->finddir(node, name);
 
-    klog(LOG_WARN, "%s: node passed is not a directory\n node = %d name = %s\n", __func__, node->inode, name);
+    klog(LOG_WARN, "%s: node passed is not a directory\n\t    node = %d name = %s\n", __func__, node->inode, name);
     return NULL;
 }
 
@@ -432,10 +432,6 @@ fs_node_t* get_mount_point(char* path, uint32_t path_depth, char** outpath, uint
 	}
 
 	return last;
-}
-
-fs_node_t* vfs_get_root(void) {
-    return fs_root;
 }
 
 void vfs_init(void) {

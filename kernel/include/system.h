@@ -1,6 +1,7 @@
 #ifndef _KERNEL_SYSTEM_H
 #define _KERNEL_SYSTEM_H
 
+#include <display.h>
 #include <stdint.h>
 
 // litteraly a bunch of commonly used constants
@@ -9,6 +10,9 @@
 #define K 1024
 #define M (1024*K)
 #define G (1024*M)
+
+#define assert(statement) ((statement) ? (void)0 : assert_failed(__FILE__, __LINE__, #statement))
+void assert_failed(const char *file, uint32_t line, const char *desc);
 
 // defined by the linker
 extern uintptr_t kernel_start;

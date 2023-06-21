@@ -21,14 +21,23 @@ int memcmp(void *s1, void *s2, int len) {
     return charCompareStatus;
 }
 
-void *memcpy (void *s1, const void *s2, size_t n) {
-    int8_t *su1; 
-    const int8_t *su2; 
+void* memcpy(void* dest, const void* src, size_t n) {
+	__asm__ volatile("cld; rep movsb" : "=c"((int){0}) : "D"(dest), "S"(src), "c"(n) : "flags", "memory");
+	return dest;
+}
 
-    for (su1 = s1, su2 = s2; 0 < n; su1++, su2++, n--) {
-        *su1 = *su2;
-    }
-    return s1;
+void* memmove(void* restrict dest, const void* restrict src, size_t count) {
+	size_t i;
+	uint8_t *a = dest;
+	const uint8_t *b = src;
+	if (src < dest) {
+		for ( i = count; i > 0; --i)
+			a[i-1] = b[i-1];
+	} else {
+		for ( i = 0; i < count; ++i)
+			a[i] = b[i];
+	}
+	return dest;
 }
 
 void *memset (void *s, uint32_t c, size_t n) {
