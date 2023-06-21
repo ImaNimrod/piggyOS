@@ -39,13 +39,4 @@ static inline uint32_t inl(uint16_t port) {
    return ret;
 } 
 
-/* multiple sets of bytes */
-static inline void outsm(uint16_t port, uint8_t* data, size_t size) {
-	__asm__ volatile("rep outsw" : "+S" (data), "+c" (size) : "d" (port));
-}
-
-static inline void insm(uint16_t port, uint8_t* data, size_t size) {
-    __asm__ volatile("rep insw" : "+D" (data), "+c" (size) : "d" (port) : "memory");
-}
-
 #endif

@@ -63,9 +63,14 @@ extern page_directory_t* boot_page_dir;
 extern uint8_t* bitmap;
 extern uint32_t bitmap_size;
 
+/* function declarations */
 void *virt2phys(page_directory_t* dir, void* virtual_addr);
 void vmm_init(void);
+void page_fault(regs_t *r);
 void *ksbrk(int32_t size);
+void allocate_region(page_directory_t *dir, uint32_t start_va, uint32_t end_va, int iden_map, int is_kernel, int is_writable);
+void free_region(page_directory_t* dir, uint32_t start_va, uint32_t end_va, int free);
 void switch_page_directory(page_directory_t* page_dir, uint32_t phys);
+void copy_page_directory(page_directory_t* dst, page_directory_t* src);
 
 #endif

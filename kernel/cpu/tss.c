@@ -1,6 +1,6 @@
 #include <cpu/desc_tbls.h>
 
-static tss_entry_t tss;
+tss_entry_t tss;
 
 static void tss_flush(uint16_t index) {
     __asm__ volatile("ltr %w0" : :  "q" (index * 8));

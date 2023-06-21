@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <system.h>
 
+typedef void (*isr_routines) (regs_t *r);
+
 /* function declarations */
 extern void isr0();
 extern void isr1();
@@ -21,7 +23,7 @@ extern void isr10();
 extern void isr11();
 extern void isr12();
 extern void isr13();
-extern void page_fault(regs_t *r);
+extern void isr14();
 extern void isr15();
 extern void isr16();
 extern void isr17();
@@ -39,8 +41,11 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
+extern void isr127();
 
 void exception_init(void);
+void isrs_install_handler(uint8_t isrs, isr_routines handler);
+void isrs_uninstall_handler(uint8_t isrs);
 void fault_handler(regs_t *r);
 
 #endif

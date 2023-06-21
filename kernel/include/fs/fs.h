@@ -64,7 +64,7 @@ typedef struct fs_node {
 	readlink_type_t readlink;
 } fs_node_t;
 
-typedef fs_node_t *(*vfs_mount_callback)(const char *arg, const char *mount_point);
+typedef fs_node_t *(*vfs_mount_callback) (const char *arg, const char *mount_point);
 
 struct vfs_entry {
 	char *name;

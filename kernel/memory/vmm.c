@@ -6,7 +6,8 @@ extern int kheap_enabled;
 uint8_t *temp_mem;
 bool paging_enabled = false;
 
-page_directory_t* kpage_dir;
+page_directory_t* kernel_page_dir = {0};
+page_directory_t* current_page_dir = {0};
 
 static void *dumb_kmalloc(uint32_t size, int align) {
     void *ret = temp_mem;
@@ -52,7 +53,7 @@ static void allocate_page(page_directory_t *dir, uint32_t virtual_addr, uint32_t
 
         memset(table, 0, sizeof(page_table_t));
 
-        uint32_t t = (uint32_t) virt2phys(kpage_dir, table);
+        uint32_t t = (uint32_t) virt2phys(kernel_page_dir, table);
         dir->tables[page_dir_idx].frame = t >> 12;
         dir->tables[page_dir_idx].present = 1;
         dir->tables[page_dir_idx].rw = 1;
@@ -74,7 +75,7 @@ static void allocate_page(page_directory_t *dir, uint32_t virtual_addr, uint32_t
     }
 }
 
-static void allocate_region(page_directory_t *dir, uint32_t start_va, uint32_t end_va, int iden_map, int is_kernel, int is_writable) {
+void allocate_region(page_directory_t *dir, uint32_t start_va, uint32_t end_va, int iden_map, int is_kernel, int is_writable) {
     uint32_t start = start_va & 0xfffff000;
     uint32_t end = end_va & 0xfffff000;
     while(start <= end) {
@@ -106,7 +107,7 @@ static void free_page(page_directory_t* dir, uint32_t virtual_addr, int free) {
     table->pages[page_tbl_idx].frame = 0;
 }
 
-static void free_region(page_directory_t* dir, uint32_t start_va, uint32_t end_va, int free) {
+void free_region(page_directory_t* dir, uint32_t start_va, uint32_t end_va, int free) {
     uint32_t start = start_va & 0xfffff000;
     uint32_t end = end_va & 0xfffff000;
     while(start <= end) {
@@ -124,8 +125,8 @@ void switch_page_directory(page_directory_t* page_dir, uint32_t phys) {
     __asm__ volatile("mov %0, %%cr3" :: "r"(t));
 }
 
-static page_table_t *copy_page_table(page_directory_t * src_page_dir, page_directory_t * dst_page_dir, uint32_t page_dir_idx, page_table_t * src) {
-    page_table_t * table = (page_table_t*) kmalloc_a(sizeof(page_table_t));
+page_table_t* copy_page_table(page_directory_t* src_page_dir, page_directory_t* dst_page_dir, uint32_t page_dir_idx, page_table_t* src) {
+    page_table_t* table = (page_table_t*) kmalloc_a(sizeof(page_table_t));
     for(int i = 0; i < 1024; i++) {
         if(!table->pages[i].frame)
             continue;
@@ -134,22 +135,22 @@ static page_table_t *copy_page_table(page_directory_t * src_page_dir, page_direc
         uint32_t tmp_virtual_address = 0;
 
         allocate_page(dst_page_dir, dst_virtual_address, 0, 0, 1);
-        allocate_page(src_page_dir, tmp_virtual_address, (uint32_t)virt2phys(dst_page_dir, (void*)dst_virtual_address), 0, 1);
-        if (src->pages[i].present) table->pages[i].present = 1;
-        if (src->pages[i].rw)      table->pages[i].rw = 1;
-        if (src->pages[i].user)    table->pages[i].user = 1;
-        if (src->pages[i].accessed)table->pages[i].accessed = 1;
-        if (src->pages[i].dirty)   table->pages[i].dirty = 1;
-        memcpy((void*)tmp_virtual_address, (void*)src_virtual_address, PAGE_SIZE);
+        allocate_page(src_page_dir, tmp_virtual_address, (uint32_t) virt2phys(dst_page_dir, (void*)dst_virtual_address), 0, 1);
+        if (src->pages[i].present)  table->pages[i].present = 1;
+        if (src->pages[i].rw)       table->pages[i].rw = 1;
+        if (src->pages[i].user)     table->pages[i].user = 1;
+        if (src->pages[i].accessed) table->pages[i].accessed = 1;
+        if (src->pages[i].dirty)    table->pages[i].dirty = 1;
+        memcpy((void*) tmp_virtual_address, (void*) src_virtual_address, PAGE_SIZE);
 
         free_page(src_page_dir, tmp_virtual_address, 0);
     }
     return table;
 }
 
-static void copy_page_directory(page_directory_t* dst, page_directory_t* src) {
+void copy_page_directory(page_directory_t* dst, page_directory_t* src) {
     for(uint32_t i = 0; i < 1024; i++) {
-        if(kpage_dir->ref_tables[i] == src->ref_tables[i]) {
+        if(kernel_page_dir->ref_tables[i] == src->ref_tables[i]) {
             dst->tables[i] = src->tables[i];
             dst->ref_tables[i] = src->ref_tables[i];
         } else {
@@ -181,24 +182,27 @@ static void enable_paging(void) {
 void vmm_init(void) {
     temp_mem = bitmap + bitmap_size;
 
-    kpage_dir = dumb_kmalloc(sizeof(page_directory_t), 1);
-    memset(kpage_dir, 0, sizeof(page_directory_t));
+    kernel_page_dir = dumb_kmalloc(sizeof(page_directory_t), 1);
+    memset(kernel_page_dir, 0, sizeof(page_directory_t));
 
     uint32_t i = LOAD_MEMORY_ADDRESS;
     while(i < LOAD_MEMORY_ADDRESS + 4 * M) {
-        allocate_page(kpage_dir, i, 0, 1, 1);
+        allocate_page(kernel_page_dir, i, 0, 1, 1);
         i = i + PAGE_SIZE;
     }
     i = LOAD_MEMORY_ADDRESS + 4 * M;
     while(i < LOAD_MEMORY_ADDRESS + 4 * M + KHEAP_INITIAL_SIZE) {
-        allocate_page(kpage_dir, i, 0, 1, 1);
+        allocate_page(kernel_page_dir, i, 0, 1, 1);
         i = i + PAGE_SIZE;
     }
 
-    switch_page_directory(kpage_dir, 0);
+    switch_page_directory(kernel_page_dir, 0);
+
+    allocate_region(kernel_page_dir, 0, 0x10000, 0, 1, 1);
 
     enable_paging();
-    allocate_region(kpage_dir, 0x0, 0x10000, 1, 1, 1);
+
+	isrs_install_handler(14, &page_fault);
 
     klog(LOG_OK, "Virtual Memory Manager initialized\n");
 }
@@ -222,7 +226,7 @@ restart_sbrk:
             runner = heap_end;
 
             while(runner < new_boundary) {
-                allocate_page(kpage_dir, (uint32_t) runner, 0, 1, 1);
+                allocate_page(kernel_page_dir, (uint32_t) runner, 0, 1, 1);
                 runner = (char*) runner +  PAGE_SIZE;
             }
 
@@ -240,7 +244,7 @@ restart_sbrk:
 
         runner = (char*) heap_end - PAGE_SIZE;
         while(runner > new_boundary) {
-            free_page(kpage_dir, (uint32_t) runner, 1);
+            free_page(kernel_page_dir, (uint32_t) runner, 1);
             runner = (char*) runner - PAGE_SIZE;
         }
         heap_end = (char*) runner + PAGE_SIZE;

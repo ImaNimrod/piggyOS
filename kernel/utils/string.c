@@ -1,5 +1,26 @@
 #include <string.h>
 
+int memcmp(void *s1, void *s2, int len) {
+    uint32_t *p = s1;
+    uint32_t *q = s2;
+    int charCompareStatus = 0;
+    //If both pointer pointing same memory block
+    if (s1 == s2)
+        return charCompareStatus;
+
+    while (len > 0) {
+        if (*p != *q) {
+            charCompareStatus = (*p >*q)?1:-1;
+            break;
+        }
+
+        len--;
+        p++;
+        q++;
+    }
+    return charCompareStatus;
+}
+
 void *memcpy (void *s1, const void *s2, size_t n) {
     int8_t *su1; 
     const int8_t *su2; 

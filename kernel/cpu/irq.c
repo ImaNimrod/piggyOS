@@ -1,6 +1,5 @@
 #include <cpu/irq.h>
 
-typedef void (*irq_routines) (regs_t *r);
 static irq_routines irqs[16] = {0};
 
 static volatile int current_int[15];
@@ -79,14 +78,6 @@ void irq_handler(regs_t *r) {
 	}
 
     __asm__ volatile("sti");
-}
-
-void enable_int(void) {
-    __asm__ volatile("sti");
-}
-
-void disable_int(void) {
-    __asm__ volatile("cli");
 }
 
 void irq_set_mask(uint8_t IRQline) {

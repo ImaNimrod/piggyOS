@@ -54,8 +54,6 @@ higher_half:
 
     ; initialize stack
     mov esp, stack_top
-
-    ; kernel needs initial stk_ptr location
     push esp
 
     ; pass multiboot information to kernel

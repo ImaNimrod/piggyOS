@@ -1,30 +1,32 @@
 #include <string.h>
 #include <dsa/list.h>
 
-void list_destroy(list_t * list) {
-	/* kfree all of the contents of a list */
-	node_t * n = list->head;
+void list_destroy(list_t* list) {
+	node_t* n = list->head;
 	while (n) {
 		kfree(n->value);
 		n = n->next;
 	}
 }
 
-void list_free(list_t * list) {
-	/* kfree the actual structure of a list */
-	node_t * n = list->head;
+void list_free(list_t* list) {
+	node_t* n = list->head;
 	while (n) {
-		node_t * s = n->next;
+		node_t* s = n->next;
 		kfree(n);
 		n = s;
 	}
 }
 
-void list_append(list_t * list, node_t * node) {
-	//assert(!(node->next || node->prev) && "Node is already in a list.");
+void* list_peek_front(list_t * list) {
+	if(!list->head) return NULL;
+	return list->head->value;
+}
+
+void list_append(list_t* list, node_t* node) {
 	node->next = NULL;
-	/* Insert a node onto the end of a list */
 	node->owner = list;
+
 	if (!list->length) {
 		list->head = node;
 		list->tail = node;
@@ -33,15 +35,15 @@ void list_append(list_t * list, node_t * node) {
 		list->length++;
 		return;
 	}
+
 	list->tail->next = node;
 	node->prev = list->tail;
 	list->tail = node;
 	list->length++;
 }
 
-node_t * list_insert(list_t * list, void * item) {
-	/* Insert an item into a list */
-	node_t * node = kmalloc(sizeof(node_t));
+node_t* list_insert(list_t* list, void* item) {
+	node_t* node = kmalloc(sizeof(node_t));
 	node->value = item;
 	node->next  = NULL;
 	node->prev  = NULL;
@@ -51,8 +53,7 @@ node_t * list_insert(list_t * list, void * item) {
 	return node;
 }
 
-void list_append_after(list_t * list, node_t * before, node_t * node) {
-	//assert(!(node->next || node->prev) && "Node is already in a list.");
+void list_append_after(list_t* list, node_t* before, node_t* node) {
 	node->owner = list;
 	if (!list->length) {
 		list_append(list, node);
@@ -77,8 +78,8 @@ void list_append_after(list_t * list, node_t * before, node_t * node) {
 	list->length++;
 }
 
-node_t * list_insert_after(list_t * list, node_t * before, void * item) {
-	node_t * node = kmalloc(sizeof(node_t));
+node_t* list_insert_after(list_t* list, node_t* before, void* item) {
+	node_t* node = kmalloc(sizeof(node_t));
 	node->value = item;
 	node->next  = NULL;
 	node->prev  = NULL;
@@ -87,13 +88,13 @@ node_t * list_insert_after(list_t * list, node_t * before, void * item) {
 	return node;
 }
 
-void list_append_before(list_t * list, node_t * after, node_t * node) {
-	//assert(!(node->next || node->prev) && "Node is already in a list.");
-	node->owner = list;
+void list_append_before(list_t* list, node_t* after, node_t* node) {
+    node->owner = list;
 	if (!list->length) {
 		list_append(list, node);
 		return;
 	}
+
 	if (after == NULL) {
 		node->next = NULL;
 		node->prev = list->tail;
@@ -102,6 +103,7 @@ void list_append_before(list_t * list, node_t * after, node_t * node) {
 		list->length++;
 		return;
 	}
+
 	if (after == list->head) {
 		list->head = node;
 	} else {
@@ -113,8 +115,8 @@ void list_append_before(list_t * list, node_t * after, node_t * node) {
 	list->length++;
 }
 
-node_t * list_insert_before(list_t * list, node_t * after, void * item) {
-	node_t * node = kmalloc(sizeof(node_t));
+node_t* list_insert_before(list_t* list, node_t* after, void* item) {
+	node_t* node = kmalloc(sizeof(node_t));
 	node->value = item;
 	node->next  = NULL;
 	node->prev  = NULL;
@@ -123,9 +125,8 @@ node_t * list_insert_before(list_t * list, node_t * after, void * item) {
 	return node;
 }
 
-list_t * list_create(const char * name, const void * metadata) {
-	/* Create a fresh list */
-	list_t * out = kmalloc(sizeof(list_t));
+list_t* list_create(const char* name, const void* metadata) {
+	list_t* out = kmalloc(sizeof(list_t));
 	out->head = NULL;
 	out->tail = NULL;
 	out->length = 0;
@@ -134,7 +135,7 @@ list_t * list_create(const char * name, const void * metadata) {
 	return out;
 }
 
-node_t * list_find(list_t * list, void * value) {
+node_t* list_find(list_t* list, void* value) {
 	foreach(item, list) {
 		if (item->value == value) {
 			return item;
@@ -143,7 +144,7 @@ node_t * list_find(list_t * list, void * value) {
 	return NULL;
 }
 
-int list_index_of(list_t * list, void * value) {
+int list_index_of(list_t* list, void* value) {
 	int i = 0;
 	foreach(item, list) {
 		if (item->value == value) {
@@ -151,11 +152,12 @@ int list_index_of(list_t * list, void * value) {
 		}
 		i++;
 	}
-	return -1; /* not find */
+	return 1;
 }
 
-void * list_index(list_t * list, int index) {
+void* list_index(list_t* list, int index) {
 	int i = 0;
+
 	foreach(item, list) {
 		if (i == index) return item->value;
 		i++;
@@ -163,8 +165,7 @@ void * list_index(list_t * list, int index) {
 	return NULL;
 }
 
-void list_remove(list_t * list, size_t index) {
-	/* remove index from the list */
+void list_remove(list_t* list, size_t index) {
 	if (index > list->length) return;
 	size_t i = 0;
 	node_t * n = list->head;
@@ -175,9 +176,21 @@ void list_remove(list_t * list, size_t index) {
 	list_delete(list, n);
 }
 
-void list_delete(list_t * list, node_t * node) {
-	/* remove node from the list */
-	//assert(node->owner == list && "Tried to remove a list node from a list it does not belong to.");
+node_t* list_insert_front(list_t* list, void* val) {
+	node_t* t = kcalloc(sizeof(node_t), 1);
+	list->head->prev = t;
+    t->next = list->head;
+	t->value = val;
+
+	if(!list->head)
+		list->tail = t;
+
+	list->head = t;
+	list->length++;
+	return t;
+}
+
+void list_delete(list_t* list, node_t* node) {
 	if (node == list->head) {
 		list->head = node->next;
 	}
@@ -190,42 +203,39 @@ void list_delete(list_t * list, node_t * node) {
 	if (node->next) {
 		node->next->prev = node->prev;
 	}
+
 	node->prev = NULL;
 	node->next = NULL;
 	node->owner = NULL;
 	list->length--;
+    kfree(node);
 }
 
-node_t * list_pop(list_t * list) {
-	/* Remove and return the last value in the list
-	 * If you don't need it, you still probably want to kfree it!
-	 * Try kfree(list_pop(list)); !
-	 * */
+
+node_t* list_pop(list_t* list) {
 	if (!list->tail) return NULL;
-	node_t * out = list->tail;
+	node_t* out = list->tail;
 	list_delete(list, out);
 	return out;
 }
 
-node_t * list_dequeue(list_t * list) {
+node_t* list_dequeue(list_t* list) {
 	if (!list->head) return NULL;
-	node_t * out = list->head;
+	node_t* out = list->head;
 	list_delete(list, out);
 	return out;
 }
 
-list_t * list_copy(list_t * original) {
-	/* Create a new copy of original */
-	list_t * out = list_create(original->name, original->metadata);
-	node_t * node = original->head;
+list_t* list_copy(list_t* original) {
+	list_t* out = list_create(original->name, original->metadata);
+	node_t* node = original->head;
 	while (node) {
 		list_insert(out, node->value);
 	}
 	return out;
 }
 
-void list_merge(list_t * target, list_t * source) {
-	/* Destructively merges source into target */
+void list_merge(list_t* target, list_t* source) {
 	foreach(node, source) {
 		node->owner = target;
 	}
@@ -243,4 +253,3 @@ void list_merge(list_t * target, list_t * source) {
 	target->length += source->length;
 	kfree(source);
 }
-

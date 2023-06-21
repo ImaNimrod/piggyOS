@@ -8,6 +8,7 @@
 /* function declarations */
 void *memcpy (void *__restrict, const void *__restrict, size_t);
 void *memset (void *, uint32_t, size_t);
+int memcmp(void *s1, void *s2, int len);
 
 int strcmp(const char* str1, const char* str2);
 char* strcpy(char* str1, const char* str2); 

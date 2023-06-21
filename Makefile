@@ -10,13 +10,14 @@ clean:
 	$(RM) -r piggyOS-disk.img
 
 kernel:
-	$(MAKE) -C $(KERNEL_DIR) -f Makefile kernel
+	$(MAKE) -C $(KERNEL_DIR) -f Makefile piggyOS-kernel.bin
 
 
 run:
 	qemu-system-i386 -m 4G\
 					 -rtc base=localtime\
 					 -cdrom piggyOS.iso\
+					 -cpu pentium3\
 					 -serial stdio\
 					 # -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
 

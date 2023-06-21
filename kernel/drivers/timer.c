@@ -4,13 +4,14 @@ uint32_t timer_ticks = 0;
 
 static void timer_irq_handler(regs_t *r) {
     timer_ticks++;
+    memcpy(&saved_context, r, sizeof(regs_t));
+    scheduler();
 
     irq_ack(TIMER_IRQ);
 
     (void) r;
 }
 
-/* because I optimize for size, this function would fail to work properly */
 #pragma GCC push_options
 #pragma GCC optimize ("O0")
 

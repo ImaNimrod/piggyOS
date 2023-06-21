@@ -13,6 +13,8 @@
 
 #define PIC_EOI    0x20
 
+typedef void (*irq_routines) (regs_t *r);
+
 /* function declarations */ 
 extern void irq0();
 extern void irq1();
@@ -39,8 +41,5 @@ void irq_wait(uint8_t irq);
 void irq_set_mask(uint8_t IRQline);
 void irq_clear_mask(uint8_t IRQline);
 void irq_handler(regs_t *r);
-
-void enable_int(void);
-void disable_int(void);
 
 #endif 

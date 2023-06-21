@@ -21,4 +21,14 @@ typedef struct {
     uint32_t eip, cs, eflags, useresp, ss;    
 } regs_t;
 
+/* function declarations */
+static inline void enable_int(void) {
+    __asm__ volatile("sti");
+}
+
+static inline void disable_int(void) {
+    __asm__ volatile("cli");
+}
+
+
 #endif
