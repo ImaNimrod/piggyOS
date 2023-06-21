@@ -1,7 +1,6 @@
 #include <cpu/cpuid.h>
 #include <cpu/desc_tbls.h>
 #include <display.h>
-#include <drivers/ata.h>
 #include <drivers/fpu.h>
 #include <drivers/keyboard.h>
 #include <drivers/pci.h>
@@ -81,7 +80,6 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     timer_init(100); /* programmable interrupt timer */
     keyboard_init(); /* ps/2 keyboard controller */
     rtc_init();      /* real time clock */
-    ata_init();      /* ata devices */
 
     allocate_region(kernel_page_dir, 0xd0000000, (0xd0000000 + (module_end - module_start)), 0, 1, 1);
     char* ramdisk = (char*) 0xd0000000;
@@ -111,12 +109,6 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     syscalls_init();
 
     tss_set_stack(0x10, inital_esp);
-
-    kprintf("%d\n", fs_root->flags);
-    fs_node_t* etc = finddir_fs(fs_root, "etc");
-    if (etc) {
-        kprintf("%s %d %d\n", etc->name, etc->flags, etc->inode);
-    }
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s", welecome_banner);

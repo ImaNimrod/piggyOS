@@ -2,12 +2,10 @@
 #define _KERNEL_EXT2_H
 
 #include <display.h>
-#include <drivers/ata.h>
 #include <fs/fs.h>
 #include <memory/kheap.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <sys/spinlock.h>
 
 #define EXT2_SUPER_MAGIC 0xEF53
 
