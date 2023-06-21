@@ -1,7 +1,6 @@
 #include <memory/pmm.h>
 
 uint8_t* phys_mem_bitmap = (uint8_t*) (&kernel_end);
-uint8_t* mem_start;
 uint32_t total_blocks;
 uint32_t phys_mem_bitmap_size;
 

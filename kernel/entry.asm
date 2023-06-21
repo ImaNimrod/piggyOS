@@ -32,7 +32,7 @@ start:
     mov ecx, (boot_page_dir - KERNEL_VIRTUAL_BASE)
     mov cr3, ecx
 
-    ; enable 4MB pages
+    ; ; enable 4MB pages
     mov ecx, cr4
     or ecx, 0x00000010
     mov cr4, ecx

@@ -13,7 +13,7 @@ kernel:
 	$(MAKE) -C $(KERNEL_DIR) -f Makefile piggyOS-kernel.bin
 
 run:
-	$(EMU) -m 1G\
+	$(EMU) -m 256M\
 		   -cdrom piggyOS.iso\
 		   -rtc base=localtime\
 		   -serial stdio

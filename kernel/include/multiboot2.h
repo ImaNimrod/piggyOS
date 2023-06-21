@@ -47,6 +47,16 @@ struct mboot_tag_module {
     char cmdline;
 };
 
+struct mboot_tag_old_acpi {
+    mboot_tag_t tag;
+	uint8_t* rsdp;
+};
+
+struct mboot_tag_new_acpi {
+    mboot_tag_t tag;
+	uint8_t* rsdp;
+};
+
 typedef struct {
     uint32_t base_addr_low;
     uint32_t base_addr_high;

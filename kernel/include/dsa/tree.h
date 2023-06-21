@@ -1,7 +1,7 @@
 #ifndef _KERNEL_TREE_H
 #define _KERNEL_TREE_H
 
-#include <list.h>
+#include <dsa/list.h>
 #include <memory/kheap.h>
 #include <stddef.h>
 #include <stdint.h>

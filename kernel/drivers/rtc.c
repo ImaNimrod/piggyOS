@@ -8,10 +8,10 @@ uint8_t read_cmos(cmos_reg reg) {
 }
 
 void write_cmos(cmos_reg reg, uint8_t value) {
-    disable_int();
+    __asm__ volatile("cli");
 	outb(CMOS_REG, (0x80 | reg));
 	outb(CMOS_DATA, value);
-    enable_int();
+    __asm__ volatile("sti");
 }
 
 void get_time(time_t *time) {

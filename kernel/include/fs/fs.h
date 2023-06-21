@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/spinlock.h>
-#include <tree.h>
+#include <dsa/tree.h>
 
 #define min(l,r) ((l) < (r) ? (l) : (r))
 

@@ -21,7 +21,7 @@ int memcmp(void *s1, void *s2, int len) {
     return charCompareStatus;
 }
 
-void* memcpy(void* dest, const void* src, size_t n) {
+void* memcpy(void* restrict dest, const void* restrict src, size_t n) {
 	__asm__ volatile("cld; rep movsb" : "=c"((int){0}) : "D"(dest), "S"(src), "c"(n) : "flags", "memory");
 	return dest;
 }

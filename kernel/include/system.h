@@ -1,7 +1,6 @@
 #ifndef _KERNEL_SYSTEM_H
 #define _KERNEL_SYSTEM_H
 
-#include <display.h>
 #include <stdint.h>
 
 // litteraly a bunch of commonly used constants
@@ -11,8 +10,10 @@
 #define M (1024*K)
 #define G (1024*M)
 
-#define assert(statement) ((statement) ? (void)0 : assert_failed(__FILE__, __LINE__, #statement))
-void assert_failed(const char *file, uint32_t line, const char *desc);
+// version name / number
+#define VERSION_MAJ 1
+#define VERSION_MIN 0
+#define VERSION_ALIAS "kerplunk"
 
 // defined by the linker
 extern uintptr_t kernel_start;
@@ -24,15 +25,5 @@ typedef struct {
     uint32_t int_no, err_code;
     uint32_t eip, cs, eflags, useresp, ss;    
 } regs_t;
-
-/* function declarations */
-static inline void enable_int(void) {
-    __asm__ volatile("sti");
-}
-
-static inline void disable_int(void) {
-    __asm__ volatile("cli");
-}
-
 
 #endif

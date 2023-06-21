@@ -39,13 +39,13 @@ static const char lower_map[128] = {
     0,	/* All other keys are undefined */
 };
 
-static void keyboard_irq_handler(regs_t *r) {
+static void keyboard_irq_handler(regs_t* r) {
     uint8_t scancode;
 
     for (uint16_t i = 0; i < 1000; i++)
-        if((inb(0x64) & 1) == 0) continue;
+        if((inb(PS2_CMD) & 1) == 0) continue;
 
-    scancode = inb(0x60);
+    scancode = inb(PS2_DATA);
 
     if (scancode & 0x80) {
     } else {
@@ -65,5 +65,5 @@ void keyboard_reset(void) {
 	uint8_t tmp = inb(0x61);
 	outb(0x61, tmp | 0x80);
 	outb(0x61, tmp & 0x7F);
-	inb(0x60);
+	inb(PS2_DATA);
 }

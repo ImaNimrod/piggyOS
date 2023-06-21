@@ -267,6 +267,11 @@ void ext2_ramdisk_mount(uint32_t mem_head) {
 	initrd_start = (void*) mem_head;
 	initrd_superblock = (ext2_superblock_t*) ((uintptr_t) initrd_start + 1024);
 
+    if (initrd_superblock->magic != EXT2_SUPER_MAGIC) {
+        klog(LOG_ERR, "Valid EXT2 superblock not found\n");
+        return;
+    }
+
 	if (initrd_superblock->inode_size == 0)
 		initrd_superblock->inode_size = 128;
 
@@ -275,7 +280,10 @@ void ext2_ramdisk_mount(uint32_t mem_head) {
 	ext2_inodetable_t* root_inode = ext2_get_inode(2);
 
 	initrd_root = (fs_node_t*) kmalloc(sizeof(fs_node_t));
-	assert(initrd_node_root(root_inode, initrd_root));
+	if (!initrd_node_root(root_inode, initrd_root)) {
+        klog(LOG_ERR, "Could not create EXT2 root node\n");
+        return;
+    }
 
 	fs_root = initrd_root;
 
