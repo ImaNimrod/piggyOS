@@ -35,8 +35,8 @@ all: clean piggyOS run
 
 piggyOS: $(kernel_object_files) $(sys_object_files)
 	nasm -f elf32 -o $(BUILDDIR)/kernel/cpu/interrupt.o $(SRCDIR)/kernel/cpu/interrupt.asm
-	$(CC) $(LDFLAGS) -o $(ISODIR)/boot/piggyOS.bin $(kernel_object_files) $(sys_object_files) $(BUILDDIR)/kernel/cpu/interrupt.o && \
-	grub-file --is-x86-multiboot2 $(ISODIR)/boot/piggyOS.bin && \
+	$(CC) $(LDFLAGS) -o $(ISODIR)/boot/piggyOS-kernel.bin $(kernel_object_files) $(sys_object_files) $(BUILDDIR)/kernel/cpu/interrupt.o && \
+	grub-file --is-x86-multiboot2 $(ISODIR)/boot/piggyOS-kernel.bin && \
 	grub-mkrescue /usr/lib/grub/i386-pc -o piggyOS.iso $(ISODIR)
 
 clean:
@@ -44,9 +44,8 @@ clean:
 	rm -rf piggyOS.iso
 
 run:
-	qemu-system-i386 -cdrom piggyOS.iso\
-					 -m 16M\
+	qemu-system-i386 -m 128M\
+					 -cdrom piggyOS.iso\
 					 -rtc base=localtime\
-					 -drive format=raw,file=floppy.img,index=0,if=floppy\
-					 # -drive format=raw,file=floppy2.img,index=0,if=ide\
+					 # -drive format=raw,file=floppy.img,index=0,if=floppy\
 					 # -drive format=raw,file=floppy2.img,index=1,if=floppy\

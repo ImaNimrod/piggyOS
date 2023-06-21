@@ -13,8 +13,12 @@ void *memmove (void *, const void *, size_t);
 void *memset (void *, uint32_t, size_t);
 
 int strcmp(const char* str1, const char* str2);
-char* strcpy(char* str1, char* str2); 
-char *strdup(const char *str);
+char* strcpy(char* str1, const char* str2); 
+char* strdup(const char *s);
 size_t strlen(const char *str);
+char *strpbrk(const char *str, const char *accept);
+size_t strspn(const char *str, const char *accept);
+char* strtok(char *s, const char *delim);
+char *strtok_r(char *str, const char *delim, char **saveptr);
 
 #endif

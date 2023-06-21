@@ -1,14 +1,14 @@
 global start
 
-extern kernel_start
-extern kernel_end
 extern kernel_main
 
 section .text
 
 bits 32
 start:
-	mov esp, stack_top
+    mov esp, stack_top
+    push eax
+    push ebx
 
 	call kernel_main
 

@@ -28,7 +28,7 @@ typedef enum {
 } cmos_reg;
 
 typedef struct{
-	uint8_t year, mnth, day, hour, min, sec;
+	uint16_t year, mnth, day, hour, min, sec;
 } time_t;
 
 /* function declarations */

@@ -44,56 +44,9 @@ static void ide_select_drive(uint8_t bus, uint8_t i) {
     }
 }
 
-static uint8_t ide_identify(uint8_t bus, uint8_t drive) {
-    uint16_t io = 0;
-
-	ide_select_drive(bus, drive);
-	if(bus == ATA_PRIMARY) { 
-        io = ATA_PRIMARY_IO;
-    } else { 
-        io = ATA_SECONDARY_IO;
-    }
-
-	outb(io + ATA_REG_SECCOUNT0, 0);
-	outb(io + ATA_REG_LBA0, 0);
-	outb(io + ATA_REG_LBA1, 0);
-	outb(io + ATA_REG_LBA2, 0);
-	outb(io + ATA_REG_COMMAND, ATA_CMD_IDENTIFY);
-
-    uint8_t status = inb(io + ATA_REG_STATUS);
-    if (status) {
-        while((inb(io + ATA_REG_STATUS) & ATA_SR_BSY) != 0);
-        pm_stat_read: status = inb(io + ATA_REG_STATUS);
-		if(status & ATA_SR_ERR) {
-            kprintf("%s%s has ERR set. disabled.\n", bus==ATA_PRIMARY?"primary":"secondary", drive==ATA_PRIMARY?" master":" slave");
-            return 0;
-        }
-
-        while(!(status & ATA_SR_DRQ)) goto pm_stat_read;
-        kprintf("%s%s is online.\n", bus==ATA_PRIMARY?"primary":"secondary", drive==ATA_PRIMARY?" master":" slave");
-
-        for(int i = 0; i<256; i++)
-			*(uint16_t *)(ide_buf + i*2) = inw(io + ATA_REG_DATA);
-    }
-
-    ide_delay(io);
-    return 1;
-}
-
-static void ata_probe(void) {
-    if (ide_identify(ATA_PRIMARY, ATA_MASTER)) {
-        char *str = (char *) kmalloc(40);
-		for(int i = 0; i < 40; i += 2) {
-            str[i] = ide_buf[ATA_IDENT_MODEL + i + 1];
-			str[i + 1] = ide_buf[ATA_IDENT_MODEL + i];
-        }
-    }
-    ide_identify(ATA_PRIMARY, ATA_SLAVE);
-}
-
 /* read / write functions */
 
-uint8_t ata_read_sector(uint8_t *buf, uint32_t lba, uint8_t drive) {
+void ide_read_sector(uint8_t drive, uint32_t lba, uint8_t *buf) {
 	uint16_t io = 0;
 	switch(drive) {
 		case (ATA_PRIMARY << 1 | ATA_MASTER):
@@ -114,7 +67,6 @@ uint8_t ata_read_sector(uint8_t *buf, uint32_t lba, uint8_t drive) {
 			break;
 		default:
 			kpanic("FATAL: unknown drive!\n");
-			return 0;
 	}
 
 	uint8_t cmd = (drive==ATA_MASTER?0xE0:0xF0);
@@ -135,25 +87,9 @@ uint8_t ata_read_sector(uint8_t *buf, uint32_t lba, uint8_t drive) {
 	}
 
 	ide_delay(io);
-	return 1;
 }
 
-uint8_t ata_read(uint8_t *buf, uint32_t lba, size_t sectors, uint8_t drive) {
-    __asm__ volatile("cli");
-
-	if(!sectors) return 1;
-
-    for (size_t i = 0; i < sectors; i++) {
-        ata_read_sector(buf, lba, drive);
-        buf += 512;
-    }
-
-    __asm__ volatile("sti");
-
-    return 0;
-}
-
-uint8_t ata_write_sector(uint8_t *buf, uint32_t lba, uint8_t drive) {
+void ide_write_sector(uint8_t drive, uint32_t lba, uint8_t *buf) {
 	uint16_t io = 0;
 	switch(drive) {
 		case (ATA_PRIMARY << 1 | ATA_MASTER):
@@ -174,7 +110,6 @@ uint8_t ata_write_sector(uint8_t *buf, uint32_t lba, uint8_t drive) {
 			break;
 		default:
 			kpanic("FATAL: unknown drive!\n");
-			return 0;
 	}
 
 	uint8_t cmd = (drive==ATA_MASTER?0xE0:0xF0);
@@ -193,24 +128,6 @@ uint8_t ata_write_sector(uint8_t *buf, uint32_t lba, uint8_t drive) {
 		outw(io + ATA_REG_DATA, buf[i]);
         ide_delay(io);
 	}
-
-	return 1;
-}
-
-uint8_t ata_write(uint8_t *buf, uint32_t lba, size_t sectors, uint8_t drive) {
-    __asm__ volatile("cli");
-
-	if(!sectors) return 1;
-
-    for (size_t i = 0; i < sectors; i++) {
-        ata_write_sector(buf, lba, drive);
-        buf += 512;
-    }
-    kprintf("ATA: wrote %d sectors from %d to %d\n", sectors, lba, lba + sectors);
-
-    __asm__ volatile("sti");
-
-    return 0;
 }
 
 void ata_init(void) {
@@ -220,6 +137,4 @@ void ata_init(void) {
 
     irq_install_handler(ATA_PRIMARY_IRQ, ata_primary_irq);
     irq_install_handler(ATA_SECONDARY_IRQ, ata_secondary_irq);
-
-    ata_probe();
 }

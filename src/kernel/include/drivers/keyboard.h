@@ -2,8 +2,8 @@
 #define _KERNEL_KEYBOARD_H
 
 #include <cpu/irq.h>
+#include <display.h>
 #include <drivers/io_port.h>
-#include <drivers/vga.h>
 #include <stdbool.h>
 #include <stdint.h>
 

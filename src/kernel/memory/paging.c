@@ -50,5 +50,6 @@ void page_fault(regs_t *r) {
     if (rw) { kprintf("read-only "); }
     if (us) { kprintf("user-mode "); }
     if (res) { kprintf("reserved "); }
+
     kprintf("0x%x)\n", faulting_address);
 }

@@ -94,9 +94,48 @@
 #define ATA_PRIMARY_IRQ 14
 #define ATA_SECONDARY_IRQ 15
 
+typedef struct {
+	uint16_t base;
+	uint16_t ctrl;
+	uint16_t bmide;
+	uint16_t nien;
+} ide_channel_regs_t;
+
+typedef struct {
+	uint8_t  reserved;
+	uint8_t  channel;
+	uint8_t  drive;
+	uint16_t type;
+	uint16_t signature;
+	uint16_t capabilities;
+	uint32_t command_sets;
+	uint32_t size;
+	uint8_t  model[41];
+} ide_device_t;
+
+typedef struct {
+	uint16_t flags;
+	uint16_t unused1[9];
+	char     serial[20];
+	uint16_t unused2[3];
+	char     firmware[8];
+	char     model[40];
+	uint16_t sectors_per_int;
+	uint16_t unused3;
+	uint16_t capabilities[2];
+	uint16_t unused4[2];
+	uint16_t valid_ext_data;
+	uint16_t unused5[5];
+	uint16_t size_of_rw_mult;
+	uint32_t sectors_28;
+	uint16_t unused6[38];
+	uint64_t sectors_48;
+	uint16_t unused7[152];
+} __attribute__((packed)) ata_identify_t;
+
 /* function declarations */
 void ata_init(void);
-uint8_t ata_read(uint8_t *buf, uint32_t lba, size_t sectors, uint8_t drive);
-uint8_t ata_write(uint8_t *buf, uint32_t lba, size_t sectors, uint8_t drive);
+void ide_read_sector(uint8_t drive, uint32_t lba, uint8_t *buf);
+void ide_write_sector(uint8_t drive, uint32_t lba, uint8_t *buf);
 
 #endif 
