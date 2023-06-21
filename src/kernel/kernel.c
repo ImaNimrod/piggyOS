@@ -1,4 +1,8 @@
+#include <vga.h>
+
 void kernel_main(void) {
-    *(char*)0xb8000 = 'Q';
+    clear();
+    set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
+    print_string("hey, pig");
     return;
 }
