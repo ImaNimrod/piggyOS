@@ -1,9 +1,7 @@
 #include <cpu/irq.h>
 
-static void *irq_routines[16] = {
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0
-};
+typedef void (*irq_routines) (regs_t *r);
+static irq_routines irqs[16] = {0};
 
 static void irq_remap(void) {
     outb(PIC1_CMD,  0x11);
@@ -52,18 +50,18 @@ void irq_wait(uint8_t irq) {
     current_int[irq] = 0;
 }
 
-void irq_install_handler(uint8_t irq, void (*handler)(regs_t *r)) {
-    irq_routines[irq] = handler;
+void irq_install_handler(uint8_t irq, irq_routines handler) {
+    irqs[irq] = handler;
 }
 
 void irq_uninstall_handler(uint8_t irq) {
-    irq_routines[irq] = 0;
+    irqs[irq] = 0;
 }
 
 void irq_ack(uint8_t irq) {
-	if (irq >= 12) {
+    if (irq >= 8)
+        outb(PIC1_CMD, PIC_EOI);
 		outb(PIC2_CMD, PIC_EOI);
-	}
 	outb(PIC1_CMD, PIC_EOI);
 }
 
@@ -71,12 +69,12 @@ void irq_handler(regs_t *r) {
     __asm__ volatile("cli");
 
     current_int[r -> int_no - 32] = 1;
-    void (*handler)(regs_t *r);
+    irq_routines handler;
 
     if (r->int_no > 47 || r->int_no < 32) {
 		handler = NULL;
 	} else {
-		handler = irq_routines[r->int_no - 32];
+		handler = irqs[r->int_no - 32];
 	}
 	if (handler) {
 		handler(r);

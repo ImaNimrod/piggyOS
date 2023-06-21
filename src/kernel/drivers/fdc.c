@@ -268,7 +268,7 @@ uint8_t floppy_write(uint8_t *buffer, uint32_t lba, uint32_t sectors) {
 		floppy_write_lba(buffer + i * 512, lba + i);
 	}
 
-	kprintf("wrote %d sectors from %d to %d\n", sectors, lba, lba + sectors);
+	kprintf("FDC: wrote %d sectors from %d to %d\n", sectors, lba, lba + sectors);
 	return 1;
 }
 

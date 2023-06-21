@@ -1,5 +1,5 @@
 CC=i686-elf-gcc
-CFLAGS=-c -m32 -std=c11 -ffreestanding -Os -Wall -Wextra -pedantic
+CFLAGS=-c -m32 -std=c11 -Os -ffreestanding -Wall -Wextra -pedantic
 LDFLAGS= -ffreestanding -Os -nostdlib -nostartfiles -nodefaultlibs -T linker.ld -lgcc
 BUILDDIR=build
 ISODIR=iso
@@ -24,7 +24,7 @@ $(kernel_object_files): $(BUILDDIR)/kernel/%.o : $(SRCDIR)/kernel/%.c
 
 $(libc_object_files): $(BUILDDIR)/libc/%.o : $(SRCDIR)/libc/src/%.c 
 	mkdir -p $(dir $@) && \
-	$(CC) $(CFLAGS) -I $(LIBCINCLUDEDIR) $(patsubst $(BUILDDIR)/libc/%.o, $(SRCDIR)/libc/src/%.c, $@) -o $@
+	$(CC) $(CFLAGS) -I $(LIBCINCLUDEDIR) -I $(KINCLUDEDIR) $(patsubst $(BUILDDIR)/libc/%.o, $(SRCDIR)/libc/src/%.c, $@) -o $@
 
 $(asm_object_files): $(BUILDDIR)/%.o : $(SRCDIR)/boot/%.asm
 	mkdir -p $(dir $@) && \
@@ -47,5 +47,6 @@ run:
 	qemu-system-i386 -cdrom piggyOS.iso\
 					 -m 16M\
 					 -rtc base=localtime\
-					 # -drive format=raw,file=floppy.img,index=0,if=floppy\
+					 -drive format=raw,file=floppy.img,index=0,if=floppy\
+					 # -drive format=raw,file=floppy2.img,index=0,if=ide\
 					 # -drive format=raw,file=floppy2.img,index=1,if=floppy\

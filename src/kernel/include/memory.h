@@ -1,6 +1,7 @@
 #ifndef _KERNEL_MEMORY_H
 #define _KERNEL_MEMORY_H
 
+#include <cpu/isr.h>
 #include <display.h>
 #include <stddef.h>
 #include <stdint.h>
