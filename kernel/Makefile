@@ -1,9 +1,9 @@
 include ../config.mk
 
 # kernel specific variables
-KERNEL_CFLAGS := -c -m32 -std=c11 -Os -ffreestanding -Wall -Wextra 
-KERNEL_CFLAGS += -Wno-unused-function -Wno-unused-parameter -pedantic
-KERNEL_CFLAGS += -mgeneral-regs-only 
+KERNEL_CFLAGS := -c -m32 -std=c11 -Os -ffreestanding
+KERNEL_CFLAGS += -Wall -Wextra -Wno-unused-function -Wstrict-prototypes -Wno-unused-parameter -pedantic
+KERNEL_CFLAGS += -mgeneral-regs-only  -mno-sse
 KERNEL_LDFLAGS= -Os -nostdlib -T linker.ld 
 
 KERNEL_C_SRCS := $(shell find -name '*.c')

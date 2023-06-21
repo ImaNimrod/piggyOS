@@ -1,21 +1,19 @@
 #include <sys/spinlock.h>
 
-void spinlock_init(spinlock_t* lock) {
-    lock->value = 0;
-    lock->task = NULL;
+static uint32_t atomic_test_and_set(spinlock_t* lock) {
+    register spinlock_t value = 1;
+	
+	__asm__ volatile("lock xchg	%0, %1"
+					  : "=q" (value), "=m" (*lock)
+					  : "0" (value));
+
+    return value;
 }
 
 void spin_lock(spinlock_t* lock) {
-    do {
-        while (__sync_lock_test_and_set(&lock->value, 0x01)); 
-        if(current_task) 
-            lock->task = current_task;
-    } while (0);
+    while(atomic_test_and_set(lock) == 0);
 }
 
 void spin_unlock(spinlock_t* lock) {
-    do { 
-        lock->task = NULL; 
-        __sync_lock_release(&lock->value);
-    } while (0);
+    *lock = 0;
 }

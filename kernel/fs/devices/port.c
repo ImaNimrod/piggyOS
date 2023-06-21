@@ -42,15 +42,16 @@ static size_t write_port(fs_node_t* node, uint32_t offset, size_t size, uint8_t*
 }
 
 void port_device_create(void) {
-    device_t port;
+    fs_node_t* port = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
 
-	strcpy(port.name, "port");
-	port.type = FS_BLOCKDEVICE;
-    port.open = NULL;
-    port.close = NULL;
-    port.read = read_port;
-    port.write = write_port;
-    port.ioctl = NULL;
+	strcpy(port->name, "port");
+	port->flags = FS_CHARDEVICE;
 
-    devfs_register(&port);
+    port->open = NULL;
+    port->close = NULL;
+    port->read = &read_port;
+    port->write = &write_port;
+    port->ioctl = NULL;
+
+    devfs_register(port);
 }

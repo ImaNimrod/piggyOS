@@ -1,14 +1,13 @@
 #include <fs/devfs.h>
 
 static list_t* devlist;
-static spinlock_t devlist_lock;
 static struct dirent* devfs_dirent;
+static spinlock_t devfs_lock = 1;
 
 static struct dirent* devfs_readdir(fs_node_t* node, uint32_t index) {
     struct dirent* result = NULL;
     uint32_t counter = 0;
-
-    spin_lock(&devlist_lock);
+    spin_lock(&devfs_lock);
 
     foreach(d, devlist) {
         if (index == counter) {
@@ -21,13 +20,14 @@ static struct dirent* devfs_readdir(fs_node_t* node, uint32_t index) {
         counter++;
     }
 
-    spin_unlock(&devlist_lock);
+    spin_unlock(&devfs_lock);
     return result;
 }
 
 static fs_node_t* devfs_finddir(fs_node_t* node, char* name) {
     fs_node_t* result = NULL;
-    spin_lock(&devlist_lock);
+
+    spin_lock(&devfs_lock);
 
     foreach(d, devlist) {
         fs_node_t* dev_node = (fs_node_t*) d->value;
@@ -38,48 +38,46 @@ static fs_node_t* devfs_finddir(fs_node_t* node, char* name) {
         }
     }
 
-    spin_unlock(&devlist_lock);
+    spin_unlock(&devfs_lock);
     return result;
+}
+
+void devfs_register(fs_node_t* device) {
+    spin_lock(&devfs_lock);
+
+    foreach(d, devlist) {
+        fs_node_t* devfs_node = (fs_node_t*) d->value;
+
+        if (!strcmp(device->name, devfs_node->name)) {
+            klog(LOG_ERR, "Could not create fs_node: %s, node by that name already exists\n");
+            spin_unlock(&devfs_lock);
+            return;
+        }
+    }
+
+    list_insert_front(devlist, device);
+    spin_unlock(&devfs_lock);
 }
 
 void devfs_init(void) {
     klog(LOG_OK, "Initializing devFS\n");
-    fs_node_t* devfs = kcalloc(sizeof(fs_node_t), 1);
+    fs_node_t* devfs = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
 
+    strcpy(devfs->name, "dev");
     devfs->flags = FS_DIRECTORY;
 
     devfs->open = NULL;
     devfs->close = NULL;
-    devfs->finddir = devfs_finddir;
-    devfs->readdir = devfs_readdir;
+    devfs->read = NULL;
+    devfs->write = NULL;
+    devfs->readdir = &devfs_readdir;
+    devfs->finddir = &devfs_finddir;
+    devfs->ioctl = NULL;
+
+    fs_register(devfs);
 
     devlist = list_create();
-    spinlock_init(&devlist_lock);
-}
 
-fs_node_t* devfs_register(device_t* device) {
-    spin_lock(&devlist_lock);
-
-    foreach(d, devlist) {
-        fs_node_t* dev_node = (fs_node_t*) d->value;
-
-        if (strcmp(device->name, dev_node->name) == 0) {
-            spin_unlock(&devlist_lock);
-            return NULL;
-        }
-    }
-
-    fs_node_t* dev_node = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
-    strcpy(dev_node->name, device->name);
-    dev_node->flags = device->type;
-    dev_node->open = device->open;
-    dev_node->close = device->close;
-    dev_node->read = device->read;
-    dev_node->write = device->write;
-    dev_node->ioctl = device->ioctl;
-
-    list_insert_front(devlist, dev_node);
-    spin_unlock(&devlist_lock);
-
-    return dev_node;
+    null_device_create();
+    port_device_create();
 }

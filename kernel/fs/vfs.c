@@ -1,6 +1,5 @@
 #include <fs/fs.h>
 
-tree_t* fs_tree = NULL;
 fs_node_t* fs_root = NULL;
 
 /* file operations */
@@ -58,7 +57,6 @@ fs_node_t* finddir_fs(fs_node_t* node, char* name) {
     return NULL;
 }
 
-
 int ioctl_fs(fs_node_t* node, uint32_t request, void* argp) {
 	if (!node) return 0;
 
@@ -67,78 +65,19 @@ int ioctl_fs(fs_node_t* node, uint32_t request, void* argp) {
     return 0;
 }
 
-/* for all things dealing with paths */
-char* canonicalize_path(const char* cwd, const char* input) {
-    list_t* out = list_create();
+fs_node_t* clone_fs(fs_node_t *node) {
+	if (!node) return NULL;
 
-    if (strlen(input) && input[0] != PATH_SEPARATOR) {
-        char* path = kmalloc((strlen(cwd) + 1) * sizeof(char));
-        memcpy(path, cwd, strlen(cwd) + 1);
+	fs_node_t* n = (fs_node_t*) kmalloc(sizeof(fs_node_t));
+	memcpy(n, node, sizeof(fs_node_t));
+	return n;
+}
 
-        char* pch;
-        char* save;
-        pch = strtok_r(path,PATH_SEPARATOR_STRING,&save);
+void vfs_init(void) {
+    klog(LOG_OK, "Initializing VFS structures\n");
+    fs_root = rootfs_init();
+}
 
-        while (pch != NULL) {
-            char* s = kmalloc(sizeof(char) * (strlen(pch) + 1));
-            memcpy(s, pch, strlen(pch) + 1);
-            list_insert_front(out, s);
-            pch = strtok_r(NULL, PATH_SEPARATOR_STRING, &save);
-        }
-
-        kfree(path);
-    }
-
-    char* path = kmalloc((strlen(input) + 1) * sizeof(char));
-    memcpy(path, input, strlen(input) + 1);
-
-    char* pch;
-    char* save;
-    pch = strtok_r(path,PATH_SEPARATOR_STRING,&save);
-
-    while (pch != NULL) {
-        if (!strcmp(pch,PATH_UP)) {
-            list_node_t* n = list_pop(out);
-            if (n) {
-                kfree(n->value);
-                kfree(n);
-            }
-        } else if (!strcmp(pch,PATH_DOT)) {
-            break;
-        } else {
-            char* s = kmalloc(sizeof(char) * (strlen(pch) + 1));
-            memcpy(s, pch, strlen(pch) + 1);
-            list_insert_front(out, s);
-        }
-        pch = strtok_r(NULL, PATH_SEPARATOR_STRING, &save);
-    }
-    kfree(path);
-
-    size_t size = 0;
-    foreach(item, out) {
-        size += strlen(item->value) + 1;
-    }
-
-    char* output = kmalloc(sizeof(char) * (size + 1));
-    char* output_offset = output;
-    if (size == 0) {
-        output = kmalloc(sizeof(char) * 2);
-        output[0] = PATH_SEPARATOR;
-        output[1] = '\0';
-    } else {
-        foreach(item, out) {
-            output_offset[0] = PATH_SEPARATOR;
-            output_offset++;
-            memcpy(output_offset, item->value, strlen(item->value) + 1);
-            output_offset += strlen(item->value);
-        }
-    }
-
-    foreach(item, out) {
-        listnode_destroy(item);
-    }
-    list_destroy(out);
-    kfree(out);
-
-    return output;
+fs_node_t* get_fs_root(void) {
+    return fs_root;
 }

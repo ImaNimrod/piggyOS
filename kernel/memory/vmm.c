@@ -177,7 +177,6 @@ static void enable_paging(void) {
     __asm__ volatile("mov %0, %%cr0" :: "r"(cr0));
 
     paging_enabled = true;
-    klog(LOG_OK, "Paging enabled\n");
 }
 
 void vmm_init(void) {

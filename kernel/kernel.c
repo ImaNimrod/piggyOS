@@ -10,14 +10,12 @@
 #include <drivers/timer.h>
 #include <drivers/vga.h>
 #include <fs/devfs.h>
-#include <fs/ext2.h>
 #include <fs/fs.h>
 #include <memory/kheap.h>
 #include <memory/pmm.h>
 #include <memory/vmm.h>
 #include <multiboot2.h>
 #include <string.h>
-#include <sys/spinlock.h>
 #include <sys/syscall.h>
 #include <sys/tasking.h>
 #include <system.h>
@@ -81,33 +79,46 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     /* initialize memory manager systems */
     pmm_init(meminfo);                                                              /* physical memory manager */
     vmm_init();                                                                     /* virtual memory manager */
-    allocate_region(kernel_page_dir, 0x00400000, 0x00400000 + module_size, 1, 1, 1);
     kheap_init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);   /* kernel heap allocator */
 
     /* initalize floating-point unit */
     fpu_init();
 
-    /* parse acpi tables */
-    acpi_init(rsdp);
+    // /* parse acpi tables */
+    // acpi_init(rsdp);
 
     /* initialize devices */
     timer_init(100); /* programmable interrupt timer */
     keyboard_init(); /* ps/2 keyboard controller */
     rtc_init();      /* real time clock */
 
-    if (ramdisk && !fs_root)
-        ext2_ramdisk_mount((uint32_t) ramdisk);
+    /* initialize vfs */
+    vfs_init();
 
-    /* initalize multitasking */
-    tasking_init(); 
+    /* initialize devfs */
+    devfs_init();
 
-    /* initialize syscalls */
-    syscalls_init();
-
-    tss_set_stack(0x10, inital_esp);
+    // /* initalize multitasking */
+    // tasking_init(); 
+    //
+    // /* initialize syscalls */
+    // syscalls_init();
+    //
+    // tss_set_stack(0x10, inital_esp);
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
+
+    fs_node_t* dev = finddir_fs(fs_root, "dev");
+    if (dev) {
+        kprintf("%s\n", dev->name);
+        kprintf("%d\n", dev->flags);
+        fs_node_t* port = finddir_fs(dev, "port");
+        if (port) {
+            kprintf("%s\n", port->name);
+            kprintf("%d\n", port->flags);
+        }
+    }
 
     for(;;);
 }

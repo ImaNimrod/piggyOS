@@ -2,12 +2,12 @@
 #define _KERNEL_FS_H
 
 #include <display.h>
+#include <dsa/tree.h>
 #include <memory/kheap.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/spinlock.h>
-#include <dsa/tree.h>
 
 #define FS_FILE        0x01
 #define FS_DIRECTORY   0x02
@@ -15,12 +15,7 @@
 #define FS_BLOCKDEVICE 0x04
 #define FS_PIPE        0x05
 #define FS_SYMLINK     0x06
-#define FS_MOUNTPOINT  0x08
-
-#define PATH_SEPARATOR '/'
-#define PATH_SEPARATOR_STRING "/"
-#define PATH_UP  ".."
-#define PATH_DOT "."
+#define FS_FIFO        0x07
 
 struct fs_node;
 
@@ -35,7 +30,6 @@ typedef int (*ioctl_type_t) (struct fs_node*, uint32_t request, void* argp);
 typedef struct fs_node {
     /* basic file information */
     char name[128]; 
-    void* device; 
     uint32_t flags, inode, length, impl;
 
     /* these are func ptrs that outline the operations we can do on files */
@@ -53,18 +47,27 @@ struct dirent {
     uint32_t inode;
 };
 
+struct vfs_entry {
+	char* name;
+	fs_node_t* file;
+};
+
 extern fs_node_t *fs_root;
 
 /* function declarations */
-size_t read_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf);
-size_t write_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf);
 void open_fs(fs_node_t *node, uint32_t flags);
 void close_fs(fs_node_t *node);
+size_t read_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf);
+size_t write_fs(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buf);
 struct dirent* readdir_fs(fs_node_t* node, uint32_t index);
 fs_node_t* finddir_fs(fs_node_t* node, char* name);
 int ioctl_fs(fs_node_t* node, uint32_t request, void* argp);
+fs_node_t* clone_fs(fs_node_t* node);
 
-char *canonicalize_path(const char *cwd, const char *input);
-fs_node_t *kopen(const char *filename, uint32_t flags);
+void vfs_init(void);
+fs_node_t* get_fs_root(void);
+void fs_register(fs_node_t* node);
+
+fs_node_t* rootfs_init(void);
 
 #endif 

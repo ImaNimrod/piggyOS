@@ -19,11 +19,11 @@ static int port_enable(uint16_t port) {
     return 1;
 }
 
-static int port_read_ready(uint16_t port) {
+static inline int port_read_ready(uint16_t port) {
     return inb(port + 5) & 1;
 }
 
-static int port_write_ready(uint16_t port) {
+static inline int port_write_ready(uint16_t port) {
     return inb(port + 5) & 0x20;
 }
 

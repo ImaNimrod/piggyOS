@@ -15,27 +15,17 @@ static size_t write_null(fs_node_t* node, uint32_t offset, size_t size, uint8_t*
     return size;
 }
 
-static void open_null(fs_node_t* node, uint32_t flags) {
-    (void) node;
-    (void) flags;
-	return;
-}
-
-static void close_null(fs_node_t* node) {
-    (void) node;
-	return;
-}
-
 void null_device_create(void) {
-    device_t null;
+    fs_node_t* null = (fs_node_t*) kcalloc(sizeof(fs_node_t), 1);
+    
+	strcpy(null->name, "null");
+	null->flags = FS_CHARDEVICE;
 
-	strcpy(null.name, "null");
-	null.type = FS_CHARDEVICE;
-    null.open = open_null;
-    null.close = close_null;
-    null.read = read_null;
-    null.write = write_null;
-    null.ioctl = NULL;
+    null->open = NULL;
+    null->close = NULL;
+    null->read = &read_null;
+    null->write = &write_null;
+    null->ioctl = NULL;
 
-    devfs_register(&null);
+    devfs_register(null);
 }
