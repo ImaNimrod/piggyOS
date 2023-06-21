@@ -91,8 +91,8 @@
 #define ATA_PRIMARY_DCR_AS 0x3F6
 #define ATA_SECONDARY_DCR_AS 0x376
 
-#define ATA_PRIMARY_IRQ 14
-#define ATA_SECONDARY_IRQ 15
+#define ATA_PRIMARY_IRQ 46
+#define ATA_SECONDARY_IRQ 47
 
 typedef struct {
 	uint16_t base;

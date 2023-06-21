@@ -18,8 +18,8 @@ static void syscall_dispatcher(regs_t* r) {
         return;
     }
 
+    memcpy(&saved_context, r, sizeof(regs_t));
     uintptr_t location = syscall_table[r->eax];
-
 
     int32_t ret;
     __asm__ volatile (" \

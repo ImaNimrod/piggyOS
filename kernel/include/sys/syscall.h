@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <system.h>
 
+/* defined in tasking.c */
+extern regs_t saved_context;
+
 /* function declarations */
 void syscalls_init(void);
 

@@ -2,14 +2,15 @@
 #define _KERNEL_TASKING_H
 
 #include <display.h>
+#include <list.h>
 #include <memory/kheap.h>
 #include <memory/vmm.h>
 #include <stdint.h>
 #include <stddef.h>
 
-#define TASK_STATUS_ALIVE 0
-#define TASK_STATUS_ZOMBIE 1
-#define TASK_STATUS_DEAD 2
+#define TASK_STATE_ALIVE 0
+#define TASK_STATE_ZOMBIE 1
+#define TASK_STATE_DEAD 2
 
 typedef uint32_t tid_t;
 
@@ -28,15 +29,20 @@ typedef struct context {
 } context_t;
 
 typedef struct task  {
-    char name[128];    
+    char* name;    
     tid_t tid;  
-    context_t* regs;
+    context_t regs;
+    uint32_t state;
     page_directory_t* page_dir;
-    struct task *prev, *next;
+    listnode_t* self;
 } task_t;
+
+/* defined in vmm.h */
+extern page_directory_t* kernel_page_dir;
 
 /* function declarations */
 void tasking_init(void);
-task_t* task_create(const char* name, uintptr_t location);
+void task_schedule(void);
+void create_task(char* name, uintptr_t location);
 
 #endif

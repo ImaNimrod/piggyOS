@@ -40,30 +40,24 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     idt_init();
     tss_init(5, 0x10, 0);
 
-    /* initialize physical memory manager */
-    pmm_init(1096 * M);
-
-    /* initialize virtual memory manager */
-    vmm_init();
-
-    /* initialize kernel kheap */
-    kheap_init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);
+    /* initialize memory manager systems */
+    pmm_init(1096 * M);                                                             /* physical memory manager */
+    vmm_init();                                                                     /* virtual memory manager */
+    kheap_init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);   /* kernel heap allocator */
 
     /* initialize devices */
-    timer_init(100);
-    keyboard_init();
-    rtc_init();
-    ata_init();
+    timer_init(100); /* programmable interrupt timer */
+    keyboard_init(); /* ps/2 keyboard controller */
+    rtc_init();      /* real time clock */
+    ata_init();      /* ata devices */
 
     /* initalize multitasking */
-    tasking_init();
+    tasking_init(); 
 
     /* initialize syscalls */
     syscalls_init();
 
-    // uint32_t a, num;
-    // num = 0;
-    // __asm__ volatile("int $0x7f" : "=a" (a) : "0" (num));
+    tss_set_stack(0x10, inital_esp);
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s", welecome_banner);

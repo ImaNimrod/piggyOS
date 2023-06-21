@@ -6,6 +6,7 @@
 #include <drivers/io_port.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/tasking.h>
 
 #define PIT_A     0x40
 #define PIT_CMD   0x43
@@ -13,9 +14,9 @@
 #define PIT_SCALE 1193180
 #define PIT_SET   0x36
 
-#define TIMER_IRQ 0
+#define TIMER_IRQ 32
 
-extern void scheduler(void);
+/* defined in tasking.c */
 extern regs_t saved_context;
 
 /* function declatations */

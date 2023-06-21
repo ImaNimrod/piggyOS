@@ -3,9 +3,6 @@
 
 #include <display.h>
 #include <memory/kheap.h>
-#include <dsa/list.h>
-#include <dsa/tree.h>
-#include <dsa/hashmap.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

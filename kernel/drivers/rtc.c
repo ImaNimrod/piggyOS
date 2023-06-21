@@ -43,7 +43,7 @@ void rtc_init(void) {
  
     read_cmos(CMOS_STATUS_C);
 
-    int_install_handler(32 + RTC_IRQ, rtc_irq_handler);
+    int_install_handler(RTC_IRQ, rtc_irq_handler);
 
     klog(LOG_OK, "RTC initialized\n");
 }

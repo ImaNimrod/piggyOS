@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define KEYBOARD_IRQ 1
+#define KEYBOARD_IRQ 33
 
 /*function declarations */
 void keyboard_init(void);
