@@ -2,13 +2,13 @@
 
 uint32_t num_syscalls;
 
-static int sys_gettid(void) {
+static int sys_hello(void) {
     kprintf("hello");
     return 0;
 }
 
 static uintptr_t syscall_table[] = {
-    (uintptr_t) &sys_gettid,
+    (uintptr_t) &sys_hello,
     0,
 };
 

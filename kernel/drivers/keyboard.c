@@ -42,7 +42,9 @@ static const char lower_map[128] = {
 static void keyboard_irq_handler(regs_t *r) {
     uint8_t scancode;
 
-    while(inb(0x64) & 2);
+    for (uint16_t i = 0; i < 1000; i++)
+        if((inb(0x64) & 1) == 0) continue;
+
     scancode = inb(0x60);
 
     if (scancode & 0x80) {
@@ -59,3 +61,9 @@ void keyboard_init(void) {
     klog(LOG_OK, "PS/2 Keyboard device initialized\n");
 }
 
+void keyboard_reset(void) {
+	uint8_t tmp = inb(0x61);
+	outb(0x61, tmp | 0x80);
+	outb(0x61, tmp & 0x7F);
+	inb(0x60);
+}

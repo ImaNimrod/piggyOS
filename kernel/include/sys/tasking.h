@@ -28,7 +28,7 @@ typedef struct context {
     uint32_t eip; //40
 } context_t;
 
-typedef struct task  {
+typedef struct {
     char* name;    
     tid_t tid;  
     context_t regs;
@@ -39,6 +39,9 @@ typedef struct task  {
 
 /* defined in vmm.h */
 extern page_directory_t* kernel_page_dir;
+
+/* usermode.asm */
+extern void user_regs_switch(context_t* r);
 
 /* function declarations */
 void tasking_init(void);

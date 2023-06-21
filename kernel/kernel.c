@@ -2,6 +2,7 @@
 #include <cpu/desc_tbls.h>
 #include <display.h>
 #include <drivers/ata.h>
+#include <drivers/fpu.h>
 #include <drivers/keyboard.h>
 #include <drivers/pci.h>
 #include <drivers/rtc.h>
@@ -15,11 +16,27 @@
 #include <memory/vmm.h>
 #include <multiboot.h>
 #include <string.h>
+#include <sys/spinlock.h>
 #include <sys/syscall.h>
 #include <sys/tasking.h>
 #include <system.h>
 
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n";
+
+void test_task(void) {
+    spinlock_t lock;
+    spinlock_init(&lock);
+    while(1) {
+        for(int i = 0; i < 10000; i++) {
+            for(int j= 0; j < 2000; j++) {
+
+            }
+        }
+        spin_lock(&lock);
+        kprintf("hi there\n");
+        spin_unlock(&lock);
+    }
+}
 
 void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t inital_esp) {
     #ifdef TEXTMODE
@@ -40,6 +57,9 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     idt_init();
     tss_init(5, 0x10, 0);
 
+    /* initalize floating-point unit */
+    fpu_init();
+
     /* initialize memory manager systems */
     pmm_init(1096 * M);                                                             /* physical memory manager */
     vmm_init();                                                                     /* virtual memory manager */
@@ -59,6 +79,8 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
 
     tss_set_stack(0x10, inital_esp);
 
+    create_task("task", (uintptr_t) &test_task);
+    
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s", welecome_banner);
 

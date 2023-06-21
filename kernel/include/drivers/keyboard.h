@@ -11,5 +11,6 @@
 
 /*function declarations */
 void keyboard_init(void);
+void keyboard_reset(void);
 
 #endif 
