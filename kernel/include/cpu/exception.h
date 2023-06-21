@@ -1,9 +1,10 @@
-#ifndef _KERNEL_ISR_H
-#define _KERNEL_ISR_H
+#ifndef _KERNEL_EXCEPTION_H
+#define _KERNEL_EXCEPTION_H
 
 #include <cpu/idt.h>
 #include <drivers/vga.h>
 #include <stdint.h>
+#include <system.h>
 
 /* function declarations */
 extern void isr0();
@@ -39,7 +40,7 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
-void isr_init(void);
+void exception_init(void);
 void fault_handler(regs_t *r);
 
 #endif

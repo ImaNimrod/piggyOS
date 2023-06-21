@@ -1,0 +1,2 @@
+#ifndef _KERNEL_DESC_TBLS_H
+#define _KERNEL_DESC_TBLS_H

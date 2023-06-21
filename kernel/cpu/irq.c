@@ -3,7 +3,9 @@
 typedef void (*irq_routines) (regs_t *r);
 static irq_routines irqs[16] = {0};
 
-static void irq_remap(void) {
+static volatile int current_int[15];
+
+void irq_init(void) {
     outb(PIC1_CMD,  0x11);
     outb(PIC2_CMD,  0x11);
     outb(PIC1_DATA, 0x20);
@@ -14,31 +16,25 @@ static void irq_remap(void) {
     outb(PIC2_DATA, 0x01);
     outb(PIC1_DATA, 0x0);
     outb(PIC2_DATA, 0x0);
-}
 
-static volatile int current_int[15];
+    idt_set_descr(32, (unsigned) irq0,  0x8E);
+    idt_set_descr(33, (unsigned) irq1,  0x8E);
+    idt_set_descr(34, (unsigned) irq2,  0x8E);
+    idt_set_descr(35, (unsigned) irq3,  0x8E);
+    idt_set_descr(36, (unsigned) irq4,  0x8E);
+    idt_set_descr(37, (unsigned) irq5,  0x8E);
+    idt_set_descr(38, (unsigned) irq6,  0x8E);
+    idt_set_descr(39, (unsigned) irq7,  0x8E);
+    idt_set_descr(40, (unsigned) irq8,  0x8E);
+    idt_set_descr(41, (unsigned) irq9,  0x8E);
+    idt_set_descr(42, (unsigned) irq10, 0x8E);
+    idt_set_descr(43, (unsigned) irq11, 0x8E);
+    idt_set_descr(44, (unsigned) irq12, 0x8E);
+    idt_set_descr(45, (unsigned) irq13, 0x8E);
+    idt_set_descr(46, (unsigned) irq14, 0x8E);
+    idt_set_descr(47, (unsigned) irq15, 0x8E);
 
-void irq_init(void) {
-    irq_remap();
-
-    idt_set_descr(32, (unsigned)irq0,  0x8E);
-    idt_set_descr(33, (unsigned)irq1,  0x8E);
-    idt_set_descr(34, (unsigned)irq2,  0x8E);
-    idt_set_descr(35, (unsigned)irq3,  0x8E);
-    idt_set_descr(36, (unsigned)irq4,  0x8E);
-    idt_set_descr(37, (unsigned)irq5,  0x8E);
-    idt_set_descr(38, (unsigned)irq6,  0x8E);
-    idt_set_descr(39, (unsigned)irq7,  0x8E);
-    idt_set_descr(40, (unsigned)irq8,  0x8E);
-    idt_set_descr(41, (unsigned)irq9,  0x8E);
-    idt_set_descr(42, (unsigned)irq10, 0x8E);
-    idt_set_descr(43, (unsigned)irq11, 0x8E);
-    idt_set_descr(44, (unsigned)irq12, 0x8E);
-    idt_set_descr(45, (unsigned)irq13, 0x8E);
-    idt_set_descr(46, (unsigned)irq14, 0x8E);
-    idt_set_descr(47, (unsigned)irq15, 0x8E);
-
-    for(int i = 0; i < 15; i++){
+    for(int8_t i = 0; i < 15; i++){
         current_int[i] = 0;
     }
 

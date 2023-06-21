@@ -4,6 +4,7 @@
 #include <cpu/idt.h>
 #include <drivers/io_port.h>
 #include <stdint.h>
+#include <system.h>
 
 #define PIC1_CMD     0x20
 #define PIC1_DATA    0x21

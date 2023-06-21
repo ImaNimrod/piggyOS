@@ -2,7 +2,7 @@
 #define _KERNEL_FS_H
 
 #include <display.h>
-#include <memory.h>
+#include <memory/kheap.h>
 #include <dsa/list.h>
 #include <dsa/tree.h>
 #include <dsa/hashmap.h>

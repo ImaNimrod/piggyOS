@@ -14,15 +14,14 @@ kernel:
 
 
 run:
-	qemu-system-i386 -m 128M\
+	qemu-system-i386 -m 4G\
 					 -rtc base=localtime\
 					 -serial stdio\
-					 -cdrom piggyOS.iso
-					 # -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
+					 -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
 
 cdrom: 
 	@grub-file --is-x86-multiboot2 iso/boot/piggyOS-kernel.bin 
-	@grub-mkrescue /usr/lib/grub/i386-pc -o $(CDROM) iso
+	@grub-mkrescue /usr/lib/grub/i386-pc -o $(CDROM) iso/
 
 IMAGE_SECTORS := 2097152 
 MAPPER_LINE := 0 $(IMAGE_SECTORS)linear 7:1 0

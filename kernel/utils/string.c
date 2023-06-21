@@ -1,5 +1,4 @@
 #include <string.h>
-#include <memory.h>
 
 void *memcpy (void *s1, const void *s2, size_t n) {
     int8_t *su1; 

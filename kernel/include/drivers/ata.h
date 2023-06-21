@@ -4,7 +4,7 @@
 #include <cpu/irq.h>
 #include <drivers/io_port.h>
 #include <display.h>
-#include <memory.h>
+#include <memory/kheap.h>
 #include <stdbool.h>
 #include <stdint.h>
 

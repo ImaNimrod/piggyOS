@@ -1,6 +1,7 @@
 #ifndef	_KERNEL_STRING_H
 #define	_KERNEL_STRING_H
 
+#include <memory/kheap.h>
 #include <stddef.h>
 #include <stdint.h>
 

@@ -6,7 +6,7 @@
 
 #define IDT_LEN 256
 
-typedef struct idt_descr {
+typedef struct {
     uint16_t base_low;
     uint16_t seg_sel; 
     uint8_t zero;
@@ -14,18 +14,10 @@ typedef struct idt_descr {
     uint16_t base_high;
 } __attribute__((packed)) idt_descr_t;
 
-typedef struct idt_ptr {
+typedef struct {
     uint16_t limit;
     uint32_t base;
 } __attribute__((packed)) idt_ptr_t;
-
-typedef struct regs {
-    unsigned int gs, fs, es, ds;
-    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    unsigned int int_no, err_code;
-    unsigned int eip, cs, eflags, useresp, ss;    
-
-} regs_t;
 
 /* function declarations */
 void idt_init(void);

@@ -1,27 +1,25 @@
 #include <string.h>
 #include <dsa/hashmap.h>
 
-unsigned int hashmap_string_hash(const void * _key) {
+uint32_t hashmap_string_hash(const void * _key) {
 	unsigned int hash = 0;
 	char * key = (char *)_key;
 	int c;
-	/* This is the so-called "sdbm" hash. It comes from a piece of
-	 * public domain code from a clone of ndbm. */
 	while ((c = *key++)) {
 		hash = c + (hash << 6) + (hash << 16) - hash;
 	}
 	return hash;
 }
 
-int hashmap_string_comp(const void * a, const void * b) {
+int hashmap_string_comp(const void* a, const void* b) {
 	return !strcmp(a,b);
 }
 
-void * hashmap_string_dupe(const void * key) {
+void* hashmap_string_dupe(const void* key) {
 	return strdup(key);
 }
 
-unsigned int hashmap_int_hash(const void * key) {
+uint32_t hashmap_int_hash(const void * key) {
 	return (intptr_t)key;
 }
 
@@ -29,7 +27,7 @@ int hashmap_int_comp(const void * a, const void * b) {
 	return (intptr_t)a == (intptr_t)b;
 }
 
-void * hashmap_int_dupe(const void * key) {
+void* hashmap_int_dupe(const void * key) {
 	return (void*)key;
 }
 
@@ -39,8 +37,8 @@ static void hashmap_int_free(void * ptr) {
 }
 
 
-hashmap_t * hashmap_create(int size) {
-	hashmap_t * map = kmalloc(sizeof(hashmap_t));
+hashmap_t* hashmap_create(int size) {
+	hashmap_t* map = kmalloc(sizeof(hashmap_t));
 
 	map->hash_func     = &hashmap_string_hash;
 	map->hash_comp     = &hashmap_string_comp;
@@ -55,8 +53,8 @@ hashmap_t * hashmap_create(int size) {
 	return map;
 }
 
-hashmap_t * hashmap_create_int(int size) {
-	hashmap_t * map = kmalloc(sizeof(hashmap_t));
+hashmap_t* hashmap_create_int(int size) {
+	hashmap_t* map = kmalloc(sizeof(hashmap_t));
 
 	map->hash_func     = &hashmap_int_hash;
 	map->hash_comp     = &hashmap_int_comp;

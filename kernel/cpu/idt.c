@@ -1,7 +1,7 @@
 #include <cpu/idt.h>
 
 static idt_descr_t idt[IDT_LEN];
-idt_ptr_t idt_ptr;
+static idt_ptr_t idt_ptr;
 
 void idt_set_descr(uint8_t num, uint32_t base, uint8_t flags) {
     idt[num].base_low = base & 0xFFFF;

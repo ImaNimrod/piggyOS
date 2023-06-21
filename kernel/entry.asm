@@ -18,6 +18,7 @@ header_end:
 
 section .data
 align 0x1000
+global boot_page_dir
 boot_page_dir:
     dd 0x00000083
     times (KERNEL_PAGE_NUMBER - 1) dd 0

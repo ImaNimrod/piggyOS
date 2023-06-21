@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <display.h>
-#include <memory.h>
+#include <memory/kheap.h>
 #include <drivers/io_port.h>
 
 #define PCI_CONFIG_ADDRESS 0xCF8
