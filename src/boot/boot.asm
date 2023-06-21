@@ -61,15 +61,13 @@ kernel_entry:
     hlt
 	jmp .end
 
-section .bootstrap_stack
-stack_bottom:
-    resb 16384 
-stack_top:
-
 section .bss
     align 4096
 boot_page_directory:
     resb 4096
 boot_page_tbl1:
     resb 4096
+stack_bottom:
+    resb 16384 
+stack_top:
 

@@ -1,82 +1,57 @@
 #include <vga.h>
 
-static const size_t NUM_COLS = 80;
-static const size_t NUM_ROWS = 25;
+static const uint8_t NUM_COLS = 80;
+static const uint8_t NUM_ROWS = 25;
 
-struct Char {
-    uint8_t character;
-    uint8_t color;
-};
+static uint16_t* screen_buffer = (uint16_t*) 0xc03ff000;
+static uint16_t cursor = 0;
+static uint16_t color = (VGA_COLOR_BLACK << 4 | VGA_COLOR_WHITE) << 8;
 
-struct Char* screen_buffer = (struct Char*) 0xc03ff000;
-size_t col = 0;
-size_t row = 0;
-uint8_t color = VGA_COLOR_WHITE | VGA_COLOR_BLACK << 4;
-
-static inline void clear_row(size_t row) {
-    struct Char empty = (struct Char) {
-        character: ' ',
-        color: color,
-    };
-
-    for (size_t col = 0; col < NUM_COLS; col++) {
-        screen_buffer[col + NUM_COLS * row] = empty;
+void vga_clear(void) {
+	for (int i = 0; i < NUM_COLS * NUM_ROWS; ++i) {
+		*(screen_buffer + i) = (uint16_t) 3872; 
     }
 }
 
-void clear() {
-    for (size_t i = 0; i < NUM_ROWS; i++) {
-        clear_row(i);
+static inline void vga_scroll(void) {
+    int i = 0;
+
+	for (i = 0; i < NUM_COLS * (NUM_ROWS - 1); ++i) {
+		screen_buffer[i] = screen_buffer[i + NUM_COLS];
+    }
+
+	for(i = 0; i < NUM_COLS; ++i) {
+		screen_buffer[NUM_COLS * (NUM_ROWS - 1) + i] = 3872; 
     }
 }
 
-static inline void print_newline() { col = 0;
+void vga_puts(const char* string) {
+	int i = 0;
+	while (string[i] != '\0') {
+		if (cursor == NUM_COLS * NUM_ROWS) {
+			vga_scroll();
+			cursor = NUM_COLS * (NUM_ROWS - 1);
+		}
 
-    if (row < NUM_ROWS - 1) {
-        row++;
-        return;
-    }
-
-    for (row = 1; row < NUM_ROWS; row++) {
-        for (col = 0; col < NUM_COLS; col++) {
-            struct Char character = screen_buffer[col + NUM_COLS * row];
-            screen_buffer[col + NUM_COLS * (row - 1)] = character;
-        }
-    }
-
-    clear_row(NUM_COLS - 1);
+		switch (string[i]) {
+            case '\n':
+                cursor = cursor + NUM_COLS - cursor % NUM_COLS;
+                break;
+            case '\r':
+                cursor = cursor - cursor % NUM_COLS;
+                break;
+            case '\t':
+             	while ((cursor % NUM_COLS) % 8 != 0)
+				    cursor++;
+                break;
+            default:
+                screen_buffer[cursor] = (uint16_t) (color | string[i]);
+                cursor++;
+	    }
+		i++;
+	}
 }
 
-void print_char(char character) {
-    if (character == '\n') {
-        print_newline();
-        return;
-    }
-
-    if (col > NUM_COLS) {
-        print_newline();
-    }
-
-    screen_buffer[col + NUM_COLS * row] = (struct Char) {
-        character: (uint8_t) character,
-        color: color,
-    };
-
-    col++;
-}
-
-void print_string(char* string) {
-    for (size_t i = 0; 1; i++) {
-        char character = (uint8_t) string[i];
-
-        if (character == '\0') {
-            return;
-        }
-
-        print_char(character);
-    }
-}
-
-void set_color(enum vga_color fg, enum vga_color bg) {
-    color = fg | bg << 4;
+void vga_set_color(uint8_t fg, uint8_t bg) {
+    color = (bg << 4 | fg) << 8;
 }

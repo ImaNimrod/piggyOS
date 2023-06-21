@@ -1,6 +1,6 @@
 CC=i686-elf-gcc
-CFLAGS=-c -m32 -std=c11 -ffreestanding -O2 -Wall -Wextra -fstack-protector -fstack-shuffle
-LDFLAGS= -ffreestanding -O2 -nostdlib -T linker.ld -lgcc
+CFLAGS=-c -m32 -std=c11 -ffreestanding -O2 -Wall -Wextra
+LDFLAGS= -ffreestanding -O2 -nostdlib -nostartfiles -nodefaultlibs -T linker.ld -lgcc
 SRCDIR=src
 ISODIR=iso
 INCLUDEDIR=$(SRCDIR)/libc/include
@@ -17,7 +17,7 @@ asm_object_files := $(patsubst src/boot/%.asm, build/%.o, $(asm_source_files))
 
 sys_object_files := $(c_object_files) $(asm_object_files)
 
-$(kernel_object_files): build/kernel/%.o : $(SRCDIR)/kernel/%.c
+$(kernel_object_files): build/kernel/%.o : $(SRCDIR)/kernel/%.c 
 	mkdir -p $(dir $@) && \
 	$(CC) $(CFLAGS) -I $(KINCLUDEDIR) $(patsubst build/kernel/%.o, $(SRCDIR)/kernel/%.c, $@) -o $@
 
@@ -27,7 +27,7 @@ $(c_object_files): build/%.o : $(SRCDIR)/libc/%.c
 
 $(asm_object_files): build/%.o : $(SRCDIR)/boot/%.asm
 	mkdir -p $(dir $@) && \
-	nasm -f elf $(patsubst build/%.o, $(SRCDIR)/boot/%.asm, $@) -o $@
+	nasm -f elf32 $(patsubst build/%.o, $(SRCDIR)/boot/%.asm, $@) -o $@
 
 .PHONY: piggyOS run
 piggyOS: $(kernel_object_files) $(sys_object_files)

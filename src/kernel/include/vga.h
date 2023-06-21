@@ -1,4 +1,4 @@
-#ifndef _KERNAL_VGA_H
+#ifndef _KERNEL_VGA_H
 #define _KERNEL_VGA_H
 
 #include <stddef.h>
@@ -25,9 +25,8 @@ enum vga_color {
 
 /* function definitions */
 
-void clear(void);
-void print_char(char character);
-void print_string(char* string);
-void set_color(enum vga_color fg, enum vga_color bg);
+void vga_clear(void);
+void vga_puts(const char* string);
+void vga_set_color(uint8_t fg, uint8_t bg);
 
 #endif
