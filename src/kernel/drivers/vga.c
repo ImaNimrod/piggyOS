@@ -1,6 +1,6 @@
 #include <drivers/vga.h>
 
-static uint16_t* screen_buffer = (uint16_t*) 0xc03ff000;
+static uint16_t* screen_buffer = (uint16_t*) 0xb8000;
 static uint16_t color = (VGA_COLOR_BLACK << 4 | VGA_COLOR_WHITE) << 8;
 static uint8_t cur_x = 0, cur_y = 0;
 
