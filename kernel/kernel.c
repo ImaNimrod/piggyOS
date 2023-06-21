@@ -95,23 +95,6 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     keyboard_init(); /* ps/2 keyboard controller */
     rtc_init();      /* real time clock */
 
-    if (ramdisk && !fs_root)
-        ext2_ramdisk_mount((uintptr_t) ramdisk);
-
-    /* initalize vfs */
-    vfs_init();
-
-    if (!fs_root) {
-        klog(LOG_ERR, "VFS root node not created\n");
-        return;
-    }
-
-    devfs_init();
-
-    null_device_create();
-    port_device_create();
-    zero_device_create();
-
     /* initalize multitasking */
     tasking_init(); 
 
@@ -119,9 +102,6 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     syscalls_init();
 
     tss_set_stack(0x10, inital_esp);
-
-    kprintf("%s\n", fs_root->name);
-    kprintf("%d\n", fs_root->inode);
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);

@@ -55,8 +55,6 @@ void devfs_init(void) {
 
     devlist = list_create();
     spinlock_init(&devlist_lock);
-
-    vfs_mount("/dev", devfs);
 }
 
 fs_node_t* devfs_register(device_t* device) {
