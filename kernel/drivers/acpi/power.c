@@ -1,7 +1,11 @@
 #include <drivers/acpi.h>
 
+extern uint32_t PM1a_CNT, PM1b_CNT;
+extern uint16_t SLP_TYPa, SLP_TYPb;
+extern uint16_t SCI_EN, SLP_EN;
+
 void reboot(void) {
-    klog(LOG_WARN, "Rebooting...\n");
+    klog(LOG_WARN, "Rebooting the machine...\n");
 
     uint8_t tmp = 0x02;
     while (tmp & 0x02)
@@ -20,6 +24,14 @@ void shutdown(void) {
     outw(0x604, 0x2000);  /* new qemu */
     outw(0x4004, 0x3400); /* virtualbox */
 
-    /* TODO ACPI shutdown */
+    if (SCI_EN == 0) {
+        kprintf("ACPI: shutdown not posible\n");
+        return;
+    }
+
+    outw(PM1a_CNT, SLP_TYPa | SLP_EN );
+    if (PM1b_CNT)
+        outw(PM1b_CNT, SLP_TYPb | SLP_EN );
+
     klog(LOG_ERR, "Shutdown failed\n");
 }

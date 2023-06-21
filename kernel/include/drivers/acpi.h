@@ -3,6 +3,7 @@
 
 #include <display.h>
 #include <drivers/io_port.h>
+#include <drivers/timer.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -42,6 +43,11 @@ typedef struct  {
     uint32_t smi_cmd;
     uint8_t acpi_enable;
     uint8_t acpi_disable;
+    uint8_t who_cares[64 - 54];
+    uint32_t pm1a_cnt_blk;
+    uint32_t pm1b_cnt_blk;
+    uint8_t who_cares2[89 - 72];
+    uint8_t pm1_cnt_length;
 } fadt_t;
 
 /* function declarations */
