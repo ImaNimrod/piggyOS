@@ -3,7 +3,9 @@
 
 #include <cpu/cpuid.h>
 #include <display.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <sys/task.h>
 
 /* function declarations */
 void fpu_init(void);

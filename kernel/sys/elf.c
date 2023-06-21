@@ -30,7 +30,6 @@ static inline elf_section_header_t* elf_get_section_header(elf_header_t* header,
     return (elf_section_header_t*) ((uint32_t) header + header->e_shoff + num * header->e_shentsize);
 }
 
-
 static inline elf_program_header_t* elf_get_program_header(elf_header_t* header, uint32_t num) {
     return (elf_program_header_t*) ((uint32_t) header + header->e_phoff + num * header->e_phentsize);
 }
@@ -68,7 +67,7 @@ static int elf_relocate(elf_header_t* header, uint32_t offset, int argc, char** 
 
         kprintf("ELF PHeader #%d, Type: LOAD, Off:0x%x, Vaddr:0x%x, Size:0x%d\n", i, pheader->p_offset, pheader->p_vaddr, pheader->p_memsz);
 
-        allocate_region(kernel_page_dir, pheader->p_vaddr, pheader->p_vaddr + pheader->p_filesz, 0, 1, 1);
+        allocate_region(kernel_page_dir, pheader->p_vaddr, pheader->p_vaddr + pheader->p_filesz, 0, 0, 1);
         memcpy((uint8_t*) pheader->p_vaddr, (uint8_t*) offset + pheader->p_offset, pheader->p_filesz);
 
         if (pheader->p_filesz < pheader->p_memsz)

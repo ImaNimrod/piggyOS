@@ -60,9 +60,6 @@ typedef struct {
 // boot_page_dir defined in entry.asm
 extern page_directory_t* boot_page_dir;
 
-// kernel_page_dir defined in memory/vmm.c 
-extern page_directory_t* kernel_page_dir;
-
 // pmm_bitmap defined in pmm.c
 extern uint32_t* pmm_bitmap;
 extern uint32_t pmm_bitmap_size;

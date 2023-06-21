@@ -7,7 +7,8 @@ piggyOS: clean kernel
 clean:
 	$(RM) -r $(BUILD_DIR)
 	$(RM) -r piggyOS.iso
-	$(RM) -r ./iso/modules/*
+	$(RM) -r ./iso/boot/piggyOS-kernel.bin
+	$(RM) -r ./iso/modules/
 
 kernel:
 	$(MAKE) -C $(KERNEL_DIR) -f Makefile piggyOS-kernel.bin
