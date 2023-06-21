@@ -1,7 +1,6 @@
-#include <cpu/gdt.h>
-#include <cpu/idt.h>
-#include <cpu/irq.h>
+#include <cpu/desc_tbls.h>
 #include <cpu/exception.h>
+#include <cpu/irq.h>
 #include <display.h>
 #include <drivers/ata.h>
 #include <drivers/keyboard.h>
@@ -20,18 +19,19 @@
 
 void kernel_main(uintptr_t inital_esp) {
     uint32_t inital_stack = inital_esp;
+    uint32_t lock = 0;
 
     #ifdef TEXTMODE
     vga_clear();
     vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
     #endif 
 
-
     serial_init();
 
     /* load descriptor tables and interrupt information */
     gdt_init();
     idt_init();
+    tss_init(5, 0x10, 0);
     exception_init();
     irq_init();
 

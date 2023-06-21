@@ -115,7 +115,7 @@ static void free_region(page_directory_t* dir, uint32_t start_va, uint32_t end_v
     }
 }
 
-static void switch_page_directory(page_directory_t* page_dir, uint32_t phys) {
+void switch_page_directory(page_directory_t* page_dir, uint32_t phys) {
     uint32_t t;
     if(!phys)
         t = (uint32_t) virt2phys(boot_page_dir, page_dir);

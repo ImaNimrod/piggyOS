@@ -1,7 +1,7 @@
 #ifndef _KERNEL_IRQ_H
 #define _KERNEL_IRQ_H
 
-#include <cpu/idt.h>
+#include <cpu/desc_tbls.h>
 #include <drivers/io_port.h>
 #include <stdint.h>
 #include <system.h>

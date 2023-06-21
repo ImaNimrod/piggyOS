@@ -1,4 +1,4 @@
-#include <cpu/idt.h>
+#include <cpu/desc_tbls.h>
 
 static idt_descr_t idt[IDT_LEN];
 static idt_ptr_t idt_ptr;

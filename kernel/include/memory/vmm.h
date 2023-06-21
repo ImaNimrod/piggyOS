@@ -66,5 +66,6 @@ extern uint32_t bitmap_size;
 void *virt2phys(page_directory_t* dir, void* virtual_addr);
 void vmm_init(void);
 void *ksbrk(int32_t size);
+void switch_page_directory(page_directory_t* page_dir, uint32_t phys);
 
 #endif

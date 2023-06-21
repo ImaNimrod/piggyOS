@@ -1,7 +1,7 @@
 #ifndef _KERNEL_EXCEPTION_H
 #define _KERNEL_EXCEPTION_H
 
-#include <cpu/idt.h>
+#include <cpu/desc_tbls.h>
 #include <drivers/vga.h>
 #include <stdint.h>
 #include <system.h>
