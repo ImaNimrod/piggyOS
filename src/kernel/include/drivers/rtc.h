@@ -4,14 +4,9 @@
 #include <cpu/irq.h>
 #include <display.h>
 #include <drivers/io_port.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
-#define array_len(xs) (int) (sizeof(xs) / sizeof(xs[0]))
-#define from_bcd(val) (uint8_t) ((val >> 4) * 10 + (val & 0xf))
-
-#define RTC_IRQ 8
+#define from_bcd(val) (((val >> 4) * 10) + (val & 0xf))
 
 typedef enum {
 	CMOS_SECOND = 0x00,
@@ -38,13 +33,12 @@ typedef enum{
 } cmos_status_c;
 
 typedef struct{
-	uint8_t year, month, day, hour, minute, second;
+	uint8_t year, mnth, day, hour, min, sec;
 } time_t;
 
 /* function declarations */
-void rtc_init(void);
-void get_time(time_t *time);
 uint8_t read_cmos(cmos_reg reg);
-void write_cmos(cmos_reg reg, uint8_t value);
+void write_cmos(cmos_reg, uint8_t value);
+void get_time(time_t* dt);
 
 #endif

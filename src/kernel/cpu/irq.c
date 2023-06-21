@@ -18,6 +18,16 @@ static void irq_remap(void) {
     outb(PIC2_DATA, 0x0);
 }
 
+static uint16_t __pic_get_irq_reg(int ocw3) {
+    outb(PIC1_CMD, ocw3);
+    outb(PIC2_CMD, ocw3);
+    return (inb(PIC2_CMD) << 8) | inb(PIC1_CMD);
+}
+ 
+uint16_t pic_get_isr(void) {
+    return __pic_get_irq_reg(PIC_READ_ISR);
+}
+
 void irq_init(void) {
     irq_remap();
 
@@ -73,4 +83,40 @@ void irq_handler(regs_t *r) {
 	}
 
     __asm__ volatile("sti");
+}
+
+void enable_int(void) {
+    __asm__ volatile("sti");
+}
+
+void disable_int(void) {
+    __asm__ volatile("cli");
+}
+
+void irq_set_mask(uint8_t IRQline) {
+    uint16_t port;
+    uint8_t value;
+ 
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) | (1 << IRQline);
+    outb(port, value);        
+}
+ 
+void irq_clear_mask(uint8_t IRQline) {
+    uint16_t port;
+    uint8_t value;
+ 
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) & ~(1 << IRQline);
+    outb(port, value);        
 }

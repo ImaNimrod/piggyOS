@@ -12,7 +12,7 @@ void idt_set_descr(uint8_t num, uint32_t base, uint8_t flags) {
 }
 
 static void idt_set(void) {
-    __asm__ volatile("lidtl (idt_ptr)"); 
+    __asm__ volatile("lidt %0" : : "m"(idt_ptr));
 }
 
 void idt_init(void) {

@@ -5,10 +5,12 @@
 #include <drivers/io_port.h>
 #include <stdint.h>
 
-#define PIC1_CMD   0x20
-#define PIC1_DATA  PIC1_CMD+1
-#define PIC2_CMD   0xA0
-#define PIC2_DATA  PIC1_CMD+1
+#define PIC1_CMD     0x20
+#define PIC1_DATA    PIC1_CMD+1
+#define PIC2_CMD     0xA0
+#define PIC2_DATA    PIC1_CMD+1
+#define PIC_READ_IRR 0x0a    /* OCW3 irq ready next CMD read */
+#define PIC_READ_ISR 0x0b    /* OCW3 irq service next CMD read */
 
 #define PIC_EOI    0x20
 
@@ -35,6 +37,14 @@ void irq_install_handler(uint8_t irq, void (*handler)(regs_t *r));
 void irq_uninstall_handler(uint8_t irq);
 void irq_ack(uint8_t irq);
 
+void irq_set_mask(uint8_t IRQline);
+void irq_clear_mask(uint8_t IRQline);
+
+uint16_t pic_get_isr(void);
+
 void irq_handler(regs_t *r);
+
+void enable_int(void);
+void disable_int(void);
 
 #endif 

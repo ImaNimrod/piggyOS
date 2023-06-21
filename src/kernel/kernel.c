@@ -27,11 +27,14 @@ void kernel_main(void) {
 
     timer_init();
     keyboard_init();
-    // rtc_init();
 
     pci_init();
 
     mmu_print_state();
+
+    time_t time;
+    get_time(&time);
+    kprintf("%d %d/%d %d:%d:%d\n", time.year + 2000, time.mnth, time.day, time.hour, time.min, time.sec);
 
     for(;;) {
         __asm__("hlt");
