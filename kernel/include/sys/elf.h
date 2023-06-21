@@ -7,6 +7,7 @@
 #include <memory/vmm.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/task.h>
 
 enum elf_ident {
     EI_MAG0        = 0,
@@ -94,8 +95,6 @@ typedef struct {
     uint32_t p_flags;
     uint32_t p_align;
 } __attribute__((packed)) elf_program_header_t;
-
-extern page_directory_t* kernel_page_dir;
 
 /* function declarations */
 uint8_t elf_check_header(elf_header_t* hdr);

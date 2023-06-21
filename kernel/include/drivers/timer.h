@@ -18,6 +18,7 @@
 
 /* function declatations */
 void timer_init(int32_t hz);
+uint32_t get_ticks(void);
 void sleep(uint64_t ticks);
 
 #endif

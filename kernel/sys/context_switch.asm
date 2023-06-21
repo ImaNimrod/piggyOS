@@ -4,6 +4,7 @@ global context_switch
 
 extern current_task
 
+; void context_switch(task_t* next);
 context_switch:
     pop eax
     pushfd
@@ -21,16 +22,7 @@ context_switch:
     mov [eax], esp
 
     mov eax, [esp + 24] 
-    mov ebx, [eax + 8] ; ptr to page_direcory 
 
-    ; virtual address space has no changed
-    mov edx, cr3
-    cmp edx, ebx
-    je .no_pagedir
-
-    mov cr3, ebx
-
-.no_pagedir:
     mov [current_task], eax
 
     mov esp, [eax]
@@ -45,4 +37,4 @@ context_switch:
     push cs
     push eax
 
-    iretd
+    iret

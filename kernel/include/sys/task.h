@@ -1,63 +1,58 @@
 #ifndef _KERNEL_TASK_H
 #define _KERNEL_TASK_H
 
-#include <cpu/desc_tbls.h>
+#include <cpu/fpu.h>
 #include <display.h>
-#include <drivers/fpu.h>
+#include <drivers/timer.h>
 #include <dsa/list.h>
-#include <fs/fs.h>
 #include <memory/kheap.h>
 #include <memory/vmm.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <system.h>
-#include <sys/spinlock.h>
 #include <types.h>
 
+#define KSTACK_SIZE 0x1000
 #define MAX_FILEDESCS 16
 
-typedef struct {
-    fs_node_t* node;
-    off_t offset; 
-} task_filedesc_t;
+struct context {
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebx;
+    uint32_t ebp;
+    uint32_t eip;
+    uint32_t eflags;
+};
 
-typedef struct {
-	uint32_t ebx, esi, edi, ebp;  // callee-save
-	uint32_t eip, eflags;	        // CALL/IRET
-} context_t;
-
-enum state { 
+enum task_state { 
     TASK_READY, 
-    TASK_RUNNING, 
-    TASK_DEAD,
+    TASK_SLEEPING,
+    TASK_ZOMBIE,
 };
 
 typedef struct {
-    uint8_t* kstack;
-	uint8_t* kstack_mem;
+    void* kstack;
+	void* kstack_mem;
     page_directory_t* page_dir;
 
-    uint8_t* fpu_state; // space for fpu/sse/mmx registers 
+    __attribute__((aligned(16))) uint8_t* fpu_state; // space for fpu/sse/mmx registers 
     uint8_t fpu_used;   // have we used the fpu yet
 
     list_node_t* self;
 
     char name[16];
-    pid_t pid;
-    enum state state;
+    tid_t tid;
+    enum task_state state;
 
-    task_filedesc_t file_descs[MAX_FILEDESCS];
-    uint32_t file_count;
+    uint32_t usage;
 } task_t;
-
-extern page_directory_t* kernel_page_dir;
 
 /* function declarations */
 void task_create(char* name, uintptr_t func);
-void task_exit(int code);
+void task_exit(void);
 void schedule(void);
 void multitasking_init(char* name, uintptr_t func);
 
-extern void context_switch(task_t* t);
+extern void context_switch(task_t* next);
 
 #endif

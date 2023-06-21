@@ -1,4 +1,4 @@
-#include <drivers/fpu.h>
+#include <cpu/fpu.h>
 
 extern task_t* current_task;
 static task_t* last_fpu_task;

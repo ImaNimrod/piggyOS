@@ -15,6 +15,10 @@ __attribute__((optimize("O0"))) void sleep(uint64_t ticks) {
     do {} while(eticks > timer_ticks);
 }
 
+uint32_t get_ticks(void) {
+    return timer_ticks;
+}
+
 void timer_init(int32_t hz) {
     int divisor = 1193180 / hz;	   
 	outb(PIT_CMD, 0x36);			 

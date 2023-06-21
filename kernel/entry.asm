@@ -6,7 +6,7 @@ header_start:
 	dd 0xe85250d6 
 	dd 0 
 	dd header_end - header_start
-	dd 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start))
+	dd -(0xe85250d6 + 0 + (header_end - header_start))
 
     dw 0 
     dw 0 
@@ -59,19 +59,17 @@ higher_half:
     cld
 
     ; unmap the first identity-mapped 4MB; we dont need it anymore
-    mov dword [boot_page_dir], 0
     invlpg [0]
 
     ; initialize stack
     mov esp, stack_top
-    push esp
 
     ; pass multiboot information to kernel
     add ebx, KERNEL_VIRTUAL_BASE
     push ebx
     push eax
 
-    ; load out kernel
+    ; load our kernel
     call kernel_main
 
     cli

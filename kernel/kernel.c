@@ -1,8 +1,8 @@
-#include <cpu/cpuid.h> 
+#include <cpu/cpuid.h>
 #include <cpu/desc_tbls.h>
+#include <cpu/fpu.h>
 #include <display.h>
 #include <drivers/acpi.h>
-#include <drivers/fpu.h>
 #include <drivers/keyboard.h>
 #include <drivers/pci.h>
 #include <drivers/rtc.h>
@@ -25,18 +25,26 @@
 
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n\t\t\t\tBy: James Steffes\n";
 
+extern void switch_to_user(uint32_t esp, uint32_t eip);
+
+void test(void) {
+    for(;;);
+}
+
 void stage2(void) {
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
 
+    task_create("test", (uintptr_t) &test);
+
     /* idle forever */
-    while (1)
+    while (1) {
         __asm__ volatile("hlt");
+    }
 }
 
-void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2, uint32_t inital_esp) {
+void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2) {
     static uint32_t module_start, module_end;
-    // static uint8_t* rsdp;
 
     #ifdef TEXTMODE
     vga_clear();
@@ -46,13 +54,9 @@ void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2, uint32_t inita
     /* initialize serial port(s) */
     serial_init();
 
-    /* load descriptor tables and interrupt information */
-    gdt_init();
-    idt_init();
-    tss_init(5, 0x10, 0);
-
+    /* verify multiboot information */
     if (mboot2_magic == MBOOT2_MAGIC) {
-        if ((uint32_t) &mb2 & 7) {
+        if ((uint32_t) mb2 & 7) {
             klog(LOG_ERR, "Multiboot2 info unaligned\n");
             return;
         }
@@ -65,13 +69,6 @@ void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2, uint32_t inita
                     module_start = ((struct mboot2_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
                     module_end = ((struct mboot2_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS;
                     break;
-                // case MBOOT2_TAG_ACPI_OLD:
-                //     if(!rsdp)
-                //         rsdp = (uint8_t*) &((struct mboot_tag_acpi_old*) tag)->rsdp;
-                //     break;
-                // case MBOOT2_TAG_ACPI_NEW: 
-                //     rsdp = (uint8_t*) &((struct mboot_tag_acpi_new*) tag)->rsdp;
-                //     break;
                 default: break;
             }
 
@@ -81,6 +78,11 @@ void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2, uint32_t inita
         klog(LOG_ERR, "Multiboot2 compatible bootloader not detected\n");
         return;
     }
+
+    /* load descriptor tables and interrupt information */
+    gdt_init();
+    idt_init();
+    tss_init(5, 0x10, 0);
 
     print_cpu_vendor();
     print_cpu_features();

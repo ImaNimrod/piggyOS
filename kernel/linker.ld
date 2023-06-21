@@ -8,30 +8,31 @@ SECTIONS {
     KERNEL_VIRTUAL_BASE = 0xc0000000;
     . += KERNEL_VIRTUAL_BASE;
 
-	kernel_start = .;
+	kernel_start_phys = . - KERNEL_VIRTUAL_BASE;
+	kernel_start_virt = .;
 
-    .text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_VIRTUAL_BASE)
-	{
-		*(.multiboot2_header)
+    .multiboot2_header ALIGN(8) : AT(ADDR(.multiboot2_header) - KERNEL_VIRTUAL_BASE) {
+        *(.multiboot2_header)
+    }
+
+    .text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_VIRTUAL_BASE) {
 		*(.text)
         *(.rodata*)
 	}
 
-    .data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_VIRTUAL_BASE)
-	{
+    .data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_VIRTUAL_BASE) {
 		*(.data)
 	}
 
-	.bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_VIRTUAL_BASE)
-	{
+	.bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_VIRTUAL_BASE) {
 		*(COMMON)
 		*(.bss)
 	}
 
-    kernel_end = .;
+	kernel_end_phys = . - KERNEL_VIRTUAL_BASE;
+    kernel_end_virt = .;
 
-    /DISCARD/ :
-	{
+    /DISCARD/ : {
 		*(.comment)
         *(.eh_frame)
 		*(.note.gnu.build-id)

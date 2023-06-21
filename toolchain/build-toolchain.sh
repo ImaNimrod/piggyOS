@@ -94,7 +94,9 @@ pushd "$DIR/tarballs"
         pushd build_binutils
             "$DIR"/tarballs/$BINUTILS_NAME/configure --prefix="$PREFIX" \
                                             --target="$TARGET" \
-                                            --disable-nls
+                                            --with-sysroot \
+                                            --disable-nls \
+                                            --disable-werror 
             make -j "$(nproc)"
             make install
         popd
@@ -109,8 +111,7 @@ pushd "$DIR/tarballs"
                                        --target="$TARGET" \
                                        --disable-nls \
                                        --enable-languages=c \
-                                       --without-headers \
-                                       --enable-default-pie
+                                       --without-headers 
             make -j "$(nproc)" all-gcc
             make -j "$(nproc)" all-target-libgcc
             make install-gcc install-target-libgcc

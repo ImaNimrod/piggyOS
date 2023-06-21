@@ -7,13 +7,14 @@
 #include <system.h>
 #include <sys/task.h>
 
-#define SYS_GETPID      1
+#define SYS_GETTID      1
 #define SYS_YIELD       2
 #define SYS_EXIT        3
-#define SYS_OPEN        4
-#define SYS_CLOSE       5
-#define SYS_READ        6
-#define SYS_WRITE       7
+#define SYS_RPL3TEST    4
+
+extern int sys_gettid(void);
+extern int sys_yield(void);
+extern int sys_exit(void);
 
 /* function declarations */
 void syscalls_init(void);

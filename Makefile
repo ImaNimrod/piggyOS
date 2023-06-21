@@ -1,20 +1,25 @@
 include config.mk
 
-.PHONY: clean kernel run initrd cdrom toolchain 
+.PHONY: clean kernel userland run initrd cdrom toolchain 
 
-piggyOS: clean kernel 
+piggyOS: clean kernel userland
 
 clean:
 	$(RM) -r $(BUILD_DIR)
-	$(RM) -r piggyOS.iso
-	$(RM) -r $(ISO_DIR)/boot/piggyOS-kernel.bin
+	$(RM) piggyOS.iso
+	$(RM) $(ISO_DIR)/boot/piggyOS-kernel.bin
 	$(RM) -r $(ISO_DIR)/modules/
 
-kernel:
-	$(MAKE) -C $(KERNEL_DIR) -f Makefile piggyOS-kernel.bin
+kernel: 
+	@echo "compiling piggyOS kernel"
+	@$(MAKE) -C $(KERNEL_DIR) -f Makefile 
+
+userland:
+	@echo "compiling and installing piggyOS userland"
+	@$(MAKE) -C $(USERLAND_DIR) -f Makefile 
 
 run:
-	$(EMU) -m 256\
+	$(EMU) -m 512 \
 		   -name piggyOS \
 		   -cdrom piggyOS.iso \
 		   -enable-kvm \
@@ -30,4 +35,5 @@ cdrom: initrd
 	@grub-mkrescue /usr/lib/grub/i386-pc -o piggyOS.iso $(ISO_DIR)
 
 toolchain:
+	@echo "compiling and installing piggyOS toolchain"
 	@$(PWD)/toolchain/build-toolchain.sh

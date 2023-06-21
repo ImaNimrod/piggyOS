@@ -3,6 +3,8 @@
 static uint32_t max_blocks;
 static uint32_t used_blocks;
 static uint32_t mem_size;
+static uintptr_t bitmap_addr;
+
 uint32_t* pmm_bitmap;
 uint32_t pmm_bitmap_size;
 
@@ -31,7 +33,7 @@ static uint32_t first_free_block(void) {
     }
 
     klog(LOG_WARN, "%s: running out of free blocks\n", __func__);
-    return 0;
+	return 0;
 }
 
 uint32_t pmm_alloc_block(void) {
@@ -41,32 +43,33 @@ uint32_t pmm_alloc_block(void) {
     }
 
     uint32_t free_block = first_free_block();
+
     pmm_bitmap_set(free_block);
-    return free_block;
+    return free_block * PMM_BLOCK_SIZE;
 }
 
-void pmm_free_block(uint32_t blk_num) {
-    pmm_bitmap_unset(blk_num);
+void pmm_free_block(uint32_t addr) {
+    uint32_t block = addr / PMM_BLOCK_SIZE;
+    pmm_bitmap_unset(block);
 }
 
 void pmm_init(struct mboot2_begin* mb2) {
     struct mboot2_tag* tag = mb2->tags;
-    uintptr_t bitmap_addr = 0;
 
     /* iterate through modules and increase bitmap_addr 
      * until it points to the end of the last module */
     do {
         if (tag->type == MBOOT2_TAG_MODULE) {
             struct mboot2_tag_module* mod = (struct mboot2_tag_module*) tag;
-            bitmap_addr = MAX(mod->mod_end + LOAD_MEMORY_ADDRESS, bitmap_addr);
+            bitmap_addr = MAX(mod->mod_end, bitmap_addr);
         }  
 
         tag = (struct mboot2_tag*) ((uintptr_t) tag + ((tag->size + 7) & ~7));
     } while (tag->type != MBOOT2_TAG_END);
 
     /* modules may come before kernel */
-    if (bitmap_addr < (uintptr_t) &kernel_end)
-        bitmap_addr = (uintptr_t) &kernel_end;
+    if (bitmap_addr < (uintptr_t) &kernel_end_phys)
+        bitmap_addr = (uintptr_t) &kernel_end_phys;
 
     /* check to see if kernel and its modules are too large */
     if (bitmap_addr > LOAD_MEMORY_ADDRESS + 0x00400000)
@@ -80,8 +83,8 @@ void pmm_init(struct mboot2_begin* mb2) {
     max_blocks = mem_size / PMM_BLOCK_SIZE;
 
     /* place pmm_bitmap after kernel and its modules */
-    pmm_bitmap = (uint32_t*) bitmap_addr;
-    pmm_bitmap_size = max_blocks / 32;
+    pmm_bitmap = (uint32_t*) align_to(bitmap_addr + LOAD_MEMORY_ADDRESS, 4);
+    pmm_bitmap_size = max_blocks / 8;
 
     memset(pmm_bitmap, 0, pmm_bitmap_size);
 

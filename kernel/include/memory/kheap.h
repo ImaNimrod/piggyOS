@@ -8,9 +8,9 @@
 #include <stddef.h>
 #include <system.h>
 
-#define KHEAP_START         (char*) LOAD_MEMORY_ADDRESS + 0x00400000 
-#define KHEAP_INITIAL_SIZE  48 * M
-#define KHEAP_MAX_ADDRESS   (char*) LOAD_MEMORY_ADDRESS + 0x0FFFFFFF
+#define KHEAP_START         (uint8_t*) LOAD_MEMORY_ADDRESS + 0x00400000 
+#define KHEAP_INITIAL_SIZE  8 * M
+#define KHEAP_MAX_ADDRESS   (uint8_t*) LOAD_MEMORY_ADDRESS + 0x0FFFFFFF
 #define KHEAP_MIN_SIZE      4 * M
 
 #define OVERHEAD (sizeof(struct Block) + sizeof(size_t))

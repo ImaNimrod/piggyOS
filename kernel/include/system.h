@@ -23,6 +23,14 @@
 
 #define NUM_ELEMENTS(array) (sizeof(array) / sizeof(array[0]))
 
+static uint32_t align_to(uint32_t n, uint32_t align) {
+    if (n % align == 0) {
+        return n;
+    }
+
+    return n + (align - n % align);
+}
+
 static uint32_t divide_up(uint32_t n, uint32_t d) {
     if (n % d == 0)
         return n / d;
@@ -31,8 +39,10 @@ static uint32_t divide_up(uint32_t n, uint32_t d) {
 }
 
 // defined by the linker
-extern uintptr_t kernel_start;
-extern uintptr_t kernel_end;
+extern uintptr_t kernel_start_phys;
+extern uintptr_t kernel_start_virt;
+extern uintptr_t kernel_end_phys;
+extern uintptr_t kernel_end_virt;
 
 typedef struct {
     uint32_t gs, fs, es, ds;

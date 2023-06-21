@@ -46,10 +46,10 @@ typedef struct {
     uint32_t reserved2  : 2;
     uint32_t available  : 3;
     uint32_t frame      : 20;
-} page_table_entry_t;
+} page_t;
 
 typedef struct {
-    page_table_entry_t pages[1024];
+    page_t pages[1024];
 } page_table_t;
 
 typedef struct {
@@ -57,12 +57,8 @@ typedef struct {
     page_table_t* ref_tables[1024];
 } page_directory_t;
 
-// boot_page_dir defined in entry.asm
+// defined in entry.asm
 extern page_directory_t* boot_page_dir;
-
-// pmm_bitmap defined in pmm.c
-extern uint32_t* pmm_bitmap;
-extern uint32_t pmm_bitmap_size;
 
 /* function declarations */
 void* virt2phys(page_directory_t* dir, void* virtual_addr);

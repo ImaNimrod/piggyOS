@@ -28,7 +28,7 @@ Once that has finished, you can now build the operating system by running:
 make
 make cdrom
 ```
-The first command will compile the kernel and the latter will create an cdrom with the kernel and an initrd image. You can now run 
+The first command will compile the kernel and userspace programs and the latter will create an cdrom with the kernel and an initrd image. You can now run 
 the `piggyOS.iso` image using your x86 emulator of choice. The build system of this project comes with a command that uses qemu to run 
 the project. Just type:
 ```bash

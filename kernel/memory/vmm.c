@@ -1,5 +1,8 @@
 #include <memory/vmm.h>
 
+extern uint32_t* pmm_bitmap;
+extern uint32_t pmm_bitmap_size;
+
 extern void *heap_start, *heap_end, *heap_max, *heap_curr;
 extern int kheap_enabled;
 
@@ -7,7 +10,6 @@ uint8_t* temp_mem;
 bool paging_enabled = false;
 
 page_directory_t* kernel_page_dir = {0};
-page_directory_t* current_page_dir = {0};
 
 static void* dumb_kmalloc(uint32_t size, int align) {
     void* ret = temp_mem;
@@ -19,7 +21,7 @@ static void* dumb_kmalloc(uint32_t size, int align) {
 
 void* virt2phys(page_directory_t* dir, void* virtual_addr) {
     if(!paging_enabled)
-        return (void*) ((char*) virtual_addr - LOAD_MEMORY_ADDRESS);
+        return (void*) ((uint8_t*) virtual_addr - LOAD_MEMORY_ADDRESS);
 
     uint32_t page_dir_idx = PAGEDIR_INDEX(virtual_addr), page_tbl_idx = PAGETBL_INDEX(virtual_addr), page_frame_offset = PAGEFRAME_INDEX(virtual_addr);
     if(!dir->ref_tables[page_dir_idx]) {
@@ -57,10 +59,10 @@ void allocate_page(page_directory_t* dir, uint32_t virtual_addr, uint32_t frame,
 
         uint32_t t = (uint32_t) virt2phys(kernel_page_dir, table);
         dir->tables[page_dir_idx].frame = t >> 12;
-        dir->tables[page_dir_idx].present = 1;
-        dir->tables[page_dir_idx].rw = 1;
-        dir->tables[page_dir_idx].user = 1;
-        dir->tables[page_dir_idx].page_size = 0;
+        dir->tables[page_dir_idx].present = 1; // present
+        dir->tables[page_dir_idx].rw = is_writable ? 1 : 0; // writable
+        dir->tables[page_dir_idx].user = is_kernel ? 0 : 1; // user accessable
+        dir->tables[page_dir_idx].page_size = 0; // 4kb page
         dir->ref_tables[page_dir_idx] = table;
     }
 
@@ -69,11 +71,11 @@ void allocate_page(page_directory_t* dir, uint32_t virtual_addr, uint32_t frame,
         if (frame)
             t = frame;
         else
-            t = pmm_alloc_block();
+            t = pmm_alloc_block() / PAGE_SIZE;
         table->pages[page_tbl_idx].frame = t;
         table->pages[page_tbl_idx].present = 1;
-        table->pages[page_tbl_idx].rw = 1;
-        table->pages[page_tbl_idx].user = 1;
+        table->pages[page_tbl_idx].rw = is_writable ? 1 : 0;
+        table->pages[page_tbl_idx].user = is_kernel ? 0 : 1;
     }
 }
 
@@ -106,7 +108,7 @@ void free_page(page_directory_t* dir, uint32_t virtual_addr, int free) {
     }
 
     if(free)
-        pmm_free_block(table->pages[page_tbl_idx].frame);
+        pmm_free_block(table->pages[page_tbl_idx].frame * PAGE_SIZE);
         
     table->pages[page_tbl_idx].present = 0;
     table->pages[page_tbl_idx].frame = 0;
@@ -194,6 +196,7 @@ void vmm_init(void) {
         allocate_page(kernel_page_dir, i, 0, 1, 0);
         i = i + PAGE_SIZE;
     }
+
     i = LOAD_MEMORY_ADDRESS + 4 * M;
     while(i < LOAD_MEMORY_ADDRESS + 4 * M + KHEAP_INITIAL_SIZE) {
         allocate_page(kernel_page_dir, i, 0, 1, 1);
@@ -201,10 +204,9 @@ void vmm_init(void) {
     }
 
     switch_page_directory(kernel_page_dir, 0);
-
-    allocate_region(kernel_page_dir, 0, 0x10000, 1, 1, 1);
-
     enable_paging();
+
+    allocate_region(kernel_page_dir, 0, 0x10000, 1, 1, 0);
 
 	int_install_handler(14, &page_fault);
 
@@ -220,7 +222,7 @@ restart_sbrk:
     if(size == 0) {
         goto ret;
     } else if(size > 0) {
-        new_boundary = (char*) heap_curr + size;
+        new_boundary = (uint8_t*) heap_curr + size;
 
         if(new_boundary <= heap_end)
             goto update_boundary;
@@ -231,7 +233,7 @@ restart_sbrk:
 
             while(runner < new_boundary) {
                 allocate_page(kernel_page_dir, (uint32_t) runner, 0, 1, 1);
-                runner = (char*) runner +  PAGE_SIZE;
+                runner = (uint8_t*) runner +  PAGE_SIZE;
             }
 
             if(old_heap_curr != heap_curr) {
@@ -242,18 +244,19 @@ restart_sbrk:
         }
     } else if(size < 0){
         new_boundary = (void*) ((uint32_t) heap_curr - size);
-        if((char*) new_boundary < (char*) heap_start + KHEAP_MIN_SIZE) {
-            new_boundary = (char*) heap_start + KHEAP_MIN_SIZE;
+        if ((uint8_t*) new_boundary < (uint8_t*) heap_start + KHEAP_MIN_SIZE) {
+            new_boundary = (uint8_t*) heap_start + KHEAP_MIN_SIZE;
         }
 
-        runner = (char*) heap_end - PAGE_SIZE;
+        runner = (uint8_t*) heap_end - PAGE_SIZE;
         while(runner > new_boundary) {
             free_page(kernel_page_dir, (uint32_t) runner, 1);
-            runner = (char*) runner - PAGE_SIZE;
+            runner = (uint8_t*) runner - PAGE_SIZE;
         }
-        heap_end = (char*) runner + PAGE_SIZE;
+        heap_end = (uint8_t*) runner + PAGE_SIZE;
         goto update_boundary;
     }
+
 update_boundary:
     heap_curr = new_boundary;
 ret:
@@ -261,19 +264,15 @@ ret:
 }
 
 void page_fault(regs_t *r) {
-    uint32_t faulting_address;
-    __asm__ volatile("mov %%cr2, %0" : "=r" (faulting_address));
-    
-    int pres = !(r->err_code & 0x1);        // page not present
-    int rw   = r->err_code & 0x2;           // write operation?
-    int us   = r->err_code & 0x4;           // processor was in user-mode?
-    int res  = r->err_code & 0x8;           // overwritten CPU-reserved bits of page entry?
+	uint32_t faulting_address;
+	__asm__ volatile("mov %%cr2, %0" : "=r" (faulting_address));
 
-    kprintf("page fault (");
-    if (pres) { kprintf("present "); }
-    if (rw) { kprintf("read-only "); }
-    if (us) { kprintf("user-mode "); }
-    if (res) { kprintf("reserved "); }
+	int present = !(r->err_code & 0x1);   // Page not present
+	int rw = r->err_code & 0x2;           // Write operation?
+	int us = r->err_code & 0x4;           // Processor was in user-mode?
+	int reserved = r->err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
+	int id = r->err_code & 0x10;          // Caused by an instruction fetch?
 
-    kprintf("0x%x)\n", faulting_address);
+	kpanic("Page fault at 0x%x (EIP: 0x%x p: %d, rw: %d, us: %d, reserved: %d, i: %d)\n",
+				faulting_address, r->eip, present, rw, us, reserved, id);
 }
