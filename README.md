@@ -20,3 +20,4 @@ is in the early phases of development and many features/fixes will be coming in 
 - [ ] Redo / make better timer interface
 - [X] Syncronization primatives (just spinlock right now)
 - [ ] User mode shell with number of commands
+- [X] ACPI parsing
