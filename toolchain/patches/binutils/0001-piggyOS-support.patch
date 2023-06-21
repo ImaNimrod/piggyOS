@@ -1,0 +1,128 @@
+diff --git a/bfd/config.bfd b/bfd/config.bfd
+index 0bc27fdce97..bb2ea6ea219 100644
+--- a/bfd/config.bfd
++++ b/bfd/config.bfd
+@@ -661,6 +661,11 @@ case "${targ}" in
+     targ_selvecs="iamcu_elf32_vec i386_pei_vec"
+     targ64_selvecs="x86_64_elf64_vec x86_64_elf32_vec x86_64_pe_vec x86_64_pei_vec"
+     ;;
++  i[3-7]86-*-piggyOS*)
++    targ_defvec=i386_elf32_vec
++    targ_selvecs=
++    targ64_selvecs=x86_64_elf64_vec
++    ;;
+   i[3-7]86-*-redox*)
+     targ_defvec=i386_elf32_vec
+     targ_selvecs=
+diff --git a/config.sub b/config.sub
+index dba16e84c77..3ed2e95ca87 100755
+--- a/config.sub
++++ b/config.sub
+@@ -1754,7 +1754,7 @@ case $os in
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+-	     | fiwix* )
++	     | fiwix* | piggyOS* )
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
+diff --git a/gas/config/tc-i386.c b/gas/config/tc-i386.c
+index 5a88d25a9c2..412e8a2a61c 100644
+--- a/gas/config/tc-i386.c
++++ b/gas/config/tc-i386.c
+@@ -491,6 +491,7 @@ const char extra_symbol_chars[] = "*%-([{}"
+      && !defined (TE_Haiku)				\
+      && !defined (TE_FreeBSD)				\
+      && !defined (TE_DragonFly)				\
++     && !defined (TE_PiggyOS)				\
+      && !defined (TE_NetBSD))
+ /* This array holds the chars that always start a comment.  If the
+    pre-processor is disabled, these aren't very useful.  The option
+diff --git a/gas/config/te-piggyOS.h b/gas/config/te-piggyOS.h
+new file mode 100644
+index 0000000000..1369f94123
+--- /dev/null
++++ b/gas/config/te-piggyOS.h
+@@ -0,0 +1,3 @@
++#include "te-generic.h"
++
++#define TE_PiggyOS 1
+diff --git a/gas/configure.tgt b/gas/configure.tgt
+index 82f2d44f418..cc61910d4c3 100644
+--- a/gas/configure.tgt
++++ b/gas/configure.tgt
+@@ -239,6 +239,7 @@ case ${generic_target} in
+       x86_64*-linux-gnux32)		arch=x86_64:32 ;;
+     esac ;;
+   i386-*-lynxos*)			fmt=elf em=lynx ;;
++  i386-*-piggyOS*)          fmt=elf ;;
+   i386-*-redox*)			fmt=elf ;;
+   i386-*-solaris*)			fmt=elf em=solaris ;;
+   i386-*-freebsd* \
+diff --git a/ld/Makefile.am b/ld/Makefile.am
+index 65fef4e1690..3ec955af02c 100644
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
+@@ -281,6 +281,7 @@ ALL_EMULATION_SOURCES = \
+ 	eelf_i386_ldso.c \
+ 	eelf_i386_sol2.c \
+ 	eelf_i386_vxworks.c \
++	eelf_i386_piggyOS.c \ 
+ 	eelf_iamcu.c \
+ 	eelf_s390.c \
+ 	eh8300elf.c \
+@@ -775,6 +776,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_ldso.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_sol2.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_vxworks.Pc@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_piggyOS.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_iamcu.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_s390.Pc@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eh8300elf.Pc@am__quote@
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index ff4c916c27b..ea4049ff565 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -782,6 +782,7 @@ ALL_EMULATION_SOURCES = \
+ 	eelf_i386_ldso.c \
+ 	eelf_i386_sol2.c \
+ 	eelf_i386_vxworks.c \
++	eelf_i386_piggyOS.c \
+ 	eelf_iamcu.c \
+ 	eelf_s390.c \
+ 	eh8300elf.c \
+@@ -1457,6 +1458,7 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_ldso.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_sol2.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_vxworks.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_piggyOS.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_iamcu.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_mipsel_haiku.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_s390.Po@am__quote@
+diff --git a/ld/configure.tgt b/ld/configure.tgt
+index 741b246f67e..612fa5440d4 100644
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
+@@ -428,6 +428,11 @@ i[3-7]86-*-winnt*)	targ_emul=i386pe ;
+ i[3-7]86-*-pe)		targ_emul=i386pe ;
+ 			targ_extra_ofiles="deffilep.o pe-dll.o"
+ 			;;
++i[3-7]86-*-piggyOS*)
++			targ_emul=elf_i386_piggyOS
++			targ_extra_emuls=elf_i386
++			targ64_extra_emuls="elf_x86_64"
++			;;
+ i[3-7]86-*-cygwin*)	targ_emul=i386pe ;
+ 			targ_extra_ofiles="deffilep.o pe-dll.o" ;
+ 			test "$targ" != "$host" && LIB_PATH='${tooldir}/lib/w32api'
+diff --git a/ld/emulparams/elf_i386_piggyOS.sh b/ld/emulparams/elf_i386_piggyOS.sh
+new file mode 100644
+index 0000000000..1369b90731
+--- /dev/null
++++ b/ld/emulparams/elf_i386_piggyOS.sh
+@@ -0,0 +1,4 @@
++source_sh ${srcdir}/emulparams/elf_i386.sh
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes
++TEXT_START_ADDR=0x10000000

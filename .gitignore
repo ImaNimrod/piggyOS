@@ -1,4 +1,6 @@
 *.iso
 *.bin
-build/*
+build/
+toolchain/build
+toolchain/tarballs
 *.img
