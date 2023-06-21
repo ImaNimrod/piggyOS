@@ -17,13 +17,12 @@ run:
 		   -cdrom piggyOS.iso\
 		   -rtc base=localtime\
 		   -cpu pentium2\
-		   -serial stdio
+		   -serial mon:stdio
 
 initrd:
 	@mkdir -p ./iso/modules
-	genext2fs -d ./initrd -b 8192 ./iso/modules/piggyOS-initrd.img
+	tar -H ustar -c -f iso/modules/piggyOS-initrd.img initrd
 
-
-cdrom: initrd 
+cdrom: initrd
 	@grub-file --is-x86-multiboot2 iso/boot/piggyOS-kernel.bin 
 	@grub-mkrescue /usr/lib/grub/i386-pc -o $(CDROM) iso/

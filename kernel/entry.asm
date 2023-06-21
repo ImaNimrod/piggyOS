@@ -30,16 +30,13 @@ boot_page_dir:
     dd 0x00400083 
     dd 0x00800083 
     dd 0x00c00083 
-    dd 0x01000083 
-    dd 0x01400083 
-    times (KERNEL_PAGE_NUMBER - 6) dd 0
+    times (KERNEL_PAGE_NUMBER - 4) dd 0
     dd 0x00000083
     %assign i 0xc0400083
     %rep 0x7f 
         dd i 
         %assign i i+0x400000
     %endrep
-
 
 section .text
 global start

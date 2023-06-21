@@ -16,7 +16,7 @@ static struct dirent* rootfs_readdir(fs_node_t* node, uint32_t index) {
     entry = list_get_node_by_index(root_nodes, index);
     rnode = (fs_node_t*) entry->value;
 
-    if(rnode) {
+    if (rnode) {
         d = (struct dirent*) kmalloc(sizeof(struct dirent));
 
         if(!d)

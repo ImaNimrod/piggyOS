@@ -13,8 +13,6 @@ int memcmp(void* s1, void* s2, int len);
 
 int strcmp(const char* str1, const char* str2);
 char* strcpy(char* str1, const char* str2); 
-char* strdup(const char* s);
 size_t strlen(const char* str);
-char* strtok_r(char* str, const char* delim, char** saveptr);
 
 #endif

@@ -3,14 +3,14 @@
 int memcmp(void *s1, void *s2, int len) {
     uint32_t *p = s1;
     uint32_t *q = s2;
-    int charCompareStatus = 0;
-    //If both pointer pointing same memory block
+    int compare_status = 0;
+
     if (s1 == s2)
-        return charCompareStatus;
+        return compare_status;
 
     while (len > 0) {
         if (*p != *q) {
-            charCompareStatus = (*p >*q)?1:-1;
+            compare_status = (*p >*q)?1:-1;
             break;
         }
 
@@ -18,7 +18,8 @@ int memcmp(void *s1, void *s2, int len) {
         p++;
         q++;
     }
-    return charCompareStatus;
+
+    return compare_status;
 }
 
 void* memcpy(void* restrict dest, const void* restrict src, size_t count) {
@@ -63,91 +64,8 @@ char* strcpy(char* str1, char const* str2) {
     return s;
 }
 
-char* strdup(const char *s) {
-  size_t len = strlen(s) + 1;
-  void *new = kmalloc(len);
-
-  if (new == NULL)
-    return NULL;
-
-  return (char *) memcpy(new, s, len);
-}
-
 size_t strlen(const char *str) {
 	size_t i = 0;
 	while(str[i] != 0) i++;
 	return i;
-}
-
-static char *strpbrk(const char *str, const char *accept) {
-	const char *acc = accept;
-
-	if (!*str) {
-		return NULL;
-	}
-
-	while (*str) {
-		for (acc = accept; *acc; ++acc) {
-			if (*str == *acc)
-				break;
-		}
-		if (*acc)
-            break;
-		++str;
-	}
-
-	if (*acc == '\0') {
-		return NULL;
-	}
-
-	return (char *)str;
-}
-
-static size_t strspn(const char *str, const char *accept) {
-	const char *ptr = str;
-	const char *acc;
-
-	while (*str) {
-		for (acc = accept; *acc; ++acc) {
-			if (*str == *acc) {
-				break;
-			}
-		}
-		if (*acc == '\0') {
-			break;
-		}
-		str++;
-	}
-	return str - ptr;
-}
-
-static size_t __lfind(const char * str, const char accept) {
-    size_t i = 0;
-    while ( str[i] != accept) {
-        i++;
-    }
-    return (size_t)(str) + i;
-}
-
-char *strtok_r(char *str, const char *delim, char **saveptr) {
-	char * token;
-	if (str == NULL) {
-		str = *saveptr;
-	}
-
-	str += strspn(str, delim);
-	if (*str == '\0') {
-		*saveptr = str;
-		return NULL;
-	}
-
-	token = str;
-	str = strpbrk(token, delim);
-	if (str == NULL) {
-		*saveptr = (char *) __lfind(token, '\0');
-	} else {
-		*str = '\0';
-		*saveptr = str + 1;
-	}
-	return token;
 }

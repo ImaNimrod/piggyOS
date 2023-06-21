@@ -10,13 +10,14 @@
 #include <drivers/timer.h>
 #include <drivers/vga.h>
 #include <fs/devfs.h>
-#include <fs/ext2.h>
 #include <fs/fs.h>
+#include <fs/tarfs.h>
 #include <memory/kheap.h>
 #include <memory/pmm.h>
 #include <memory/vmm.h>
 #include <multiboot2.h>
 #include <string.h>
+#include <sys/elf.h>
 #include <sys/process.h>
 #include <sys/syscall.h>
 #include <system.h>
@@ -56,7 +57,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
                 case MBOOT_TAG_TYPE_MODULE:
                     module_start = ((struct mboot_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
                     module_size = (((struct mboot_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS) - module_start;
-                    ramdisk = (uint8_t*) 0x800000;
+                    ramdisk = (uint8_t*) 0xc00000;
                     klog(LOG_OK, "Copying ramdisk to usable memory...\n");
                     memcpy(ramdisk, (uint8_t*) module_start, module_size);
                     break;
@@ -99,10 +100,10 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     /* initialize devfs */
     devfs_init();
 
-    /* initialize initrd */
+    /* initalize tarfs */
     if (ramdisk) {
         allocate_region(kernel_page_dir, (uint32_t) ramdisk, (uint32_t) ramdisk + module_size, 1, 1, 0);
-        ext2_ramdisk_mount((uint32_t) ramdisk);
+        tarfs_init((uint32_t) ramdisk, (uint32_t) ramdisk + module_size);
     }
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);

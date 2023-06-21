@@ -73,48 +73,6 @@ fs_node_t* clone_fs(fs_node_t *node) {
 	return n;
 }
 
-char** path(char* file) {
-    uint32_t i = 0, i0 = 0, seg = 0, segs = 0;
-    char** p;
-    char* str;
-
-    if (!file)
-        return NULL;
-
-    if(file[i] == '/')
-        i0++;
-
-    str = strdup(file);
-    str = &str[i0]; // skip initial '/'
-    segs = 1;
-
-    while(str[i]) {
-        if(str[i] == '/') {
-            str[i] = '\0';
-
-            if(str[i+1] == '\0')
-                break;
-            segs++;
-        }
-        i++;
-    }
-
-    p = (char**) kmalloc(sizeof(char*) * (segs));
-
-    for(seg = 0, i = 0; seg < segs; seg++) {
-        p[seg] = &str[i];
-        while(str[i++]);
-    }
-
-    p[seg] = NULL;
-
-    return p;
-}
-
-void path_free(char** p) {
-    kfree(p[0]);
-}
-
 void vfs_init(void) {
     klog(LOG_OK, "Initializing VFS structures\n");
     fs_root = rootfs_init();

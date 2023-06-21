@@ -72,8 +72,7 @@ fs_node_t* finddir_fs(fs_node_t* node, char* name);
 int ioctl_fs(fs_node_t* node, uint32_t request, void* argp);
 fs_node_t* clone_fs(fs_node_t* node);
 
-char** path(char* file);
-void path_free(char** p);
+char* split_path(char* path);
 
 void vfs_init(void);
 fs_node_t* get_fs_root(void);

@@ -30,6 +30,20 @@
 #define MBOOT_TAG_TYPE_LOAD_BASE_ADDR    21
 
 typedef struct {
+    uint32_t base_addr_low;
+    uint32_t base_addr_high;
+    uint32_t length_low;
+    uint32_t length_high;
+#define MULTIBOOT_MEMORY_AVAILABLE		        1
+#define MULTIBOOT_MEMORY_RESERVED		        2
+#define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
+#define MULTIBOOT_MEMORY_NVS                    4
+#define MULTIBOOT_MEMORY_BADRAM                 5
+    uint32_t type;
+    uint32_t zero;
+} mboot_mmap_t;
+
+typedef struct {
     uint32_t type;
     uint32_t size;
 } mboot_tag_t;
@@ -38,6 +52,13 @@ struct mboot_tag_basic_meminfo {
     mboot_tag_t tag;
     uint32_t mem_lower;
     uint32_t mem_upper;
+};
+
+struct mboot_tag_mmap {
+    mboot_tag_t tag;
+    uint32_t entry_size;
+    uint32_t entry_version;
+    mboot_mmap_t entries[];  
 };
 
 struct mboot_tag_module {
@@ -56,19 +77,5 @@ struct mboot_tag_new_acpi {
     mboot_tag_t tag;
 	uint8_t* rsdp;
 };
-
-typedef struct {
-    uint32_t base_addr_low;
-    uint32_t base_addr_high;
-    uint32_t length_low;
-    uint32_t length_high;
-#define MULTIBOOT_MEMORY_AVAILABLE		        1
-#define MULTIBOOT_MEMORY_RESERVED		        2
-#define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
-#define MULTIBOOT_MEMORY_NVS                    4
-#define MULTIBOOT_MEMORY_BADRAM                 5
-    uint32_t type;
-    uint32_t zero;
-} mboot_mmap_t;
 
 #endif
