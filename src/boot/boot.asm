@@ -29,7 +29,7 @@ setup_page_entry:
 	loop map_kernel 
 
 map_vga:
-    mov dword [boot_page_tbl1 - 0xC0000000 + 1023 * 4], 0x000B8003
+    mov dword [boot_page_tbl1 - 0xC0000000 + 1023 * 4], 0x000B8000 | 0x003
 
     mov dword [boot_page_directory - 0xC0000000 ], boot_page_tbl1 - 0xC0000000 + 0x003
     mov dword [boot_page_directory - 0xC0000000 + 768 * 4], boot_page_tbl1 - 0xC0000000 + 0x003

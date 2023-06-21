@@ -1,4 +1,4 @@
-#include <vga.h>
+#include <drivers/vga.h>
 
 static const uint8_t NUM_COLS = 80;
 static const uint8_t NUM_ROWS = 25;
@@ -8,7 +8,7 @@ static uint16_t cursor = 0;
 static uint16_t color = (VGA_COLOR_BLACK << 4 | VGA_COLOR_WHITE) << 8;
 
 void vga_clear(void) {
-	for (int i = 0; i < NUM_COLS * NUM_ROWS; ++i) {
+	for (int i = 0; i < NUM_COLS * NUM_ROWS; i++) {
 		*(screen_buffer + i) = (uint16_t) 3872; 
     }
 }
@@ -27,6 +27,7 @@ static inline void vga_scroll(void) {
 
 void vga_puts(const char* string) {
 	int i = 0;
+
 	while (string[i] != '\0') {
 		if (cursor == NUM_COLS * NUM_ROWS) {
 			vga_scroll();

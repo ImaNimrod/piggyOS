@@ -1,33 +1,34 @@
 CC=i686-elf-gcc
 CFLAGS=-c -m32 -std=c11 -ffreestanding -O2 -Wall -Wextra
 LDFLAGS= -ffreestanding -O2 -nostdlib -nostartfiles -nodefaultlibs -T linker.ld -lgcc
-SRCDIR=src
+BUILDDIR=build
 ISODIR=iso
+SRCDIR=src
 INCLUDEDIR=$(SRCDIR)/libc/include
-KINCLUDEDIR=$(SRCDIR)/kernel/include
+KINCLUDEDIR=$(SRCDIR)/kernel/include 
 
-kernel_source_files := $(shell find src/kernel -name *.c)
-kernel_object_files := $(patsubst src/kernel/%.c, build/kernel/%.o, $(kernel_source_files))
+kernel_source_files := $(shell find $(SRCDIR)/kernel -name *.c)
+kernel_object_files := $(patsubst $(SRCDIR)/kernel/%.c, $(BUILDDIR)/kernel/%.o, $(kernel_source_files))
 
-c_source_files := $(shell find src/libc -name *.c)
-c_object_files := $(patsubst src/libc/%.c, build/kernel/%.o, $(c_source_files))
+c_source_files := $(shell find $(SRCDIR)/libc -name *.c)
+c_object_files := $(patsubst $(SRCDIR)/libc/%.c, $(BUILDDIR)/kernel/%.o, $(c_source_files))
 
-asm_source_files := $(shell find src/boot/ -name *.asm)
-asm_object_files := $(patsubst src/boot/%.asm, build/%.o, $(asm_source_files))
+asm_source_files := $(shell find $(SRCDIR)/boot/ -name *.asm)
+asm_object_files := $(patsubst $(SRCDIR)/boot/%.asm, $(BUILDDIR)/%.o, $(asm_source_files))
 
 sys_object_files := $(c_object_files) $(asm_object_files)
 
-$(kernel_object_files): build/kernel/%.o : $(SRCDIR)/kernel/%.c 
+$(kernel_object_files): $(BUILDDIR)/kernel/%.o : $(SRCDIR)/kernel/%.c 
 	mkdir -p $(dir $@) && \
-	$(CC) $(CFLAGS) -I $(KINCLUDEDIR) $(patsubst build/kernel/%.o, $(SRCDIR)/kernel/%.c, $@) -o $@
+	$(CC) $(CFLAGS) -I $(KINCLUDEDIR) $(patsubst $(BUILDDIR)/kernel/%.o, $(SRCDIR)/kernel/%.c, $@) -o $@
 
-$(c_object_files): build/%.o : $(SRCDIR)/libc/%.c 
+$(c_object_files): $(BUILDDIR)/%.o : $(SRCDIR)/libc/%.c 
 	mkdir -p $(dir %@) && \
-	$(CC) $(CFLAGS) -I $(INCLUDEDIR) $(patsubst build/%.o, $(SRCDIR)/libc/%.c, $@) -o $@
+	$(CC) $(CFLAGS) -I $(INCLUDEDIR) $(patsubst $(BUILDDIR)/%.o, $(SRCDIR)/libc/%.c, $@) -o $@
 
-$(asm_object_files): build/%.o : $(SRCDIR)/boot/%.asm
+$(asm_object_files): $(BUILDDIR)/%.o : $(SRCDIR)/boot/%.asm
 	mkdir -p $(dir $@) && \
-	nasm -f elf32 $(patsubst build/%.o, $(SRCDIR)/boot/%.asm, $@) -o $@
+	nasm -f elf32 $(patsubst $(BUILDDIR)/%.o, $(SRCDIR)/boot/%.asm, $@) -o $@
 
 .PHONY: piggyOS run
 piggyOS: $(kernel_object_files) $(sys_object_files)
