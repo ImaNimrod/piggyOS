@@ -87,4 +87,7 @@ void idt_init(void) {
     idt_set_descr(47, (uint32_t) irq15, 0x8E);
 
     idt_set();
+
+    /* renable interrupts */
+    __asm__ volatile("sti");
 }

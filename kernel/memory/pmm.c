@@ -1,7 +1,7 @@
 #include <memory/pmm.h>
 
-uint8_t* phys_mem_bitmap = (uint8_t*) (&kernel_end);
 uint32_t total_blocks;
+uint8_t* phys_mem_bitmap = (uint8_t*) (&kernel_end);
 uint32_t phys_mem_bitmap_size;
 
 static uint32_t first_free_block(void) {
@@ -13,13 +13,13 @@ static uint32_t first_free_block(void) {
     return (uint32_t) -1;
 }
 
-uint32_t allocate_block(void) {
+uint32_t pmm_alloc_block(void) {
     uint32_t free_block = first_free_block();
     SETBIT(free_block);
     return free_block;
 }
 
-void free_block(size_t blk_num) {
+void pmm_free_block(size_t blk_num) {
     CLEARBIT(blk_num);
 }
 

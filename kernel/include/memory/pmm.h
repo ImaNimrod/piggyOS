@@ -19,7 +19,7 @@
 
 /* function declarations */
 void pmm_init(struct mboot_tag_basic_meminfo* meminfo);
-uint32_t allocate_block();
-void free_block(size_t blk_num);
+uint32_t pmm_alloc_block(void);
+void pmm_free_block(size_t blk_num);
 
 #endif

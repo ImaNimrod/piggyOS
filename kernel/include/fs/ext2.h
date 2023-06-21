@@ -9,7 +9,7 @@
 
 #define EXT2_SUPER_MAGIC 0xEF53
 
-struct ext2_superblock {
+typedef struct {
 	uint32_t inodes_count;
 	uint32_t blocks_count;
 	uint32_t r_blocks_count;
@@ -76,9 +76,7 @@ struct ext2_superblock {
 	uint32_t first_meta_bg;
 	uint8_t _unused[760];
 
-} __attribute__ ((packed));
-
-typedef struct ext2_superblock ext2_superblock_t;
+} ext2_superblock_t;
 
 struct ext2_bgdescriptor {
 	uint32_t block_bitmap;

@@ -67,7 +67,7 @@ static void allocate_page(page_directory_t *dir, uint32_t virtual_addr, uint32_t
         if(frame)
             t = frame;
         else
-            t = allocate_block();
+            t = pmm_alloc_block();
         table->pages[page_tbl_idx].frame = t;
         table->pages[page_tbl_idx].present = 1;
         table->pages[page_tbl_idx].rw = 1;
@@ -103,7 +103,7 @@ static void free_page(page_directory_t* dir, uint32_t virtual_addr, int free) {
     }
 
     if(free)
-        free_block(table->pages[page_tbl_idx].frame);
+        pmm_free_block(table->pages[page_tbl_idx].frame);
     table->pages[page_tbl_idx].present = 0;
     table->pages[page_tbl_idx].frame = 0;
 }
@@ -200,7 +200,7 @@ void vmm_init(void) {
     switch_page_directory(kernel_page_dir, 0);
 
     allocate_region(kernel_page_dir, 0, 0x10000, 0, 1, 1);
-    allocate_region(kernel_page_dir, 0xffe0000, 0xffeffff, 0, 1, 1);
+    allocate_region(kernel_page_dir, 0x0ffe0000, 0xffeffff, 0, 1, 1);
 
     enable_paging();
 

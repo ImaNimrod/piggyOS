@@ -1,8 +1,5 @@
 bits 32 
 
-KERNEL_VIRTUAL_BASE equ 0xc0000000
-KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; PDE of kernel's 4MB PTE 
-
 section .multiboot2_header
 align 8
 header_start:
@@ -16,14 +13,31 @@ header_start:
 	dd 8
 header_end:
 
+section .bss
+align 4
+kernel_stack:
+    resb 0x4000
+stack_top:
+
+KERNEL_VIRTUAL_BASE equ 0xc0000000
+KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; PDE of kernel's 4MB PTE 
+
 section .data
 align 0x1000
 global boot_page_dir
 boot_page_dir:
     dd 0x00000083
-    times (KERNEL_PAGE_NUMBER - 1) dd 0
+    dd 0x00400083 
+    dd 0x00800083 
+    dd 0x00c00083 
+    dd 0x01000083 
+    times (KERNEL_PAGE_NUMBER - 5) dd 0
     dd 0x00000083
-    times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0
+    %assign i 0xc0400083
+    %rep 0x7f 
+        dd i 
+        %assign i i+0x400000
+    %endrep
 
 section .text
 global start
@@ -48,6 +62,10 @@ start:
 
 extern kernel_main
 higher_half:
+    ; disable interrupts until it is safe
+    cli
+    cld
+
     ; unmap the first identity-mapped 4MB; we dont need it anymore
     mov dword [boot_page_dir], 0
     invlpg [0]
@@ -57,7 +75,7 @@ higher_half:
     push esp
 
     ; pass multiboot information to kernel
-    add ebx, dword KERNEL_VIRTUAL_BASE
+    add ebx, KERNEL_VIRTUAL_BASE
     push ebx
     push eax
 
@@ -68,9 +86,3 @@ higher_half:
 .end:
     hlt
     jmp .end
-
-section .bss
-align 4
-kernel_stack:
-    resb 0x4000
-stack_top:

@@ -168,7 +168,7 @@ void close_initrd(fs_node_t* node) {
     (void) node;
 }
 
-uint32_t read_initrd(fs_node_t* node, uint32_t offset, size_t size, uint8_t *buffer) {
+uint32_t read_initrd(fs_node_t* node, uint32_t offset, size_t size, uint8_t* buffer) {
 	ext2_inodetable_t* inode = ext2_get_inode(node->inode);
 
 	uint32_t end;
