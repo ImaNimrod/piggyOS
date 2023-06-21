@@ -26,6 +26,7 @@ void* list_remove_front(list_t* list);
 void* list_remove_back(list_t* list);
 void* list_peek_front(list_t* list);
 void* list_peek_back(list_t* list);
+list_node_t* list_pop(list_t* list);
 void list_destroy(list_t* list);
 void listnode_destroy(list_node_t* node);
 list_node_t* list_contain(list_t* list, void* value);

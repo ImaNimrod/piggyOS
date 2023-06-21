@@ -9,6 +9,7 @@
 #include <drivers/serial.h>
 #include <drivers/timer.h>
 #include <drivers/vga.h>
+#include <fs/devfs.h>
 #include <fs/fs.h>
 #include <fs/msdospart.h>
 #include <memory/kheap.h>
@@ -55,6 +56,10 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     keyboard_init(); /* ps/2 keyboard controller */
     rtc_init();      /* real time clock */
     ata_init();      /* ata devices */
+
+    /* initalize vfs */
+    vfs_init();
+    devfs_init();
 
     /* initalize multitasking */
     tasking_init(); 

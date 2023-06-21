@@ -89,6 +89,18 @@ void* list_peek_back(list_t* list) {
 	return list->tail->value;
 }
 
+list_node_t* list_pop(list_t* list) {
+	if(!list->head) return NULL;
+	list_node_t* t = list->tail;
+	list->tail = t->prev;
+
+	if(list->tail)
+		list->tail->next = NULL;
+
+	list->size--;
+	return t;
+}
+
 list_node_t* list_contain(list_t* list, void* value) {
     size_t idx = 0;
     foreach(listnode, list) {
