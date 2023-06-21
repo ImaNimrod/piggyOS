@@ -12,10 +12,11 @@
 
 #define PAGE_SIZE 4096
 
+#define ALIGN(addr) (((uint32_t) (addr) & 0xFFFFF000) + PAGE_SIZE)
 #define IS_ALIGN(addr) ((((uint32_t)(addr)) | 0xFFFFF000) == 0)
 
 #define PAGEDIR_INDEX(va) (((uint32_t) va) >> 22)
-#define PAGETBL_INDEX(va) ((((uint32_t) va) >>12) & 0x3ff)
+#define PAGETBL_INDEX(va) ((((uint32_t) va) >> 12) & 0x3ff)
 #define PAGEFRAME_INDEX(va) (((uint32_t) va) & 0xfff)
 
 #define SET_PGBIT(cr0) (cr0 = cr0 | 0x80000000)
@@ -56,21 +57,21 @@ typedef struct {
     page_table_t* ref_tables[1024];
 } page_directory_t;
 
-// boot page directory defined in entry.asm
+// boot_page_dir defined in entry.asm
 extern page_directory_t* boot_page_dir;
 
-// boot page directory defined in memory/vmm.c 
+// kernel_page_dir defined in memory/vmm.c 
 extern page_directory_t* kernel_page_dir;
 
-// phys_mem_bitmap defined in pmm.c
-extern uint8_t* phys_mem_bitmap;
-extern uint32_t phys_mem_bitmap_size;
+// pmm_bitmap defined in pmm.c
+extern uint8_t* pmm_bitmap;
+extern uint32_t pmm_bitmap_size;
 
 /* function declarations */
-void *virt2phys(page_directory_t* dir, void* virtual_addr);
+void* virt2phys(page_directory_t* dir, void* virtual_addr);
 void vmm_init(void);
 void page_fault(regs_t *r);
-void *ksbrk(int32_t size);
+void* ksbrk(int32_t size);
 void allocate_page(page_directory_t* dir, uint32_t virtual_addr, uint32_t frame, int is_kernel, int is_writable);
 void allocate_region(page_directory_t *dir, uint32_t start_va, uint32_t end_va, int iden_map, int is_kernel, int is_writable);
 void free_page(page_directory_t* dir, uint32_t virtual_addr, int free);

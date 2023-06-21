@@ -27,9 +27,7 @@ align 0x1000
 global boot_page_dir
 boot_page_dir:
     dd 0x00000083
-    dd 0x00400083 
-    dd 0x00800083 
-    times (KERNEL_PAGE_NUMBER - 3) dd 0
+    times (KERNEL_PAGE_NUMBER - 1) dd 0
     dd 0x00000083
     times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0
 

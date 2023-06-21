@@ -23,6 +23,13 @@
 
 #define NUM_ELEMENTS(array) (sizeof(array) / sizeof(array[0]))
 
+static uint32_t divide_up(uint32_t n, uint32_t d) {
+    if (n % d == 0)
+        return n / d;
+
+    return 1 + n / d;
+}
+
 // defined by the linker
 extern uintptr_t kernel_start;
 extern uintptr_t kernel_end;

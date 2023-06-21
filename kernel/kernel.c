@@ -26,11 +26,9 @@
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n\t\t\t\tBy: James Steffes\n";
 extern void switch_to_user(void);
 
-void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_esp) {
-    static uint32_t module_start, module_size;
-    static struct mboot_tag_basic_meminfo* meminfo;
-    static uint8_t* rsdp;
-    static uint8_t* ramdisk;
+void kernel_main(uint32_t mboot2_magic, struct mboot2_begin* mb2, uint32_t inital_esp) {
+    static uint32_t module_start, module_end;
+    // static uint8_t* rsdp;
 
     #ifdef TEXTMODE
     vga_clear();
@@ -45,36 +43,32 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     idt_init();
     tss_init(5, 0x10, 0);
 
-    if(mboot2_magic == MBOOT2_MAGIC) {
-        if(mboot2_info & 7) {
+    if (mboot2_magic == MBOOT2_MAGIC) {
+        if ((uint32_t) &mb2 & 7) {
             klog(LOG_ERR, "Multiboot2 info unaligned\n");
             return;
         }
 
-        for (mboot_tag_t* tag = (mboot_tag_t*) ((uint32_t) mboot2_info + 8);
-                tag->type != MBOOT_TAG_TYPE_END;
-                tag = (mboot_tag_t*) ((uint8_t*) tag + ((tag->size + 7) & ~7)))
-        { 
+        struct mboot2_tag* tag = mb2->tags;
+
+        do {
             switch(tag->type) {
-                case MBOOT_TAG_TYPE_MODULE:
-                    module_start = ((struct mboot_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
-                    module_size = (((struct mboot_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS) - module_start;
-                    ramdisk = (uint8_t*) 0x800000;
-                    klog(LOG_OK, "Copying ramdisk to usable memory...\n");
-                    memcpy(ramdisk, (uint8_t*) module_start, module_size);
+                case MBOOT2_TAG_MODULE:
+                    module_start = ((struct mboot2_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
+                    module_end = ((struct mboot2_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS;
                     break;
-                case MBOOT_TAG_TYPE_BASIC_MEMINFO:
-                    meminfo = (struct mboot_tag_basic_meminfo*) tag;
-                    break;
-                case MBOOT_TAG_TYPE_ACPI_OLD:
-                    if(!rsdp)
-                        rsdp = (uint8_t*) &((struct mboot_tag_old_acpi*) tag)->rsdp;
-                    break;
-                case MBOOT_TAG_TYPE_ACPI_NEW: 
-                    rsdp = (uint8_t*) &((struct mboot_tag_new_acpi*) tag)->rsdp;
-                    break;
+                // case MBOOT2_TAG_ACPI_OLD:
+                //     if(!rsdp)
+                //         rsdp = (uint8_t*) &((struct mboot_tag_acpi_old*) tag)->rsdp;
+                //     break;
+                // case MBOOT2_TAG_ACPI_NEW: 
+                //     rsdp = (uint8_t*) &((struct mboot_tag_acpi_new*) tag)->rsdp;
+                //     break;
+                default: break;
             }
-        }
+
+            tag = (struct mboot2_tag*) ((uintptr_t) tag + ((tag->size + 7) & ~7));
+        } while (tag->type != MBOOT2_TAG_END);
     } else {
         klog(LOG_ERR, "Multiboot2 compatible bootloader not detected\n");
         return;
@@ -84,7 +78,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     print_cpu_features();
 
     /* initialize memory manager systems */
-    pmm_init(meminfo);                                                              /* physical memory manager */
+    pmm_init(mb2);                                                                  /* physical memory manager */
     vmm_init();                                                                     /* virtual memory manager */
     kheap_init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);   /* kernel heap allocator */
 
@@ -106,10 +100,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     devfs_init();
 
     /* initalize tarfs */
-    if (ramdisk) {
-        allocate_region(kernel_page_dir, (uint32_t) ramdisk, (uint32_t) ramdisk + module_size, 1, 1, 0);
-        tarfs_init((uint32_t) ramdisk, (uint32_t) ramdisk + module_size);
-    }
+    tarfs_init(module_start, module_end);
 
     /* initialize multiasking */ 
     tasking_init();
