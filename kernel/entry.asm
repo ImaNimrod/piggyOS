@@ -15,7 +15,7 @@ header_end:
 
 section .bss
 align 4
-kernel_stack:
+stack_bottom:
     resb 0x4000
 stack_top:
 

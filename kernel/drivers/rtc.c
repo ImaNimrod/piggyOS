@@ -25,6 +25,8 @@ uint32_t get_seconds(void) {
 }
 
 static void rtc_irq_handler(regs_t *r) {
+    (void) r;
+
     if (read_cmos(CMOS_STATUS_C) & 0x10) {
         dt.sec   = from_bcd(read_cmos(CMOS_SECOND));
         dt.min   = from_bcd(read_cmos(CMOS_MINUTE));
@@ -33,8 +35,6 @@ static void rtc_irq_handler(regs_t *r) {
         dt.mnth  = from_bcd(read_cmos(CMOS_MONTH));
         dt.year  = 2000 + from_bcd(read_cmos(CMOS_YEAR));
     }
-
-    (void) r;
 }
 
 void rtc_init(void) {

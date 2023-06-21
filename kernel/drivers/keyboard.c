@@ -63,6 +63,8 @@ static uint8_t shift;
 static uint8_t* charcode[4] = { normalmap, shiftmap, ctlmap, ctlmap };
 
 static void keyboard_irq_handler(regs_t* r) {
+    (void) r;
+
     uint8_t data, c;
 
     for (uint16_t i = 0; i < 1000; i++)
@@ -70,23 +72,23 @@ static void keyboard_irq_handler(regs_t* r) {
 
     data = inb(PS2_DATA);
 
-    if(data == 0xE0){
+    if(data == 0xE0) {
         shift |= E0ESC;
         return;
-    } else if(data & 0x80){
+    } else if(data & 0x80) {
         data = (shift & E0ESC ? data : data & 0x7F);
         shift &= ~(shiftcode[data] | E0ESC);
         return;
-    } else if(shift & E0ESC){
+    } else if(shift & E0ESC) {
         data |= 0x80;
         shift &= ~E0ESC;
     }
 
     shift |= shiftcode[data];
     shift ^= togglecode[data];
-    c = charcode[shift & (CTL | SHIFT)][data];
+    c = charcode[shift & (CTL | SHIFT)] [data];
 
-    if(shift & CAPSLOCK) {
+    if (shift & CAPSLOCK) {
         if('a' <= c && c <= 'z')
             c += 'A' - 'a';
         else if('A' <= c && c <= 'Z')
@@ -94,7 +96,6 @@ static void keyboard_irq_handler(regs_t* r) {
     }
 
     kprintf("%c", c);
-    (void) r;
 }
 
 static void keyboard_reset(void) {

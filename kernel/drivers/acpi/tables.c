@@ -73,7 +73,7 @@ static void acpi_parse_header(acpi_header_t* header) {
 
     switch (signature) {
         case 0x50434146: /* FACP */
-            acpi_parse_fadt((fadt_t*) header);
+            acpi_parse_fadt((fadt_t*) header + 0xc0000000);
             break;
     }
 }
@@ -86,7 +86,7 @@ static void acpi_parse_rsdt(rsdt_t* rsdt) {
 
     for (uint32_t i = 0; i < ((rsdt->header.length - sizeof(acpi_header_t)) / 4); i++) {
         acpi_header_t* header = (acpi_header_t*) rsdt->sdt_entries[i];
-        acpi_parse_header(header);
+        acpi_parse_header(header + 0xc0000000);
     }
 }
 
@@ -140,7 +140,7 @@ void acpi_init(uint8_t* rsdp) {
     for (uint8_t i = 0; i < 20; ++i)
         sum += rsdp[i];
 
-    if(sum) {
+    if (sum) {
         klog(LOG_ERR, "ACPI: RSDP checksum verification failed\n");
         return;
     }
@@ -148,12 +148,10 @@ void acpi_init(uint8_t* rsdp) {
     uint8_t revision = rsdp[15];
     if (revision == 0) {
         uint32_t rsdt_address = *(uint32_t*) (rsdp + 16);
-        allocate_region(kernel_page_dir, rsdt_address & 0xffff0000, (rsdt_address + 64 * K) & 0xffff0000, 1, 1, 1);
-        acpi_parse_rsdt((rsdt_t*) rsdt_address);
+        acpi_parse_rsdt((rsdt_t*) rsdt_address + 0xc0000000);
     } else if(revision == 2) {
         uint32_t rsdt_address = *(uint32_t*) (rsdp + 16);
-        allocate_region(kernel_page_dir, rsdt_address & 0xffff0000, (rsdt_address + 64 * K) & 0xffff0000, 1, 1, 1);
-        acpi_parse_rsdt((rsdt_t*) rsdt_address);
+        acpi_parse_rsdt((rsdt_t*) rsdt_address + 0xc0000000);
     } else {
         klog(LOG_ERR, "Unsuppored ACPI version %d\n", revision);
     }

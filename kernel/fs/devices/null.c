@@ -3,9 +3,8 @@
 static ssize_t read_null(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {
     (void) node;
     (void) offset;
-    (void) size;
     (void) buf;
-	return 0;
+	return size;
 }
 
 static ssize_t write_null(fs_node_t* node, off_t offset, size_t size, uint8_t* buf) {

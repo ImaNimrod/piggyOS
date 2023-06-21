@@ -2,22 +2,18 @@
 
 uint32_t timer_ticks = 0;
 
-static void timer_irq_handler(regs_t *r) {
-    timer_ticks++;
-
+static void timer_irq_handler(regs_t* r) {
     (void) r;
+
+    timer_ticks++;
+    // schedule();
 }
 
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
-
-void sleep(uint64_t ticks) {
+__attribute__((optimize("O0"))) void sleep(uint64_t ticks) {
     uint64_t eticks = 0;
     eticks = ticks + timer_ticks;
     do {} while(eticks > timer_ticks);
 }
-
-#pragma GCC pop_options
 
 void timer_init(int32_t hz) {
     int divisor = 1193180 / hz;	   
@@ -29,4 +25,3 @@ void timer_init(int32_t hz) {
 
     klog(LOG_OK, "PIT initialized\n");
 }
-

@@ -1,19 +1,22 @@
 #include <sys/syscall.h>
 
-uint32_t num_syscalls;
-
 static int sys_hello(void) {
-    kprintf("hello");
+    kprintf("hello\n");
+    return 0;
+}
+
+static int sys_goodbye(void) {
+    kprintf("goodbye\n");
     return 0;
 }
 
 static uintptr_t syscall_table[] = {
-    (uintptr_t) &sys_hello,
-    0,
+    [SYS_HELLO]   = (uintptr_t) &sys_hello,
+    [SYS_GOODBYE] = (uintptr_t) &sys_goodbye,
 };
 
 static void syscall_dispatcher(regs_t* r) {
-    if(r->eax >= num_syscalls) {
+    if (r->eax <= 0 && (NUM_ELEMENTS(syscall_table) - 1) && syscall_table[r->eax]) {
         klog(LOG_ERR, "Invalid syscall number: %d\n", r->eax);
         return;
     }
@@ -41,6 +44,5 @@ static void syscall_dispatcher(regs_t* r) {
 
 void syscalls_init(void) {
     klog(LOG_OK, "Initializing syscall handler\n");
-    for(num_syscalls = 0; syscall_table[num_syscalls]; num_syscalls++);
     int_install_handler(0x7f, syscall_dispatcher);
 }

@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <system.h>
 
+#define SYS_HELLO 1
+#define SYS_GOODBYE 2
+
 /* function declarations */
 void syscalls_init(void);
 

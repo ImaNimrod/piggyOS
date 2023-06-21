@@ -189,7 +189,7 @@ void vmm_init(void) {
 
     uint32_t i = LOAD_MEMORY_ADDRESS;
     while(i < LOAD_MEMORY_ADDRESS + 4 * M) { /* map kernel 4Mb */
-        allocate_page(kernel_page_dir, i, 0, 1, 1);
+        allocate_page(kernel_page_dir, i, 0, 1, 0);
         i = i + PAGE_SIZE;
     }
     i = LOAD_MEMORY_ADDRESS + 4 * M;
@@ -209,7 +209,7 @@ void vmm_init(void) {
     klog(LOG_OK, "Virtual Memory Manager initialized\n");
 }
 
-void *ksbrk(int32_t size) {
+void* ksbrk(int32_t size) {
     void* runner = NULL;
     void* new_boundary;
     void* old_heap_curr;

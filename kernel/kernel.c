@@ -91,7 +91,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     /* initalize floating-point unit */
     fpu_init();
 
-    /* parse acpi tables */
+    // /* parse acpi tables */
     // acpi_init(rsdp);
 
     /* initialize devices */
@@ -112,13 +112,19 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     }
 
     /* initialize multiasking */ 
-    // tasking_init();
+    tasking_init();
 
     /* initialize syscall handler */
     syscalls_init();
 
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
+
+    fs_node_t* initrd = finddir_fs(get_fs_root(), "initrd"); 
+    if (initrd) {
+        fs_node_t* elf = finddir_fs(initrd, "initrd/test"); 
+        elf_run(elf);
+    }
 
     for(;;);
 }

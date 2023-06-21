@@ -1,133 +1,113 @@
 #include <sys/elf.h>
 
-uint8_t elf_check_header(elf_header_t* hdr) {
-    if (hdr->magic[0] != 0x7f || 
-        hdr->magic[1] != 'E' || 
-        hdr->magic[2] != 'L' || 
-        hdr->magic[3] != 'F') {
-        klog(LOG_ERR, "Unable to load executable, ELF header not valid\n");
-        return 1;
+uint8_t elf_check_header(elf_header_t* header) {
+    if (header->e_ident[0] != 0x7f || 
+        header->e_ident[1] != 'E' || 
+        header->e_ident[2] != 'L' || 
+        header->e_ident[3] != 'F') {
+        return 0;
     }
 
-    if (hdr->arch != 1) {
-        klog(LOG_ERR, "Unable to load executable, not a 32-bit program\n");
-        return 2;
-    }
+    if (header->e_ident[EI_CLASS] != 1)
+        return 0;
 
-    if (hdr->byteorder != 1) {
-        klog(LOG_ERR, "Unable to load executable, byte order not little-endian\n");
-        return 3;
-    }
+    if (header->e_ident[EI_DATA] != 1)
+        return 0;
 
-    if (hdr->elf_version != 1) {
-        klog(LOG_ERR, "Unable to load executable, invalid ELF header version\n");
-        return 4;
-    }
+    if (header->e_ident[EI_VERSION] != 1)
+        return 0;
+    
+    if (header->e_machine != 3)
+        return 0;
 
-    if (hdr->filetype != ELF_REL && hdr->filetype != ELF_EXEC) {
-        klog(LOG_ERR, "Unable to load executable, wrong file type\n");
-        return 5; 
-    }
+    if (header->e_type != ET_REL && header->e_type != ET_EXEC)
+        return 0;
 
-    if (hdr->machine != 3) {
-        klog(LOG_ERR, "Unable to load executable, program is not for i386 platform\n");
-        return 6;
+    return 1;
+}
+
+static inline elf_section_header_t* elf_get_section_header(elf_header_t* header, uint32_t num) {
+    return (elf_section_header_t*) ((uint32_t) header + header->e_shoff + num * header->e_shentsize);
+}
+
+
+static inline elf_program_header_t* elf_get_program_header(elf_header_t* header, uint32_t num) {
+    return (elf_program_header_t*) ((uint32_t) header + header->e_phoff + num * header->e_phentsize);
+}
+
+static int elf_prep_sections(elf_header_t* header) {
+    static elf_section_header_t* sheader;
+
+    for (uint32_t i = 0; i < header->e_shnum; i++) {
+        sheader = elf_get_section_header(header, i);
+
+        // handle bss section
+        if (sheader->sh_type == SHT_NOBITS) {
+            if (!sheader->sh_size) continue;
+
+            if (sheader->sh_flags & SHF_ALLOC) {
+                // allocate and zero bss memory
+                void* mem = kmalloc(sheader->sh_size);
+                memset(mem, 0, sheader->sh_size);
+
+                sheader->sh_offset = (uint32_t) mem - (uint32_t) header;
+            }
+        }
     }
 
     return 0;
 }
 
-elf_header_t* elf_open(fs_node_t* node) {
-    if (!node) return NULL;
+static int elf_relocate(elf_header_t* header, uint32_t offset, int argc, char** argv) {
+    static elf_program_header_t* pheader;
 
-    elf_header_t* hdr = kmalloc(node->length);
-    read_fs(node, 0, node->length, (uint8_t*) hdr);
-    
-    if (elf_check_header(hdr))
-        return NULL;
+    for (uint32_t i = 0; i < header->e_phnum; i++) {
+        pheader = elf_get_program_header(header, i);
 
-    return hdr;
-}
+        if (pheader->p_type != PT_LOAD) continue;
 
-static inline elf_section_header_t* elf_get_section_header(elf_header_t* elf_file, uint32_t num) {
-    return (elf_section_header_t*) (elf_file + elf_file->shoff + elf_file->sh_ent_size * num);
-}
+        kprintf("ELF PHeader #%d, Type: LOAD, Off:0x%x, Vaddr:0x%x, Size:0x%d\n", i, pheader->p_offset, pheader->p_vaddr, pheader->p_memsz);
 
-static inline elf_program_header_t* elf_get_program_header(elf_header_t* elf_file, uint32_t num) {
-    return (elf_program_header_t*) (elf_file + elf_file->phoff + elf_file->ph_ent_size * num);
-}
+        allocate_region(kernel_page_dir, pheader->p_vaddr, pheader->p_vaddr + pheader->p_filesz, 0, 1, 1);
+        memcpy((uint8_t*) pheader->p_vaddr, (uint8_t*) offset + pheader->p_offset, pheader->p_filesz);
 
-void elf_hdr_info(elf_header_t* hdr) {
-    kprintf("\tHeader information:\n");
-    kprintf("\t Architecture: %s\n", (hdr->arch==1) 
-                                         ? "32-bit" 
-                                         : (hdr->arch == 2) 
-                                           ? "64-bit" 
-                                           : "Unknown architecture");
-    kprintf("\t Byte order: %s\n", (hdr->byteorder == 1) 
-                                       ? "little-endian" 
-                                       : "unknown");
-    kprintf("\t ELF file version: %d\n", hdr->elf_version);
-    kprintf("\t ELF file type: %s\n", (hdr->filetype == 1) 
-                                          ? "relocatable" 
-                                          : (hdr->filetype == 2) 
-                                            ? "executable" 
-                                            : "unknown");
-    kprintf("\t Target machine: %s\n", (hdr->machine == 3) 
-                                           ? "i386" 
-                                           : "unknown");
-    kprintf("\t Entry point: 0x%x\n", hdr->entry);
-    kprintf("\t Program header offset: %d\n", hdr->phoff);
-    kprintf("\t Section header offset: %d\n", hdr->shoff);
-    kprintf("\t File flags: %d\n", hdr->flags);
-    kprintf("\t File header size: %d\n", hdr->hsize);
-    kprintf("\t Program header entry size: %d\n", hdr->ph_ent_size);
-    kprintf("\t Section header entry size: %d\n", hdr->sh_ent_size);
-    kprintf("\t Section header count: %d\n", hdr->sh_ent_cnt);
-    kprintf("\t Program header count: %d\n", hdr->ph_ent_cnt);
-}
-
-int run_elf_file(elf_header_t* hdr, int argc, char **argv) {
-    kprintf("loading segments:\n");
-    uint32_t vmm_alloced[4096] = {0};
-    int32_t ptr_vmm_alloced = 0;
-
-    for (int32_t i = 0; i < hdr->ph_ent_cnt; i++) {
-        elf_program_header_t *phdr = elf_get_program_header(hdr, i);
-        if (phdr->type != 0) {
-            continue;
-        }
-        kprintf("Loading %x bytes to %x\n", phdr->size_in_mem, phdr->load_to);
-
-        uint32_t alloc_addr;
-        for (alloc_addr = phdr->load_to;
-            alloc_addr < phdr->load_to + phdr->size_in_mem;
-            alloc_addr += PAGE_SIZE) {
-            vmm_alloced[ptr_vmm_alloced] = alloc_addr;
-            ptr_vmm_alloced++;
-            kprintf("Alloc %d: %x\n", ptr_vmm_alloced, alloc_addr);
-            allocate_page(kernel_page_dir, alloc_addr, 0, 0, 1);
-        }
-
-        memset((void*) phdr->load_to, 0, phdr->size_in_mem);
-        memcpy((void*) phdr->load_to, hdr + phdr->data_offset, phdr->size_in_file);
-        kprintf("Loaded\n");
+        if (pheader->p_filesz < pheader->p_memsz)
+            memset((uint8_t*) pheader->p_vaddr + pheader->p_filesz, 0, pheader->p_memsz - pheader->p_filesz);
     }
 
-    int(*entry_point)(int argc, char** argv) = (void*) (hdr->entry);
-    kprintf("ELF entry point: %x\n", hdr->entry);
 
-    kprintf("Executing\n");
-    int _result = entry_point(argc, argv);
+    typedef int (*entry_point) (int, char**);
+    entry_point entry = (entry_point) header->e_entry;
 
-    kprintf("[PROGRAMM FINISHED WITH CODE <%d>]\n", _result);
-    kprintf("Cleaning VMM:\n");
+    int result = entry(argc, argv);
 
-    for (int32_t i = 0; i != ptr_vmm_alloced; i++){
-        kprintf("\tCleaning %d: %x\n", i, vmm_alloced[i]);
-        free_page(kernel_page_dir, vmm_alloced[i], 0);
+    kprintf("Program finished with value: %d", result);
+
+    return 0;
+}
+
+int elf_run(fs_node_t* node) {
+    if (!node)
+        return 1;
+
+    open_fs(node, 0);
+
+    uint8_t* modulebuffer = (uint8_t*) kmalloc(node->length);
+    read_fs(node, 0, node->length, modulebuffer);
+
+    if (!elf_check_header((elf_header_t*) modulebuffer))
+        return 1;
+
+    if (elf_prep_sections((elf_header_t*) modulebuffer)) {
+        klog(LOG_ERR, "Failed to prepare ELF section\n");
     }
-    kprintf("[CLEANED <%d> PAGES]\n", ptr_vmm_alloced);
+
+    if (elf_relocate((elf_header_t*) modulebuffer, (uint32_t) modulebuffer, 0, NULL)) {
+        klog(LOG_ERR, "Failed to relocate ELF binary\n");
+    }
+
+    close_fs(node);
+    kfree(modulebuffer);
 
     return 0;
 }

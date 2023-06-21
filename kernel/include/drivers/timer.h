@@ -6,6 +6,7 @@
 #include <drivers/io_port.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/task.h>
 
 #define PIT_A     0x40
 #define PIT_CMD   0x43

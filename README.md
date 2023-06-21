@@ -17,7 +17,7 @@ is in the early phases of development and many features/fixes will be coming in 
 - [x] Improved memory management system
 - [ ] Switch to user mode
 - [X] Syscalls
-- [ ] Loading ELF User Mode programs into memory and run them
+- [X] Loading ELF executables into memory and run them
 - [ ] Redo / make better timer interface
 - [X] Syncronization primatives (just spinlock right now)
 - [ ] User mode shell with number of commands

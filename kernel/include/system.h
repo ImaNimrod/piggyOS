@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-// litteraly a bunch of commonly used constants
+// virtual 
 #define LOAD_MEMORY_ADDRESS 0xC0000000
 
 #define K 1024
@@ -14,6 +14,14 @@
 #define VERSION_MAJ 1
 #define VERSION_MIN 0
 #define VERSION_ALIAS "kerplunk"
+
+#define ALIGN_UP(val, a) (((val) + ((a) - 1)) & ~((a) - 1))
+#define ALIGN_DOWN(val, a) ((val) & ~((a) - 1))
+
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+#define NUM_ELEMENTS(array) (sizeof(array) / sizeof(array[0]))
 
 // defined by the linker
 extern uintptr_t kernel_start;

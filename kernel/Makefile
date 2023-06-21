@@ -4,7 +4,7 @@ include ../config.mk
 KERNEL_CFLAGS := -c -m32 -std=c11 -Os -ffreestanding
 KERNEL_CFLAGS += -Wall -Wextra -Wno-unused-function -Wstrict-prototypes -Wno-unused-parameter
 KERNEL_CFLAGS += -Wnested-externs -Winline -Wpointer-arith -pedantic
-KERNEL_CFLAGS += -mgeneral-regs-only  -mno-sse 
+KERNEL_CFLAGS += -mgeneral-regs-only -mno-sse 
 KERNEL_LDFLAGS= -Os -nostdlib -melf_i386
 
 KERNEL_C_SRCS := $(shell find -name '*.c')

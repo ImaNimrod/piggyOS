@@ -46,7 +46,7 @@ void __kprintf_va_list(char* str, va_list ap) {
                     #ifdef TEXTMODE
 					vga_puts(s);
                     #endif 
-                    serial_puts(PORT_COM1, s);
+                    serial_puts(s);
 					i++;
 					continue;
 				/** decimal **/
@@ -57,7 +57,7 @@ void __kprintf_va_list(char* str, va_list ap) {
                     #ifdef TEXTMODE
 					vga_puts(str);
                     #endif 
-                    serial_puts(PORT_COM1, str);
+                    serial_puts(str);
 					i++;
 					continue;
 				}
@@ -68,7 +68,7 @@ void __kprintf_va_list(char* str, va_list ap) {
                     #ifdef TEXTMODE
 					vga_puts(str);
                     #endif 
-                    serial_puts(PORT_COM1, str);
+                    serial_puts(str);
 					i++;
 					continue;
 				}
@@ -77,7 +77,7 @@ void __kprintf_va_list(char* str, va_list ap) {
                     #ifdef TEXTMODE
 					vga_putc(c);
                     #endif 
-                    serial_putc(PORT_COM1, c);
+                    serial_putc(c);
 					i++;
 					continue;
 				}
@@ -88,7 +88,7 @@ void __kprintf_va_list(char* str, va_list ap) {
             #ifdef TEXTMODE
             vga_putc(str[i]);
             #endif 
-            serial_putc(PORT_COM1, str[i]);
+            serial_putc(str[i]);
 		}
 	}
 	va_end(ap);
@@ -97,9 +97,10 @@ void __kprintf_va_list(char* str, va_list ap) {
 int kprintf(const char* str, ...) {
     if(!str)
         return 0;
+
     va_list ap;
     va_start(ap, str);
-    __kprintf_va_list((char *)str, ap);
+    __kprintf_va_list((char*) str, ap);
     return 1;
 }
 
@@ -116,9 +117,9 @@ int klog(enum status status, const char* str, ...) {
             vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
             vga_puts(" ] ");
             #endif
-            serial_puts(PORT_COM1, "[ ");
-            serial_puts(PORT_COM1, "\033[92mOK\033[0m");
-            serial_puts(PORT_COM1, " ] ");
+            serial_puts("[ ");
+            serial_puts("\033[92mOK\033[0m");
+            serial_puts(" ] ");
             break;
         case LOG_ERR:
             #ifdef TEXTMODE
@@ -128,9 +129,9 @@ int klog(enum status status, const char* str, ...) {
             vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
             vga_puts(" ] ");
             #endif
-            serial_puts(PORT_COM1, "[ ");
-            serial_puts(PORT_COM1, "\033[91mERROR\033[0m");
-            serial_puts(PORT_COM1, " ] ");
+            serial_puts("[ ");
+            serial_puts("\033[91mERROR\033[0m");
+            serial_puts(" ] ");
             break;
         case LOG_WARN:
             #ifdef TEXTMODE
@@ -140,9 +141,9 @@ int klog(enum status status, const char* str, ...) {
             vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
             vga_puts(" ] ");
             #endif
-            serial_puts(PORT_COM1, "[ ");
-            serial_puts(PORT_COM1, "\033[93mWARNING\033[0m");
-            serial_puts(PORT_COM1, " ] ");
+            serial_puts("[ ");
+            serial_puts("\033[93mWARNING\033[0m");
+            serial_puts(" ] ");
             break;
         default:
             return 0; 
@@ -150,6 +151,6 @@ int klog(enum status status, const char* str, ...) {
 
     va_list ap;
     va_start(ap, str);
-    __kprintf_va_list((char *) str, ap);
+    __kprintf_va_list((char*) str, ap);
     return 1;
 }

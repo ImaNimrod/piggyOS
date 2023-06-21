@@ -9,6 +9,7 @@
 
 #define PS2_DATA 0x60
 #define PS2_CMD  0x64
+
 #define KEYBOARD_IRQ 33
 
 #define SHIFT (1<<0)

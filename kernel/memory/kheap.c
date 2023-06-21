@@ -11,7 +11,7 @@ void* heap_max;
 
 bool kheap_enabled = false;
 
-extern page_directory_t *kernel_page_dir;
+extern page_directory_t* kernel_page_dir;
 uint32_t placement_address = (uint32_t) &kernel_end;
 
 void *kmalloc_cont(uint32_t sz, int align, uint32_t *phys) {
