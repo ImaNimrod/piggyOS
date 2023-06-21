@@ -36,12 +36,9 @@ void irq_init(void);
 void irq_install_handler(uint8_t irq, void (*handler)(regs_t *r));
 void irq_uninstall_handler(uint8_t irq);
 void irq_ack(uint8_t irq);
-
+void irq_wait(uint8_t irq);
 void irq_set_mask(uint8_t IRQline);
 void irq_clear_mask(uint8_t IRQline);
-
-uint16_t pic_get_isr(void);
-
 void irq_handler(regs_t *r);
 
 void enable_int(void);

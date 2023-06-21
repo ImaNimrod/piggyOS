@@ -1,14 +1,14 @@
 #include <drivers/rtc.h>
 
 uint8_t read_cmos(cmos_reg reg) {
-	outb(0x70, (0x80 | reg));
-	return inb(0x71);
+	outb(CMOS_REG, (0x80 | reg));
+	return inb(CMOS_DATA);
 }
 
 void write_cmos(cmos_reg reg, uint8_t value) {
     disable_int();
-	outb(0x70, (0x80 | reg));
-	outb(0x71, value);
+	outb(CMOS_REG, (0x80 | reg));
+	outb(CMOS_DATA, value);
     enable_int();
 }
 

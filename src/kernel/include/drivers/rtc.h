@@ -6,6 +6,9 @@
 #include <drivers/io_port.h>
 #include <stdint.h>
 
+#define CMOS_REG  0x70
+#define CMOS_DATA 0x71
+
 #define from_bcd(val) (((val >> 4) * 10) + (val & 0xf))
 
 typedef enum {

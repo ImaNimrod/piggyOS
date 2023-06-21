@@ -1,6 +1,6 @@
 CC=i686-elf-gcc
-CFLAGS=-c -m32 -std=c11 -ffreestanding -O2 -Wall -Wextra
-LDFLAGS= -ffreestanding -O2 -nostdlib -nostartfiles -nodefaultlibs -T linker.ld -lgcc
+CFLAGS=-c -m32 -std=c11 -ffreestanding -Os -Wall -Wextra -pedantic
+LDFLAGS= -ffreestanding -Os -nostdlib -nostartfiles -nodefaultlibs -T linker.ld -lgcc
 BUILDDIR=build
 ISODIR=iso
 SRCDIR=src
@@ -46,4 +46,6 @@ clean:
 run:
 	qemu-system-i386 -cdrom piggyOS.iso\
 					 -m 16M\
-					 -rtc base=localtime
+					 -rtc base=localtime\
+					 # -drive format=raw,file=floppy.img,index=0,if=floppy\
+					 # -drive format=raw,file=floppy2.img,index=1,if=floppy\

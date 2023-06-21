@@ -39,7 +39,7 @@ static const char lower_map[128] = {
     0,	/* All other keys are undefined */
 };
 
-static void keyboard_handler(regs_t *r) {
+static void keyboard_irq_handler(regs_t *r) {
     uint8_t scancode;
 
     while(inb(0x64) & 2);
@@ -57,6 +57,6 @@ static void keyboard_handler(regs_t *r) {
 void keyboard_init(void) {
     /* installs keyboard_handler to IRQ1 */ 
     vga_puts("initializing PS/2 keyboard...\n");
-    irq_install_handler(KEYBOARD_IRQ, keyboard_handler);
+    irq_install_handler(KEYBOARD_IRQ, keyboard_irq_handler);
 }
 

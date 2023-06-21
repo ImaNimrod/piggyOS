@@ -3,6 +3,7 @@
 #include <cpu/irq.h>
 #include <cpu/isr.h>
 #include <display.h>
+#include <drivers/fdc.h>
 #include <drivers/keyboard.h>
 #include <drivers/pci.h>
 #include <drivers/rtc.h>
@@ -25,16 +26,13 @@ void kernel_main(void) {
 
     paging_init();
 
-    timer_init();
+    timer_init(100);
     keyboard_init();
 
+    fdc_init();
+
     pci_init();
-
     mmu_print_state();
-
-    time_t time;
-    get_time(&time);
-    kprintf("%d %d/%d %d:%d:%d\n", time.year + 2000, time.mnth, time.day, time.hour, time.min, time.sec);
 
     for(;;) {
         __asm__("hlt");

@@ -18,15 +18,7 @@ static void irq_remap(void) {
     outb(PIC2_DATA, 0x0);
 }
 
-static uint16_t __pic_get_irq_reg(int ocw3) {
-    outb(PIC1_CMD, ocw3);
-    outb(PIC2_CMD, ocw3);
-    return (inb(PIC2_CMD) << 8) | inb(PIC1_CMD);
-}
- 
-uint16_t pic_get_isr(void) {
-    return __pic_get_irq_reg(PIC_READ_ISR);
-}
+static volatile int current_int[15];
 
 void irq_init(void) {
     irq_remap();
@@ -48,7 +40,16 @@ void irq_init(void) {
     idt_set_descr(46, (unsigned)irq14, 0x8E);
     idt_set_descr(47, (unsigned)irq15, 0x8E);
 
+    for(int i = 0; i < 15; i++){
+        current_int[i] = 0;
+    }
+
     __asm__ volatile("sti");
+}
+
+void irq_wait(uint8_t irq) {
+    while (!current_int[irq]){};
+    current_int[irq] = 0;
 }
 
 void irq_install_handler(uint8_t irq, void (*handler)(regs_t *r)) {
@@ -69,6 +70,7 @@ void irq_ack(uint8_t irq) {
 void irq_handler(regs_t *r) {
     __asm__ volatile("cli");
 
+    current_int[r -> int_no - 32] = 1;
     void (*handler)(regs_t *r);
 
     if (r->int_no > 47 || r->int_no < 32) {
