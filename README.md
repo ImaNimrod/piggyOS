@@ -1,5 +1,4 @@
-# piggyOS 
-![Download Status] (https://img.shields.io/github/downloads/GlowInTheDark123/piggyOS/total)
+# piggyOS ![GitHub all releases](https://img.shields.io/github/downloads/GlowInTheDark123/piggyOS/total) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/GlowInTheDark123/piggyOS)
 
 piggyOS is a homemade operating system for i686 processors. This is a toy OS created purely
 to learn the concepts of OS development and how to put them into practice. Right now, it 
