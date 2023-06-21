@@ -5,9 +5,9 @@ to learn the concepts of OS development and how to put them into practice. Right
 is in the early phases of development and many features/fixes will be coming in the coming months.
 
 ## coming features
-- [ ] Multitasking
+- [x] Multitasking (not fully featured as of 8/23/22)
 - [ ] Ext2 filesystem support
 - [x] Improved memory management system
 - [ ] Switch to user mode
-- [ ] Syscalls
+- [x] Syscalls
 - [ ] Loading ELF User Mode programs into memory and run them
