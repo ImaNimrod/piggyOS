@@ -7,6 +7,7 @@
 #include <drivers/keyboard.h>
 #include <drivers/pci.h>
 #include <drivers/rtc.h>
+#include <drivers/serial.h>
 #include <drivers/timer.h>
 #include <drivers/vga.h>
 #include <fs/fs.h>
@@ -18,8 +19,12 @@
 #include <system.h>
 
 void kernel_main() {
+    #ifdef TEXTMODE
     vga_clear();
     vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+    #endif 
+
+    serial_init();
 
     /* load descriptor tables and interrupt information */
     gdt_init();
@@ -41,6 +46,7 @@ void kernel_main() {
     keyboard_init();
     rtc_init();
     ata_init();
+    pci_init();
 
     for(;;) {
         __asm__("hlt");

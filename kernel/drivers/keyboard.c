@@ -47,7 +47,7 @@ static void keyboard_irq_handler(regs_t *r) {
 
     if (scancode & 0x80) {
     } else {
-        vga_putc(lower_map[scancode]);
+        kprintf("%c", lower_map[scancode]);
     }
     irq_ack(KEYBOARD_IRQ);
 
@@ -56,7 +56,7 @@ static void keyboard_irq_handler(regs_t *r) {
 
 void keyboard_init(void) {
     /* installs keyboard_handler to IRQ1 */ 
-    kprintf("initializing PS/2 keyboard...\n");
     irq_install_handler(KEYBOARD_IRQ, keyboard_irq_handler);
+    klog(LOG_OK, "PS/2 Keyboard device initialized\n");
 }
 

@@ -24,13 +24,13 @@ void sleep(uint64_t ticks) {
 
 void timer_init(int32_t hz) {
     /* installs 'timer_handler' to IRQ0 */
-    kprintf("initializing PIT...\n");
-
     int divisor = 1193180 / hz;	   
 	outb(PIT_CMD, 0x36);			 
 	outb(PIT_A, divisor & 0xFF);   
 	outb(PIT_A, divisor >> 8);
 
     irq_install_handler(TIMER_IRQ, timer_irq_handler);
+
+    klog(LOG_OK, "PIT initialized\n");
 }
 

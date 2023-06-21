@@ -77,8 +77,8 @@ void pci_init(void) {
 	devs = drivs = 0;
 	pci_devices = (pci_device **) kmalloc(32 * sizeof(pci_device));
 	pci_drivers = (pci_driver **) kmalloc(32 * sizeof(pci_driver));
+    klog(LOG_OK, "PCI device support loaded\n");
 	pci_probe();
-	kprintf("PCI driver support loaded.\n");
 }
 
 void pci_register_driver(pci_driver *driv) {

@@ -16,8 +16,9 @@ kernel:
 run:
 	qemu-system-i386 -m 4G\
 					 -rtc base=localtime\
+					 -cdrom piggyOS.iso\
 					 -serial stdio\
-					 -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
+					 # -drive format=raw,file=piggyOS-disk.img,index=0,if=ide\
 
 cdrom: 
 	@grub-file --is-x86-multiboot2 iso/boot/piggyOS-kernel.bin 
@@ -36,7 +37,7 @@ disk:
 	@mkfs.ext2 /dev/mapper/hda1
 	@mount /dev/mapper/hda1 /mnt
 	@echo "installing main files."
-	@cp -r ./hdd/* /mnt/
+	@cp -r ./rootfs/* /mnt/
 	@echo "installing kernel..."
 	@mkdir -p /mnt/boot/
 	@cp -r ./iso/boot/* /mnt/boot

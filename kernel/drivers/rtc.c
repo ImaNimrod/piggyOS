@@ -33,7 +33,6 @@ static void rtc_irq_handler(regs_t *r) {
 }
 
 void rtc_init(void) {
-    kprintf("initializing RTC...\n");
     uint8_t status;
      
     status = read_cmos(CMOS_STATUS_B);
@@ -46,4 +45,6 @@ void rtc_init(void) {
     read_cmos(CMOS_STATUS_C);
 
     irq_install_handler(RTC_IRQ, rtc_irq_handler);
+
+    klog(LOG_OK, "RTC initialized\n");
 }

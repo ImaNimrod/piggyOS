@@ -43,7 +43,10 @@ void __kprintf_va_list(char* str, va_list ap) {
 				/** string **/
 				case 's':
 					s = va_arg(ap, char*);
+                    #ifdef TEXTMODE
 					vga_puts(s);
+                    #endif 
+                    serial_puts(PORT_COM1, s);
 					i++;
 					continue;
 				/** decimal **/
@@ -51,7 +54,10 @@ void __kprintf_va_list(char* str, va_list ap) {
 					int c = va_arg(ap, int);
 					char str[32] = {0};
 					__itoa_s(c, 10, str);
+                    #ifdef TEXTMODE
 					vga_puts(str);
+                    #endif 
+                    serial_puts(PORT_COM1, str);
 					i++;
 					continue;
 				}
@@ -59,16 +65,19 @@ void __kprintf_va_list(char* str, va_list ap) {
 					int c = va_arg(ap, int);
 					char str[32]= {0};
 					__itoa(c, 16, str);
+                    #ifdef TEXTMODE
 					vga_puts(str);
+                    #endif 
+                    serial_puts(PORT_COM1, str);
 					i++;
 					continue;
 				}
-				/** character **/
 				case 'c': {
-					// char gets promoted to int for va_arg!
-					// clean it.
 					char c = (char)(va_arg(ap, int) & ~0xFFFFFF00);
+                    #ifdef TEXTMODE
 					vga_putc(c);
+                    #endif 
+                    serial_putc(PORT_COM1, c);
 					i++;
 					continue;
 				}
@@ -76,17 +85,71 @@ void __kprintf_va_list(char* str, va_list ap) {
 					break;
 			}
 		} else {
-			vga_putc(str[i]);
+            #ifdef TEXTMODE
+            vga_putc(str[i]);
+            #endif 
+            serial_putc(PORT_COM1, str[i]);
 		}
 	}
 	va_end(ap);
 }
 
-int kprintf (const char* str, ...) {
+int kprintf(const char* str, ...) {
     if(!str)
         return 0;
     va_list ap;
     va_start(ap, str);
     __kprintf_va_list((char *)str, ap);
+    return 1;
+}
+
+int klog(enum status status, const char* str, ...) {
+    if (!str)
+        return 0;
+
+    switch (status) {
+        case LOG_OK:
+            #ifdef TEXTMODE
+            vga_puts("[ ");
+            vga_set_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+            vga_puts("OK");
+            vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+            vga_puts(" ] ");
+            #endif
+            serial_puts(PORT_COM1, "[ ");
+            serial_puts(PORT_COM1, "\033[92mOK\033[0m");
+            serial_puts(PORT_COM1, " ] ");
+            break;
+        case LOG_ERR:
+            #ifdef TEXTMODE
+            vga_puts("[ ");
+            vga_set_color(VGA_COLOR_LIGHT_RED, VGA_COLOR_BLACK);
+            vga_puts("ERROR");
+            vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+            vga_puts(" ] ");
+            #endif
+            serial_puts(PORT_COM1, "[ ");
+            serial_puts(PORT_COM1, "\033[91mERROR\033[0m");
+            serial_puts(PORT_COM1, " ] ");
+            break;
+        case LOG_WARN:
+            #ifdef TEXTMODE
+            vga_puts("[ ");
+            vga_set_color(VGA_COLOR_YELLOW, VGA_COLOR_BLACK);
+            vga_puts("WARNING");
+            vga_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+            vga_puts(" ] ");
+            #endif
+            serial_puts(PORT_COM1, "[ ");
+            serial_puts(PORT_COM1, "\033[93mWARNING\033[0m");
+            serial_puts(PORT_COM1, " ] ");
+            break;
+        default:
+            return 0; 
+    }
+
+    va_list ap;
+    va_start(ap, str);
+    __kprintf_va_list((char *) str, ap);
     return 1;
 }

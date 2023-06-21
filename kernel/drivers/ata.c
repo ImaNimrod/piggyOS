@@ -131,10 +131,10 @@ void ide_write_sector(uint8_t drive, uint32_t lba, uint8_t *buf) {
 }
 
 void ata_init(void) {
-    kprintf("searching for ATA drives\n");
-
     ide_buf = (uint16_t *) kmalloc(512);
 
     irq_install_handler(ATA_PRIMARY_IRQ, ata_primary_irq);
     irq_install_handler(ATA_SECONDARY_IRQ, ata_secondary_irq);
+
+    klog(LOG_OK, "ATA devices initialized\n");
 }

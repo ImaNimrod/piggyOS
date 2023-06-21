@@ -93,6 +93,7 @@ void kheap_init(void* start, void* end, void* max) {
     heap_max = max;
     heap_curr = start;
     kheap_enabled = true;
+    klog(LOG_OK, "Kernel Heap initialized\n");
 }
 
 uint32_t getRealSize(uint32_t size) {

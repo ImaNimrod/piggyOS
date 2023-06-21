@@ -12,18 +12,12 @@ void pmm_init(size_t mem_size) {
 
     memset(bitmap, 0, bitmap_size);
 
-    mem_start = (uint8_t*) ALIGN(((uint32_t) (bitmap + bitmap_size)));
-    kprintf("mem size:     %d mb\n", mem_size / (M));
-    kprintf("total_blocks: %d\n", total_blocks);
-    kprintf("bitmap addr:  0x%d\n", *bitmap);
-    kprintf("bitmap_size:  %d\n", bitmap_size);
-    kprintf("mem_start:    0x%d\n", *mem_start);
-
     for(size_t i = 0; i < bitmap_size; i++) {
         if(bitmap[i] != 0) {
-            kprintf("%s: memory bitmap is not all empty, fix it!\n", __func__);
+            klog(LOG_WARN, "%s: memory bitmap is not all empty, fix it!\n", __func__);
         }
     }
+    klog(LOG_OK, "Physical Memory Manager initialized\n");
 }
 
 uint32_t allocate_block(void) {
@@ -41,6 +35,6 @@ uint32_t first_free_block(void) {
         if(!ISSET(i))
             return i;
     }
-    kprintf("%s: running out of free blocks\n", __func__);
+    klog(LOG_WARN, "%s: running out of free blocks\n", __func__);
     return (uint32_t) -1;
 }

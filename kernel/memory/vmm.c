@@ -175,6 +175,7 @@ static void enable_paging(void) {
     __asm__ volatile("mov %0, %%cr0" :: "r"(cr0));
 
     paging_enabled = true;
+    klog(LOG_OK, "Paging enabled\n");
 }
 
 void vmm_init(void) {
@@ -198,6 +199,8 @@ void vmm_init(void) {
 
     enable_paging();
     allocate_region(kpage_dir, 0x0, 0x10000, 1, 1, 1);
+
+    klog(LOG_OK, "Virtual Memory Manager initialized\n");
 }
 
 void *ksbrk(int32_t size) {
