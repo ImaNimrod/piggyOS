@@ -1,58 +1,73 @@
 #include <drivers/vga.h>
 
-static const uint8_t NUM_COLS = 80;
-static const uint8_t NUM_ROWS = 25;
-
 static uint16_t* screen_buffer = (uint16_t*) 0xc03ff000;
-static uint16_t cursor = 0;
 static uint16_t color = (VGA_COLOR_BLACK << 4 | VGA_COLOR_WHITE) << 8;
+static uint8_t cur_x = 0, cur_y = 0;
 
 void vga_clear(void) {
-	for (int i = 0; i < NUM_COLS * NUM_ROWS; i++) {
+	for (uint16_t i = 0; i < NUM_COLS * NUM_ROWS; i++) {
 		*(screen_buffer + i) = (uint16_t) 3872; 
     }
 }
 
-static inline void vga_scroll(void) {
-    int i = 0;
+static void scroll(void) {
+    if(cur_y >= NUM_ROWS) {
+        uint16_t temp = cur_y - NUM_ROWS + 1;
+        memcpy(screen_buffer, screen_buffer + temp * NUM_COLS, (NUM_ROWS - temp) * NUM_COLS * 2);
 
-	for (i = 0; i < NUM_COLS * (NUM_ROWS - 1); ++i) {
-		screen_buffer[i] = screen_buffer[i + NUM_COLS];
+        for(int8_t i = 0; i < NUM_COLS; ++i) {
+            screen_buffer[NUM_COLS * (NUM_ROWS - 1) + i] = 3872; 
+        }
+
+        cur_y = NUM_ROWS - 1;
+    }
+}
+
+static void move_cur(void) {
+    uint16_t temp = cur_y * NUM_COLS + cur_x;
+
+    outb(0x3D4, 14);
+    outb(0x3D5, temp >> 8);
+    outb(0x3D4, 15);
+    outb(0x3D5, temp);
+}
+
+void vga_putc(const char c) {
+    uint16_t *where;
+
+    if(c == 0x08) {
+        if(cur_x != 0) cur_x--;
+    } else if(c == 0x09) {
+        cur_x = (cur_x + 8) & ~(8 - 1);
+    } else if(c == '\r') {
+        cur_x = 0;
+    } else if(c == '\n') {
+        cur_x = 0;
+        cur_y++;
+    } else if(c >= ' ') {
+        where = screen_buffer + (cur_y * NUM_COLS + cur_x);
+        *where = (uint16_t) c | color;	
+        cur_x++;
     }
 
-	for(i = 0; i < NUM_COLS; ++i) {
-		screen_buffer[NUM_COLS * (NUM_ROWS - 1) + i] = 3872; 
+    if(cur_x >= NUM_COLS) {
+        cur_x = 0;
+        cur_y++;
     }
+
+    scroll();
+    move_cur();
 }
 
 void vga_puts(const char* string) {
-	int i = 0;
+    int32_t i = 0;
 
-	while (string[i] != '\0') {
-		if (cursor == NUM_COLS * NUM_ROWS) {
-			vga_scroll();
-			cursor = NUM_COLS * (NUM_ROWS - 1);
-		}
-
-		switch (string[i]) {
-            case '\n':
-                cursor = cursor + NUM_COLS - cursor % NUM_COLS;
-                break;
-            case '\r':
-                cursor = cursor - cursor % NUM_COLS;
-                break;
-            case '\t':
-             	while ((cursor % NUM_COLS) % 8 != 0)
-				    cursor++;
-                break;
-            default:
-                screen_buffer[cursor] = (uint16_t) (color | string[i]);
-                cursor++;
-	    }
-		i++;
-	}
+    while(string[i] != '\0') {
+        vga_putc(string[i]);
+        i++;
+    }
 }
 
-void vga_set_color(uint8_t fg, uint8_t bg) {
+void vga_set_color(enum vga_color fg, enum vga_color bg) {
     color = (bg << 4 | fg) << 8;
 }

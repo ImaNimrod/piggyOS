@@ -30,12 +30,18 @@ $(asm_object_files): $(BUILDDIR)/%.o : $(SRCDIR)/boot/%.asm
 	mkdir -p $(dir $@) && \
 	nasm -f elf32 $(patsubst $(BUILDDIR)/%.o, $(SRCDIR)/boot/%.asm, $@) -o $@
 
-.PHONY: piggyOS run
+.PHONY: all piggyOS clean run
+all: clean piggyOS run
+
 piggyOS: $(kernel_object_files) $(sys_object_files)
 	nasm -f elf32 -o $(BUILDDIR)/kernel/cpu/interrupt.o $(SRCDIR)/kernel/cpu/interrupt.asm
 	$(CC) $(LDFLAGS) -o $(ISODIR)/boot/piggyOS.bin $(kernel_object_files) $(sys_object_files) $(BUILDDIR)/kernel/cpu/interrupt.o && \
 	grub-file --is-x86-multiboot2 $(ISODIR)/boot/piggyOS.bin && \
 	grub-mkrescue /usr/lib/grub/i386-pc -o piggyOS.iso $(ISODIR)
+
+clean:
+	rm -rf $(BUILDDIR)
+	rm -rf piggyOS.iso
 
 run:
 	qemu-system-i386 -cdrom piggyOS.iso -m 4G

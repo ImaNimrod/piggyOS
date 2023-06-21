@@ -1,7 +1,12 @@
 #ifndef _KERNEL_VGA_H
 #define _KERNEL_VGA_H
 
+#include <drivers/io_port.h>
 #include <stdint.h>
+#include <string.h>
+
+#define NUM_COLS 80
+#define NUM_ROWS 25
 
 enum vga_color {
     VGA_COLOR_BLACK       = 0,
@@ -23,9 +28,9 @@ enum vga_color {
 };
 
 /* function declarations */
-
 void vga_clear(void);
+void vga_putc(const char c);
 void vga_puts(const char* string);
-void vga_set_color(uint8_t fg, uint8_t bg);
+void vga_set_color(enum vga_color fg, enum vga_color bg);
 
 #endif
