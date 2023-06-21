@@ -12,26 +12,26 @@ is in the early phases of development and many features/fixes will be coming in 
 
 ## build instructions
 To build and run this project you first need to get a copy of the source code:
-```console
+```bash
 git clone https://github.com/GlowInTheDark123/piggyOS.git
 cd piggyOS
 ```
 Next you will need to build the project's toolchain. This is includes the binutils (v2.39) and gcc (v12.2.0). In order to build
 these you need the standard coreutils as well as curl, tar, and all the libraries needed to build the software from source. You should 
 check your package manager's documentation to find and install these dependencies. To download and compile the toolchain, run:
-```console
+```bash
 make toolchain
 ```
 This will take a while, as it is patching and building the cross compiler from source.
 Once that has finished, you can now build the operating system by running:
-```console
+```bash
 make
 make cdrom
 ```
 The first command will compile the kernel and the latter will create an cdrom with the kernel and an initrd image. You can now run 
 the `piggyOS.iso` image using your x86 emulator of choice. The build system of this project comes with a command that uses qemu to run 
 the project. Just type:
-```console
+```bash
 make run
 ```
 
