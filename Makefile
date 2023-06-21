@@ -20,7 +20,6 @@ sys_object_files := $(libc_object_files) $(asm_object_files)
 
 $(kernel_object_files): $(BUILDDIR)/kernel/%.o : $(SRCDIR)/kernel/%.c 
 	mkdir -p $(dir $@) && \
-	nasm -f elf32 -o $(BUILDDIR)/kernel/interrupt.o $(SRCDIR)/kernel/interrupt.asm
 	$(CC) $(CFLAGS) -I $(KINCLUDEDIR) -I $(LIBCINCLUDEDIR) $(patsubst $(BUILDDIR)/kernel/%.o, $(SRCDIR)/kernel/%.c, $@) -o $@
 
 $(libc_object_files): $(BUILDDIR)/libc/%.o : $(SRCDIR)/libc/src/%.c 
@@ -33,7 +32,8 @@ $(asm_object_files): $(BUILDDIR)/%.o : $(SRCDIR)/boot/%.asm
 
 .PHONY: piggyOS run
 piggyOS: $(kernel_object_files) $(sys_object_files)
-	$(CC) $(LDFLAGS) -o $(ISODIR)/boot/piggyOS.bin $(kernel_object_files) $(sys_object_files) $(BUILDDIR)/kernel/interrupt.o && \
+	nasm -f elf32 -o $(BUILDDIR)/kernel/cpu/interrupt.o $(SRCDIR)/kernel/cpu/interrupt.asm
+	$(CC) $(LDFLAGS) -o $(ISODIR)/boot/piggyOS.bin $(kernel_object_files) $(sys_object_files) $(BUILDDIR)/kernel/cpu/interrupt.o && \
 	grub-file --is-x86-multiboot2 $(ISODIR)/boot/piggyOS.bin && \
 	grub-mkrescue /usr/lib/grub/i386-pc -o piggyOS.iso $(ISODIR)
 

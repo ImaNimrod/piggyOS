@@ -1,4 +1,4 @@
-#include <gdt.h>
+#include <cpu/gdt.h>
 
 static gdt_descr_t gdt[GDT_LEN];
 static gdt_ptr_t gdt_ptr;
