@@ -6,16 +6,17 @@ is in the early phases of development and many features/fixes will be coming in 
 
 ## plan for version 1.0
 - The goal right now is to have v1.0 finished by late November 2022.
-- It will have no permanent storage and run off of an ext2 ramdisk.
+- It will have no permanent storage and run off of an read-only ramdisk.
 - It will have some basic commands and a shell (all loaded/run in usermode)
-- Should be bug free
+- Should be free of any major bugs
 
 ## coming features
-- [x] Multitasking (not fully featured as of 8/27/22)
-- [ ] Ext2 filesystem support
+- [ ] Multitasking (not fully featured as of 8/27/22)
+- [X] VFS and devFS working
+- [ ] Ramdisk support
 - [x] Improved memory management system
 - [ ] Switch to user mode
-- [x] Syscalls
+- [X] Syscalls
 - [ ] Loading ELF User Mode programs into memory and run them
 - [ ] Redo / make better timer interface
 - [X] Syncronization primatives (just spinlock right now)
