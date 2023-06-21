@@ -30,7 +30,9 @@ typedef int (*ioctl_type_t) (struct fs_node*, uint32_t request, void* argp);
 typedef struct fs_node {
     /* basic file information */
     char name[128]; 
-    uint32_t flags, inode, length, impl;
+    uint32_t flags;
+    uint32_t inode;
+    uint32_t length;
 
     /* these are func ptrs that outline the operations we can do on files */
     open_type_t open;
@@ -44,7 +46,9 @@ typedef struct fs_node {
 
 struct dirent {
     char name[128];
+    uint32_t flags;
     uint32_t inode;
+    uint32_t offset;
 };
 
 struct vfs_entry {
@@ -63,6 +67,9 @@ struct dirent* readdir_fs(fs_node_t* node, uint32_t index);
 fs_node_t* finddir_fs(fs_node_t* node, char* name);
 int ioctl_fs(fs_node_t* node, uint32_t request, void* argp);
 fs_node_t* clone_fs(fs_node_t* node);
+
+char** path(char* file);
+void path_free(char** p);
 
 void vfs_init(void);
 fs_node_t* get_fs_root(void);

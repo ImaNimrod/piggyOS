@@ -40,5 +40,4 @@ SECTIONS {
         *(.eh_frame)
 		*(.note.gnu.build-id)
 	}
-
 }

@@ -32,7 +32,7 @@ static fs_node_t* devfs_finddir(fs_node_t* node, char* name) {
     foreach(d, devlist) {
         fs_node_t* dev_node = (fs_node_t*) d->value;
 
-        if (strcmp(name, dev_node->name) == 0) {
+        if (!strcmp(name, dev_node->name)) {
             result = dev_node;
             break;
         }
@@ -65,6 +65,7 @@ void devfs_init(void) {
 
     strcpy(devfs->name, "dev");
     devfs->flags = FS_DIRECTORY;
+    devfs->inode = 0;
 
     devfs->open = NULL;
     devfs->close = NULL;

@@ -1,27 +1,35 @@
 #include <fs/fs.h>
 
 static list_t* root_nodes;
-static struct dirent* rootfs_dirent;
 static spinlock_t rootfs_lock = 1;
+static uint32_t root_files;
 
 static struct dirent* rootfs_readdir(fs_node_t* node, uint32_t index) {
-    struct dirent* result = NULL;
-    uint32_t counter = 0;
-    spin_lock(&rootfs_lock);
+    struct dirent* d = NULL;
 
-    foreach(d, root_nodes) {
-        if (index == counter) {
-            fs_node_t* rootfs_node = (fs_node_t*) d->value;
-            strcpy(rootfs_dirent->name, rootfs_node->name);
-            rootfs_dirent->inode = index;
-            result = rootfs_dirent;
-            break;
-        }
-        counter++;
+    fs_node_t* rnode;
+    list_node_t* entry;
+
+    if(index >= root_files)
+        return NULL;
+
+    entry = list_get_node_by_index(root_nodes, index);
+    rnode = (fs_node_t*) entry->value;
+
+    if(rnode) {
+        d = (struct dirent*) kmalloc(sizeof(struct dirent));
+
+        if(!d)
+            return NULL;
+
+        strcpy(d->name, rnode->name);
+        d->inode = (uint32_t) rnode;
+        d->offset = index;
+        d->flags = rnode->flags;
     }
 
     spin_unlock(&rootfs_lock);
-    return result;
+    return d;
 }
 
 static fs_node_t* rootfs_finddir(fs_node_t* node, char* name) {
@@ -31,7 +39,7 @@ static fs_node_t* rootfs_finddir(fs_node_t* node, char* name) {
     foreach(d, root_nodes) {
         fs_node_t* rootfs_node = (fs_node_t*) d->value;
 
-        if (strcmp(name, rootfs_node->name) == 0) {
+        if (!strcmp(name, rootfs_node->name)) {
             result = rootfs_node;
             break;
         }
@@ -55,6 +63,7 @@ void fs_register(fs_node_t* node) {
     }
 
     list_insert_front(root_nodes, node);
+    root_files++;
     spin_unlock(&rootfs_lock);
 }
 

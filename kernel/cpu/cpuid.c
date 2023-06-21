@@ -363,7 +363,6 @@ int do_amd(void) {
 int detect_cpu(void) {
     cpuid_t cpuid_info;
 
-    klog(LOG_OK, "Identifying CPU type\n");
     if (!has_cpuid()) {
         klog(LOG_WARN, "CPU does not support cpuid instrcution\n");
         return 1;

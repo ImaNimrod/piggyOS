@@ -12,9 +12,9 @@
 #define BLOCKS_PER_BUCKET 8
 
 // macros for setting/clearing bits in a phys_mem_bitmap
-#define SETBIT(i) phys_mem_bitmap[i / BLOCKS_PER_BUCKET] = phys_mem_bitmap[i / BLOCKS_PER_BUCKET] | (1 << (i % BLOCKS_PER_BUCKET))
-#define CLEARBIT(i) phys_mem_bitmap[i / BLOCKS_PER_BUCKET] = phys_mem_bitmap[i / BLOCKS_PER_BUCKET] & (~(1 << (i % BLOCKS_PER_BUCKET)))
-#define ISSET(i) ((phys_mem_bitmap[i / BLOCKS_PER_BUCKET] >> (i % BLOCKS_PER_BUCKET)) & 0x1)
+#define PMM_BITMAP_SET(i) phys_mem_bitmap[i / BLOCKS_PER_BUCKET] = phys_mem_bitmap[i / BLOCKS_PER_BUCKET] | (1 << (i % BLOCKS_PER_BUCKET))
+#define PMM_BITMAP_CLEAR(i) phys_mem_bitmap[i / BLOCKS_PER_BUCKET] = phys_mem_bitmap[i / BLOCKS_PER_BUCKET] & (~(1 << (i % BLOCKS_PER_BUCKET)))
+#define PMM_BITMAP_ISSET(i) ((phys_mem_bitmap[i / BLOCKS_PER_BUCKET] >> (i % BLOCKS_PER_BUCKET)) & 0x1)
 #define ALIGN(addr) (((uint32_t) (addr) & 0xFFFFF000) + BLOCK_SIZE)
 
 /* function declarations */

@@ -39,20 +39,22 @@ list_node_t* list_insert_front(list_t* list, void* value) {
 	return t;
 }
 
-void list_insert_back(list_t* list, void* value) {
+list_node_t* list_insert_back(list_t* list, void* value) {
 	list_node_t* t = kcalloc(sizeof(list_node_t), 1);
 	t->prev = list->tail;
+
     if(list->tail) {
         list->tail->next = t;
     }
+
 	t->value = value;
 
-	if(!list->head) {
+	if(!list->head)
 		list->head = t;
-    }
 
 	list->tail = t;
 	list->size++;
+    return t;
 }
 
 void* list_remove_front(list_t* list) {

@@ -6,7 +6,7 @@ uint32_t phys_mem_bitmap_size;
 
 static uint32_t first_free_block(void) {
     for(size_t i = 0; i < total_blocks; i++) {
-        if(!ISSET(i))
+        if(!PMM_BITMAP_ISSET(i))
             return i;
     }
     klog(LOG_WARN, "%s: running out of free blocks\n", __func__);
@@ -15,12 +15,12 @@ static uint32_t first_free_block(void) {
 
 uint32_t pmm_alloc_block(void) {
     uint32_t free_block = first_free_block();
-    SETBIT(free_block);
+    PMM_BITMAP_SET(free_block);
     return free_block;
 }
 
 void pmm_free_block(size_t blk_num) {
-    CLEARBIT(blk_num);
+    PMM_BITMAP_CLEAR(blk_num);
 }
 
 void pmm_init(struct mboot_tag_basic_meminfo* meminfo) {

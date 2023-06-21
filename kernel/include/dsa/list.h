@@ -20,7 +20,7 @@ typedef struct list{
 list_t* list_create(void);
 size_t list_size(list_t* list);
 list_node_t* list_insert_front(list_t* list, void* value);
-void list_insert_back(list_t* list, void* value);
+list_node_t* list_insert_back(list_t* list, void* value);
 void* list_remove_node(list_t* list, list_node_t* node);
 void* list_remove_front(list_t* list);
 void* list_remove_back(list_t* list);

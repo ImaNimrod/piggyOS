@@ -1,6 +1,6 @@
 include config.mk
 
-.PHONY: clean kernel cdrom run 
+.PHONY: clean kernel initrd cdrom run 
 
 piggyOS: clean kernel 
 
@@ -13,14 +13,16 @@ kernel:
 	$(MAKE) -C $(KERNEL_DIR) -f Makefile piggyOS-kernel.bin
 
 run:
-	$(EMU) -m 256\
+	$(EMU) -m 1G\
 		   -cdrom piggyOS.iso\
 		   -rtc base=localtime\
+		   -cpu pentium2\
 		   -serial stdio
 
 initrd:
-	@mkdir -p ./iso/modules 
-	@tar -c -F ustar -f ./iso/modules/piggyOS-initrd ./initrd/
+	@mkdir -p ./iso/modules
+	@genext2fs -d ./initrd -q -b 8192 ./iso/modules/piggyOS-initrd
+
 
 cdrom: initrd 
 	@grub-file --is-x86-multiboot2 iso/boot/piggyOS-kernel.bin 

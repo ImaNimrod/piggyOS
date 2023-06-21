@@ -10,6 +10,7 @@
 #include <drivers/timer.h>
 #include <drivers/vga.h>
 #include <fs/devfs.h>
+#include <fs/ext2.h>
 #include <fs/fs.h>
 #include <memory/kheap.h>
 #include <memory/pmm.h>
@@ -55,7 +56,7 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
                 case MBOOT_TAG_TYPE_MODULE:
                     module_start = ((struct mboot_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
                     module_size = (((struct mboot_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS) - module_start;
-                    ramdisk = (uint8_t*) 0x400000;
+                    ramdisk = (uint8_t*) 0x800000;
                     klog(LOG_OK, "Copying ramdisk to usable memory...\n");
                     memcpy(ramdisk, (uint8_t*) module_start, module_size);
                     break;
@@ -98,27 +99,39 @@ void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_es
     /* initialize devfs */
     devfs_init();
 
-    // /* initalize multitasking */
-    // tasking_init(); 
-    //
-    // /* initialize syscalls */
-    // syscalls_init();
-    //
-    // tss_set_stack(0x10, inital_esp);
+    /* initialize initrd */
+    if (ramdisk) {
+        allocate_region(kernel_page_dir, (uint32_t) ramdisk, (uint32_t) ramdisk + module_size, 1, 1, 0);
+        ext2_ramdisk_mount((uint32_t) ramdisk);
+    }
 
-    vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
-    kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
-
-    fs_node_t* dev = finddir_fs(fs_root, "dev");
-    if (dev) {
-        kprintf("%s\n", dev->name);
-        kprintf("%d\n", dev->flags);
-        fs_node_t* port = finddir_fs(dev, "port");
-        if (port) {
-            kprintf("%s\n", port->name);
-            kprintf("%d\n", port->flags);
+    fs_node_t* initrd = finddir_fs(get_fs_root(), "initrd");
+    if (initrd) {
+        kprintf("%s\n", initrd->name);
+        fs_node_t* test = finddir_fs(initrd, "dir");
+        if (test) {
+            kprintf("0x%x\n", test);
+            kprintf("%s\n", test->name);
+            kprintf("%d\n", test->flags);
+            fs_node_t* motd = finddir_fs(test, "motd.txt");
+            if (motd) {
+                kprintf("0x%x\n", motd);
+                kprintf("%s\n", motd->name);
+                kprintf("%d\n", motd->flags);
+                kprintf("%d\n", motd->length);
+                uint8_t* buffer = kmalloc(motd->length / sizeof(uint8_t));
+                read_fs(motd, 0, motd->length, buffer);
+                for (uint32_t i = 0; i < motd->length; i++) {
+                    kprintf("%c", buffer[i]);
+                }
+                kprintf("\n");
+                kfree(buffer);
+            }
         }
     }
+    
+    vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
+    kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
 
     for(;;);
 }
