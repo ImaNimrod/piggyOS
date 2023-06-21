@@ -79,6 +79,7 @@ _pick_next:
         kpanic("no tasks left. this is really bad\n");
     }
    
+    tss_set_stack(0x10, (uint32_t) &next->kstack);
     switch_page_directory(next->page_dir, 1);
     context_switch(next);
 }

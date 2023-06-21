@@ -3,6 +3,7 @@
 
 #include <cpu/desc_tbls.h>
 #include <display.h>
+#include <drivers/fpu.h>
 #include <dsa/list.h>
 #include <fs/fs.h>
 #include <memory/kheap.h>
@@ -35,6 +36,10 @@ typedef struct {
     uint8_t* kstack;
 	uint8_t* kstack_mem;
     page_directory_t* page_dir;
+
+    uint8_t* fpu_state; // space for fpu/sse/mmx registers 
+    uint8_t fpu_used;   // have we used the fpu yet
+
     list_node_t* self;
 
     char name[16];
@@ -45,12 +50,14 @@ typedef struct {
     uint32_t file_count;
 } task_t;
 
-extern void context_switch(task_t* t);
+extern page_directory_t* kernel_page_dir;
 
 /* function declarations */
 void task_create(char* name, uintptr_t func);
 void task_exit(int code);
 void schedule(void);
 void multitasking_init(char* name, uintptr_t func);
+
+extern void context_switch(task_t* t);
 
 #endif
