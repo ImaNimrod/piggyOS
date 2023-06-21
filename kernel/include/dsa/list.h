@@ -17,6 +17,7 @@ typedef struct list{
 
 #define foreach(t, list) for(list_node_t* t = list->head; t != NULL; t = t->next)
 
+/* function declarations */
 list_t* list_create(void);
 size_t list_size(list_t* list);
 list_node_t* list_insert_front(list_t* list, void* value);

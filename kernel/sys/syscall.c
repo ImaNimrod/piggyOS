@@ -6,8 +6,19 @@ static int sys_getpid(void) {
     return current_task->pid;
 }
 
+static int sys_yield(void) {
+    schedule();
+    return 0;
+}
+
+static void sys_exit(int code) {
+    task_exit(code);
+}
+
 static uintptr_t syscall_table[] = {
     [SYS_GETPID]  = (uintptr_t) &sys_getpid,
+    [SYS_YIELD]   = (uintptr_t) &sys_yield,
+    [SYS_EXIT]    = (uintptr_t) &sys_exit,
 };
 
 static void syscall_dispatcher(regs_t* r) {

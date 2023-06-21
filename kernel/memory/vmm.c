@@ -82,10 +82,11 @@ void allocate_region(page_directory_t* dir, uint32_t start_va, uint32_t end_va, 
     uint32_t end = end_va & 0xfffff000;
 
     while(start <= end) {
-        if(iden_map)
+        if (iden_map)
             allocate_page(dir, start, start / PAGE_SIZE, is_kernel, is_writable);
         else
             allocate_page(dir, start, 0, is_kernel, is_writable);
+
         start = start + PAGE_SIZE;
     }
 }
@@ -201,7 +202,7 @@ void vmm_init(void) {
 
     switch_page_directory(kernel_page_dir, 0);
 
-    allocate_region(kernel_page_dir, 0, 0x10000, 0, 1, 1);
+    allocate_region(kernel_page_dir, 0, 0x10000, 1, 1, 1);
 
     enable_paging();
 

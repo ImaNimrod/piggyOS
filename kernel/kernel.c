@@ -1,4 +1,4 @@
-#include <cpu/cpuid.h>
+#include <cpu/cpuid.h> 
 #include <cpu/desc_tbls.h>
 #include <display.h>
 #include <drivers/acpi.h>
@@ -29,6 +29,7 @@ void stage2(void) {
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
     kprintf("%s\t\t\t\tVersion %d.%d (%s)\n", welecome_banner, VERSION_MAJ, VERSION_MIN, VERSION_ALIAS);
 
+    /* idle forever */
     while (1)
         __asm__ volatile("hlt");
 }

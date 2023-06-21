@@ -5,41 +5,44 @@ global context_switch
 extern current_task
 
 context_switch:
-    pop     eax		; convert CALL stack frame (EIP only)...
-    pushf		      ; ...to partial IRET (EIP, EFLAGS)
-    push    eax
+    pop eax
+    pushfd
+    push eax
 
-    push    ebp	  ; callee-save registers used by C
-    push    edi	  ; pushing these creates kregs_t stack frame
-    push    esi
-    push    ebx
+    push ebp
+    push edi
+    push esi
+    push ebx
+
     cli
-    mov     eax, [current_task]
 
-    ; store current kernel ESP in thread_t struct of current thread/task
-    mov     [eax], esp
+    mov eax, [current_task]
 
-    ; get pointer (thread_t t) to new task/thread to run
-    mov     eax,  [esp + 24]
+    mov [eax], esp
 
-    mov     ebx, [eax + 8]
-    ; cmp     ebx, dword 0
-    ; je      no_cr3
+    mov eax, [esp + 24] 
+    mov ebx, [eax + 8] ; ptr to page_direcory 
 
-    xchg bx, bx
-    mov     cr3, ebx
+    ; virtual address space has no changed
+    mov edx, cr3
+    cmp edx, ebx
+    je .no_pagedir
 
-no_cr3:
-    mov     [current_task], eax
+    mov cr3, ebx
 
-    mov     esp,[eax]
-    pop     ebx
-    pop     esi
-    pop     edi
-    pop     ebp
+.no_pagedir:
+    mov [current_task], eax
 
-    pop     eax
-    push    cs
-    push    eax
+    mov esp, [eax]
 
-    iret		; IRET to new kernel thread
+    pop ebx
+    pop esi
+    pop edi
+    pop ebp
+ 
+    ; setup iretd stack frame properly
+    pop eax 
+    push cs
+    push eax
+
+    iretd
