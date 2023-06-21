@@ -2,12 +2,16 @@
 
 uint32_t timer_ticks = 0;
 
+static void timer_phase(uint32_t hz) {
+	int divisor = PIT_SCALE / hz;
+	outb(PIT_CMD, PIT_SET);
+	outb(PIT_A, divisor & 0xFF);
+ 	outb(PIT_A, (divisor >> 8) & 0xFF);
+}
+
 static void timer_handler(regs_t *r) {
     timer_ticks++;
-
-    if (timer_ticks % 18 == 0) {
-        vga_puts("One second has passed\n");
-    }
+    irq_ack(TIMER_IRQ);
 
     (void) r;
 }
@@ -21,6 +25,8 @@ void timer_wait(uint32_t ticks) {
 
 void init_timer(void) {
     /* installs 'timer_handler' to IRQ0 */
-    irq_install_handler(0, timer_handler);
+    vga_puts("initializing PIT...\n");
+    irq_install_handler(TIMER_IRQ, timer_handler);
+    timer_phase(100);
 }
 

@@ -20,11 +20,12 @@ typedef struct idt_ptr {
 } __attribute__((packed)) idt_ptr_t;
 
 typedef struct regs {
-    unsigned int gs, fs, es, ds;      /* pushed the segs last */
-    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;  /* pushed by 'pusha' */
-    unsigned int int_no, err_code;    /* our 'push byte #' and ecodes do this */
-    unsigned int eip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */ 
-} __attribute__((packed)) regs_t;
+    unsigned int gs, fs, es, ds;
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    unsigned int int_no, err_code;
+    unsigned int eip, cs, eflags, useresp, ss;    
+
+} regs_t;
 
 /* function declarations */
 void init_idt(void);

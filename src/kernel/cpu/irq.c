@@ -38,6 +38,7 @@ void init_irq(void) {
     idt_set_descr(46, (unsigned)irq14, 0x8E);
     idt_set_descr(47, (unsigned)irq15, 0x8E);
 
+    __asm__ volatile("sti");
 }
 
 void irq_install_handler(uint8_t irq, void (*handler)(regs_t *r)) {
@@ -48,17 +49,28 @@ void irq_uninstall_handler(uint8_t irq) {
     irq_routines[irq] = 0;
 }
 
-extern void irq_handler(regs_t *r) {
+void irq_ack(uint8_t irq) {
+	if (irq >= 12) {
+		outb(PIC2_CMD, PIC_EOI);
+	}
+	outb(PIC1_CMD, PIC_EOI);
+}
+
+void irq_handler(regs_t *r) {
+    __asm__ volatile("cli");
+
     void (*handler)(regs_t *r);
 
-    handler = irq_routines[r->int_no - 32];
-    if (handler) {
-        handler(r);
-    }
+    if (r->int_no > 47 || r->int_no < 32) {
+		handler = NULL;
+	} else {
+		handler = irq_routines[r->int_no - 32];
+	}
+	if (handler) {
+		handler(r);
+	} else {
+		irq_ack(r->int_no - 32);
+	}
 
-    if (r->int_no >= 40) {
-        outb(PIC2_CMD, PIC_EOI);
-    }
-    outb(PIC1_CMD, PIC_EOI);
-
+    __asm__ volatile("sti");
 }

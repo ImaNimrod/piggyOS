@@ -36,7 +36,11 @@ void vga_putc(const char c) {
     uint16_t *where;
 
     if(c == 0x08) {
-        if(cur_x != 0) cur_x--;
+        if(cur_x != 0) {
+            cur_x--;
+            where = screen_buffer + (cur_y * NUM_COLS + cur_x);
+            *where = 3872;
+        } 
     } else if(c == 0x09) {
         cur_x = (cur_x + 8) & ~(8 - 1);
     } else if(c == '\r') {

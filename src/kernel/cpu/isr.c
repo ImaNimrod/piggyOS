@@ -73,10 +73,14 @@ char *exception_messages[32] = {
     "Reserved",
 };
 
-extern void fault_handler(regs_t *r) {
+void fault_handler(regs_t *r) {
+    __asm__ volatile("cli");
+
     if (r->int_no < 32) {
         vga_set_color(VGA_COLOR_RED, VGA_COLOR_LIGHT_GRAY);
         vga_puts("recieved interrupt: ");
 		vga_puts(exception_messages[r->int_no]);
     }
+    
+    __asm__ volatile("sti");
 }

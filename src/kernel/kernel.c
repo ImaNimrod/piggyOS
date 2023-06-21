@@ -3,6 +3,7 @@
 #include <cpu/isr.h>
 #include <cpu/irq.h>
 #include <drivers/timer.h>
+#include <drivers/keyboard.h>
 #include <drivers/vga.h>
 
 void kernel_main(void) {
@@ -13,6 +14,11 @@ void kernel_main(void) {
 
     vga_clear();
     vga_set_color(VGA_COLOR_PINK, VGA_COLOR_BLACK);
+
     init_timer();
-    timer_wait(1);
+    init_keyboard();
+
+    for(;;) {
+        __asm__("hlt");
+    }
 }

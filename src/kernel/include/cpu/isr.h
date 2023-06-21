@@ -40,6 +40,6 @@ extern void isr30();
 extern void isr31();
 
 void init_isr(void);
-extern void fault_handler(struct regs *r);
+void fault_handler(regs_t *r);
 
 #endif
