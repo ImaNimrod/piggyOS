@@ -20,7 +20,7 @@ run:
 
 initrd:
 	@mkdir -p ./iso/modules 
-	@genext2fs -d ./rootfs -q -b 16384 ./iso/modules/piggyOS-initrd.img
+	@genext2fs -d ./rootfs -q -b 8192 ./iso/modules/piggyOS-initrd.img
 
 cdrom: initrd 
 	@grub-file --is-x86-multiboot2 iso/boot/piggyOS-kernel.bin 

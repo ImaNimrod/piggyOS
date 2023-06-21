@@ -2,6 +2,7 @@
 #define _KERNEL_PMM_H
 
 #include <display.h>
+#include <multiboot2.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -10,15 +11,14 @@
 #define BLOCK_SIZE 4096
 #define BLOCKS_PER_BUCKET 8
 
-// macros for setting/clearing bits in a bitmap
-#define SETBIT(i) bitmap[i / BLOCKS_PER_BUCKET] = bitmap[i / BLOCKS_PER_BUCKET] | (1 << (i % BLOCKS_PER_BUCKET))
-#define CLEARBIT(i) bitmap[i / BLOCKS_PER_BUCKET] = bitmap[i / BLOCKS_PER_BUCKET] & (~(1 << (i % BLOCKS_PER_BUCKET)))
-#define ISSET(i) ((bitmap[i / BLOCKS_PER_BUCKET] >> (i % BLOCKS_PER_BUCKET)) & 0x1)
-#define GET_BUCKET32(i) (*((uint32_t*) &bitmap[i / 32]))
+// macros for setting/clearing bits in a phys_mem_bitmap
+#define SETBIT(i) phys_mem_bitmap[i / BLOCKS_PER_BUCKET] = phys_mem_bitmap[i / BLOCKS_PER_BUCKET] | (1 << (i % BLOCKS_PER_BUCKET))
+#define CLEARBIT(i) phys_mem_bitmap[i / BLOCKS_PER_BUCKET] = phys_mem_bitmap[i / BLOCKS_PER_BUCKET] & (~(1 << (i % BLOCKS_PER_BUCKET)))
+#define ISSET(i) ((phys_mem_bitmap[i / BLOCKS_PER_BUCKET] >> (i % BLOCKS_PER_BUCKET)) & 0x1)
 #define ALIGN(addr) (((uint32_t) (addr) & 0xFFFFF000) + BLOCK_SIZE)
 
 /* function declarations */
-void pmm_init(size_t mem_size);
+void pmm_init(struct mboot_tag_basic_meminfo* meminfo);
 uint32_t allocate_block();
 void free_block(size_t blk_num);
 

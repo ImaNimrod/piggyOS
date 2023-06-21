@@ -14,7 +14,7 @@
 #include <memory/kheap.h>
 #include <memory/pmm.h>
 #include <memory/vmm.h>
-#include <multiboot.h>
+#include <multiboot2.h>
 #include <string.h>
 #include <sys/spinlock.h>
 #include <sys/syscall.h>
@@ -23,10 +23,10 @@
 
 const char* welecome_banner = "\nWelecome to:\n         _                        ___    _____    \n        (_)                      /   \\  / ____|  \n  _ __   _   __ _   __ _  _   _ |     || (___     \n | '_ \\ | | / _` | / _` || | | || | | | \\___ \\ \n | |_) || || (_| || (_| || |_| ||     | ____) |   \n | .__/ |_| \\__, | \\__, | \\__, | \\___/ |_____/\n | |         __/ |  __/ |  __/ |                  \n |_|        |___/  |___/  |___/                   \n";
 
-void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t inital_esp) {
+void kernel_main(uint32_t mboot2_magic, uint32_t mboot2_info, uint32_t inital_esp) {
     uint32_t module_start = 0;
     uint32_t module_end = 0;
-    uint32_t mem = 0;
+    static struct mboot_tag_basic_meminfo* meminfo;
 
     #ifdef TEXTMODE
     vga_clear();
@@ -37,7 +37,7 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     serial_init();
 
     if(mboot2_magic == MBOOT2_MAGIC) {
-        if((uint32_t) mboot2_info & 7) {
+        if(mboot2_info & 7) {
             klog(LOG_ERR, "Multiboot2 info unaligned\n");
             return;
         }
@@ -48,13 +48,11 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
         { 
             switch(tag->type) {
                 case MBOOT_TAG_TYPE_MODULE:
-                    module_start = ((mboot_tag_module_t*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
-                    module_end = ((mboot_tag_module_t*) tag)->mod_end + LOAD_MEMORY_ADDRESS;
+                    module_start = ((struct mboot_tag_module*) tag)->mod_start + LOAD_MEMORY_ADDRESS;
+                    module_end = ((struct mboot_tag_module*) tag)->mod_end + LOAD_MEMORY_ADDRESS;
                     break;
                 case MBOOT_TAG_TYPE_BASIC_MEMINFO:
-                    /* mboot gives meminfo in kB but we need it in bytes */
-                    mem = (((mboot_tag_basic_meminfo_t*) tag)->mem_lower + 
-                          ((mboot_tag_basic_meminfo_t*) tag)->mem_upper) * K;
+                    meminfo = (struct mboot_tag_basic_meminfo*) tag;
                     break;
             }
         }
@@ -72,7 +70,7 @@ void kernel_main(uint32_t mboot2_magic, mboot_info_t* mboot2_info, uint32_t init
     fpu_init();
 
     /* initialize memory manager systems */
-    pmm_init(mem);                                                                  /* physical memory manager */
+    pmm_init(meminfo);                                                              /* physical memory manager */
     vmm_init();                                                                     /* virtual memory manager */
     kheap_init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_ADDRESS);   /* kernel heap allocator */
 

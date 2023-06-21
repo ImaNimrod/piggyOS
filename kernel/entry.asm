@@ -2,8 +2,6 @@ bits 32
 
 KERNEL_VIRTUAL_BASE equ 0xc0000000
 KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; PDE of kernel's 4MB PTE 
-RAMDISK_VIRTUAL_BASE equ 0xd0000000
-RAMDISK_PAGE_NUMBER equ (RAMDISK_VIRTUAL_BASE >> 22)  ; PDE of kernel's 4MB PTE 
 
 section .multiboot2_header
 align 8

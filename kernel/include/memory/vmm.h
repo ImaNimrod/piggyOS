@@ -59,9 +59,9 @@ typedef struct {
 // boot page directory defined in entry.asm
 extern page_directory_t* boot_page_dir;
 
-// phys mem bitmap defined in pmm.c
-extern uint8_t* bitmap;
-extern uint32_t bitmap_size;
+// phys_mem_bitmap defined in pmm.c
+extern uint8_t* phys_mem_bitmap;
+extern uint32_t phys_mem_bitmap_size;
 
 /* function declarations */
 void *virt2phys(page_directory_t* dir, void* virtual_addr);

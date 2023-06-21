@@ -181,7 +181,7 @@ static void enable_paging(void) {
 }
 
 void vmm_init(void) {
-    temp_mem = bitmap + bitmap_size;
+    temp_mem = phys_mem_bitmap + phys_mem_bitmap_size;
 
     kernel_page_dir = dumb_kmalloc(sizeof(page_directory_t), 1);
     memset(kernel_page_dir, 0, sizeof(page_directory_t));

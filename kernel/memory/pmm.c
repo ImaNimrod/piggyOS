@@ -1,24 +1,9 @@
 #include <memory/pmm.h>
 
-uint8_t* bitmap = (uint8_t*) (&kernel_end);
+uint8_t* phys_mem_bitmap = (uint8_t*) (&kernel_end);
 uint8_t* mem_start;
 uint32_t total_blocks;
-uint32_t bitmap_size;
-
-void pmm_init(size_t mem_size) {
-    total_blocks = mem_size / BLOCK_SIZE; bitmap_size = total_blocks / BLOCKS_PER_BUCKET;
-    if(bitmap_size* BLOCKS_PER_BUCKET < total_blocks)
-        bitmap_size++;
-
-    memset(bitmap, 0, bitmap_size);
-
-    for(size_t i = 0; i < bitmap_size; i++) {
-        if(bitmap[i] != 0) {
-            klog(LOG_WARN, "%s: memory bitmap is not all empty, fix it!\n", __func__);
-        }
-    }
-    klog(LOG_OK, "Physical Memory Manager initialized\n");
-}
+uint32_t phys_mem_bitmap_size;
 
 static uint32_t first_free_block(void) {
     for(size_t i = 0; i < total_blocks; i++) {
@@ -39,3 +24,19 @@ void free_block(size_t blk_num) {
     CLEARBIT(blk_num);
 }
 
+void pmm_init(struct mboot_tag_basic_meminfo* meminfo) {
+    uint32_t phys_mem_size = (meminfo->mem_lower + meminfo->mem_upper) * K;
+    total_blocks = phys_mem_size / BLOCK_SIZE; 
+    phys_mem_bitmap_size = total_blocks / BLOCKS_PER_BUCKET;
+    if(phys_mem_bitmap_size* BLOCKS_PER_BUCKET < total_blocks)
+        phys_mem_bitmap_size++;
+
+    memset(phys_mem_bitmap, 0, phys_mem_bitmap_size);
+
+    for(size_t i = 0; i < phys_mem_bitmap_size; i++) {
+        if(phys_mem_bitmap[i] != 0) {
+            klog(LOG_WARN, "%s: memory phys_mem_bitmap is not all empty, fix it!\n", __func__);
+        }
+    }
+    klog(LOG_OK, "Physical Memory Manager initialized\n");
+}
